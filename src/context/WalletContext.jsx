@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { ethers } from 'ethers';
 
 const WalletContext = createContext();
@@ -33,24 +33,32 @@ export function WalletProvider({ children }) {
                 // Ensure Injective testnet
                 await detectedProvider.request({
                     method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: '0x59f' }] // 1439
+                    params: [{ chainId: '0x59f' }]
                 });
             } catch (switchError) {
-                if (switchError.code === 4902) {
+                console.warn("Chain switch failed (may not be added yet). Error:", switchError.message || switchError);
+                // Provide fallback for Keplr and other wallets that may not return 4902
+                try {
                     await detectedProvider.request({
                         method: 'wallet_addEthereumChain',
                         params: [{
                             chainId: '0x59f',
                             chainName: 'Injective EVM Testnet',
                             rpcUrls: ['https://k8s.testnet.json-rpc.injective.network/'],
-                            nativeCurrency: { name: 'Injective', symbol: 'INJ', decimals: 18 },
-                            blockExplorerUrls: ['https://testnet.blockscout.injective.network/blocks']
+                            nativeCurrency: { 
+                                name: 'Injective', 
+                                symbol: 'INJ', 
+                                decimals: 18 
+                            },
+                            blockExplorerUrls: ['https://testnet.blockscout.injective.network/']
                         }]
                     });
+                } catch (addError) {
+                    console.error("Failed to add network:", addError);
                 }
             }
             
-            const reqAccounts = await ethersProvider.send('eth_requestAccounts', []);
+            await ethersProvider.send('eth_requestAccounts', []);
             const ethersSigner = await ethersProvider.getSigner(); // MUST await in v6
             const addr = await ethersSigner.getAddress();
             
@@ -72,6 +80,7 @@ export function WalletProvider({ children }) {
     );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useWallet() {
     return useContext(WalletContext);
 }
