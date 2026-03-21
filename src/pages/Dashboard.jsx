@@ -34,8 +34,8 @@ export default function Dashboard() {
 
     const filteredAgreements = agreements.filter(item => 
         activeTab === 'freelancer' 
-        ? item.freelancer_address === address 
-        : item.client_address === address
+        ? item.freelancer_wallet === address 
+        : item.client_wallet === address
     );
 
     const getStatusColor = (status) => {
@@ -185,8 +185,8 @@ export default function Dashboard() {
                                         </span>
                                         <span className="text-xs font-bold text-navy">
                                             {activeTab === 'freelancer' 
-                                                ? `${deal.client_address?.slice(0,6)}...${deal.client_address?.slice(-4)}`
-                                                : `${deal.freelancer_address?.slice(0,6)}...${deal.freelancer_address?.slice(-4)}`}
+                                                ? `${deal.client_wallet?.slice(0,6)}...${deal.client_wallet?.slice(-4)}`
+                                                : `${deal.freelancer_wallet?.slice(0,6)}...${deal.freelancer_wallet?.slice(-4)}`}
                                         </span>
                                     </div>
                                     <Link 

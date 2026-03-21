@@ -156,8 +156,8 @@ export default function AgreementRoom() {
         );
     }
 
-    const isFreelancer = address === agreement.freelancer_address;
-    const isClient = address === agreement.client_address;
+    const isFreelancer = address === agreement.freelancer_wallet;
+    const isClient = address === agreement.client_wallet;
     const isFunded = agreement.status === 'FUNDED' || agreement.status === 1;
     const isSubmitted = agreement.status === 'SUBMITTED' || agreement.status === 2;
     const isCompleted = agreement.status === 'COMPLETED' || agreement.status === 4;
@@ -433,10 +433,10 @@ export default function AgreementRoom() {
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="text-[10px] font-bold text-gray-400 italic mb-0.5">FREELANCER</span>
-                                            <span className="text-xs font-bold text-navy truncate w-24">{agreement.freelancer_address?.slice(0, 10)}...</span>
+                                            <span className="text-xs font-bold text-navy truncate w-24">{agreement.freelancer_wallet?.slice(0, 10)}...</span>
                                         </div>
                                     </div>
-                                    <a href={`https://testnet.blockscout.injective.network/address/${agreement.freelancer_address}`} target="_blank" className="p-2 text-gray-300 hover:text-teal transition-all">
+                                    <a href={`https://testnet.blockscout.injective.network/address/${agreement.freelancer_wallet}`} target="_blank" className="p-2 text-gray-300 hover:text-teal transition-all">
                                         <ExternalLink className="w-4 h-4" />
                                     </a>
                                 </div>
@@ -447,10 +447,10 @@ export default function AgreementRoom() {
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="text-[10px] font-bold text-gray-400 italic mb-0.5 uppercase tracking-wider">Client</span>
-                                            <span className="text-xs font-bold text-navy truncate w-24">{agreement.client_address?.slice(0, 10)}...</span>
+                                            <span className="text-xs font-bold text-navy truncate w-24">{agreement.client_wallet?.slice(0, 10)}...</span>
                                         </div>
                                     </div>
-                                     <a href={`https://testnet.blockscout.injective.network/address/${agreement.client_address}`} target="_blank" className="p-2 text-gray-300 hover:text-teal transition-all">
+                                     <a href={`https://testnet.blockscout.injective.network/address/${agreement.client_wallet}`} target="_blank" className="p-2 text-gray-300 hover:text-teal transition-all">
                                         <ExternalLink className="w-4 h-4" />
                                     </a>
                                 </div>
