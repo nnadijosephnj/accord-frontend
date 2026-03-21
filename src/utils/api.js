@@ -2,16 +2,6 @@ import { BACKEND_URL } from './contractABI';
 
 export async function apiCall(endpoint, options = {}) {
     const token = localStorage.getItem('jwt_token');
-    
-    // Safety check: if we are trying to call a private API (not /api/auth/verify) 
-    // without a token, throw a more descriptive error or return empty.
-    if (!token && !endpoint.includes('/api/auth/verify')) {
-        console.warn(`Auth token missing for ${endpoint}. Session may be expired.`);
-        // Note: we let the call proceed or throw? 
-        // Let's throw a clear error the UI can handle specifically.
-        throw new Error("AUTHENTICATION_REQUIRED");
-    }
-
     const headers = {
         'Content-Type': 'application/json',
         ...(token && { 'Authorization': `Bearer ${token}` }),

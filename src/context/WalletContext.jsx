@@ -80,21 +80,30 @@ export function WalletProvider({ children }) {
             const addr = await ethersSigner.getAddress();
             
             // Perform login signature if we don't have a token or it's a new connection
-            if (!localStorage.getItem('jwt_token') || localStorage.getItem('wallet_address') !== addr.toLowerCase()) {
-                try {
-                    const message = `Welcome to Accord! Sign this message to log in securely.\n\nWallet: ${addr.toLowerCase()}\nTimestamp: ${Date.now()}`;
-                    const signature = await ethersSigner.signMessage(message);
-                    
-                    const { token } = await apiCall('/api/auth/verify', {
-                        method: 'POST',
-                        body: JSON.stringify({ address: addr, signature, message })
-                    });
-                    
-                    localStorage.setItem('jwt_token', token);
-                } catch (authError) {
-                    console.warn("Backend login failed (API keys likely missing on Render):", authError.message);
-                    // We don't block the UI here, allowing the user to at least see their address
+            const existingToken = localStorage.getItem('jwt_token');
+            const needsSignature = !existingToken || localStorage.getItem('wallet_address') !== addr.toLowerCase();
+
+            if (needsSignature) {
+                // We only prompt for signature in FORCED connection (not background reconnect)
+                if (!isReconnect) {
+                    try {
+                        const message = `Welcome to Accord! Sign this message to log in securely.\n\nWallet: ${addr.toLowerCase()}\nTimestamp: ${Date.now()}`;
+                        const signature = await ethersSigner.signMessage(message);
+                        
+                        const { token } = await apiCall('/api/auth/verify', {
+                            method: 'POST',
+                            body: JSON.stringify({ address: addr, signature, message })
+                        });
+                        
+                        localStorage.setItem('jwt_token', token.toString());
+                        setIsLoggedIn(true);
+                    } catch (authError) {
+                        console.error("Signature failed:", authError);
+                        throw new Error("Signature required to unlock Dashboard. " + authError.message);
+                    }
                 }
+            } else {
+                setIsLoggedIn(true);
             }
             
             localStorage.setItem('wallet_address', addr.toLowerCase());
@@ -102,8 +111,17 @@ export function WalletProvider({ children }) {
             setSigner(ethersSigner);
             setAddress(addr.toLowerCase());
             
-            // Force profile refresh
-            await fetchProfile();
+            // Force profile refresh silently
+            try {
+                const profile = await apiCall('/api/auth/profile');
+                setUserProfile(profile);
+                setIsLoggedIn(true);
+            } catch (pErr) {
+                if (pErr.message.includes('token')) {
+                    setIsLoggedIn(false);
+                    localStorage.removeItem('jwt_token');
+                }
+            }
             
         } catch (error) {
             console.error("Connection error:", error);
@@ -121,7 +139,7 @@ export function WalletProvider({ children }) {
         setSigner(null);
         setUserProfile(null);
         setIsLoggedIn(false);
-        window.location.href = '/'; // Ensure we return to landing
+        window.location.href = '/'; 
     };
     
     return (
