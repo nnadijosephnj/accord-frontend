@@ -64,15 +64,20 @@ export function WalletProvider({ children }) {
             
             // Perform login signature if we don't have a token or it's a new connection
             if (!localStorage.getItem('jwt_token') || localStorage.getItem('wallet_address') !== addr.toLowerCase()) {
-                const message = `Welcome to Accord! Sign this message to log in securely.\n\nWallet: ${addr.toLowerCase()}\nTimestamp: ${Date.now()}`;
-                const signature = await ethersSigner.signMessage(message);
-                
-                const { token } = await apiCall('/api/auth/verify', {
-                    method: 'POST',
-                    body: JSON.stringify({ address: addr, signature, message })
-                });
-                
-                localStorage.setItem('jwt_token', token);
+                try {
+                    const message = `Welcome to Accord! Sign this message to log in securely.\n\nWallet: ${addr.toLowerCase()}\nTimestamp: ${Date.now()}`;
+                    const signature = await ethersSigner.signMessage(message);
+                    
+                    const { token } = await apiCall('/api/auth/verify', {
+                        method: 'POST',
+                        body: JSON.stringify({ address: addr, signature, message })
+                    });
+                    
+                    localStorage.setItem('jwt_token', token);
+                } catch (authError) {
+                    console.warn("Backend login failed (API keys likely missing on Render):", authError.message);
+                    // We don't block the UI here, allowing the user to at least see their address
+                }
             }
             
             localStorage.setItem('wallet_address', addr.toLowerCase());
@@ -82,7 +87,7 @@ export function WalletProvider({ children }) {
             
         } catch (error) {
             console.error("Connection error:", error);
-            if (!isReconnect) alert("Failed to connect wallet: " + error.message);
+            if (!isReconnect) alert("Connection Error: " + error.message);
         } finally {
             setIsConnecting(false);
         }
