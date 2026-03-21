@@ -8,6 +8,7 @@ export function WalletProvider({ children }) {
     const [address, setAddress] = useState(localStorage.getItem('wallet_address'));
     const [provider, setProvider] = useState(null);
     const [signer, setSigner] = useState(null);
+    const [userProfile, setUserProfile] = useState(null);
     const [isConnecting, setIsConnecting] = useState(false);
     
     // Automatically try to reconnect if there's a stored address
@@ -16,6 +17,17 @@ export function WalletProvider({ children }) {
             connectWallet(true); // silent/background connect
         }
     }, []);
+
+    const fetchProfile = async () => {
+        try {
+            const profile = await apiCall('/api/auth/profile');
+            setUserProfile(profile);
+            return profile;
+        } catch (e) {
+            console.warn("Profile fetch failed:", e.message);
+            return null;
+        }
+    };
 
     const connectWallet = async (isReconnect = false) => {
         try {
@@ -85,6 +97,9 @@ export function WalletProvider({ children }) {
             setSigner(ethersSigner);
             setAddress(addr.toLowerCase());
             
+            // Force profile refresh
+            await fetchProfile();
+            
         } catch (error) {
             console.error("Connection error:", error);
             if (!isReconnect) alert("Connection Error: " + error.message);
@@ -99,10 +114,12 @@ export function WalletProvider({ children }) {
         setAddress(null);
         setProvider(null);
         setSigner(null);
+        setUserProfile(null);
+        window.location.href = '/'; // Ensure we return to landing
     };
     
     return (
-        <WalletContext.Provider value={{ address, provider, signer, connectWallet, logout, isConnecting }}>
+        <WalletContext.Provider value={{ address, provider, signer, userProfile, fetchProfile, connectWallet, logout, isConnecting }}>
             {children}
         </WalletContext.Provider>
     );

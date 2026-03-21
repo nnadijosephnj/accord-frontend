@@ -4,7 +4,9 @@ import { WalletProvider, useWallet } from './context/WalletContext';
 
 import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
-import CreateAgreement from './pages/CreateAgreement';
+import CreateFreelancer from './pages/CreateFreelancer';
+import CreateClient from './pages/CreateClient';
+import Profile from './pages/Profile';
 import AgreementRoom from './pages/AgreementRoom';
 
 function App() {
@@ -13,10 +15,19 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Landing />} />
+          
+          {/* Post-Login Routing */}
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/create" element={<ProtectedRoute><CreateAgreement /></ProtectedRoute>} />
+          <Route path="/create/freelancer" element={<ProtectedRoute><CreateFreelancer /></ProtectedRoute>} />
+          <Route path="/create/client" element={<ProtectedRoute><CreateClient /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          
+          {/* Room Access (Public/Private handled inside) */}
           <Route path="/agreement/:id" element={<AgreementRoom />} />
           <Route path="/deal/:id" element={<AgreementRoom />} />
+          
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
     </WalletProvider>
