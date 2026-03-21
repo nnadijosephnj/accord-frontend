@@ -1,159 +1,207 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ShieldCheck, Plus, Handshake, LayoutDashboard, Settings, Bell, LogOut, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useWallet } from '../context/WalletContext';
-import { useNavigate, Link } from 'react-router-dom';
-
-function Sidebar() {
-  const { address } = useWallet();
-  const navItems = [
-    { icon: <LayoutDashboard size={20}/>, label: 'Dashboard', path: '/dashboard', active: true },
-    { icon: <Handshake size={20}/>, label: 'My Agreements', path: '/dashboard', active: false },
-    { icon: <Plus size={20}/>, label: 'Create Agreement', path: '/create', active: false, highlight: true },
-    { icon: <Bell size={20}/>, label: 'Notifications', path: '/dashboard', active: false },
-    { icon: <Settings size={20}/>, label: 'Settings', path: '/dashboard', active: false },
-  ];
-
-  return (
-    <div className="w-64 bg-white border-r border-gray-100 flex flex-col h-screen fixed hidden md:flex">
-      <div className="p-6">
-        <div className="flex items-center gap-2 mb-2">
-          <ShieldCheck className="w-8 h-8 text-[#17B978]" />
-          <span className="text-2xl font-bold tracking-tight text-[#0A3D62]">ACCORD</span>
-        </div>
-        <div className="text-xs font-semibold text-gray-400 bg-gray-50 uppercase inline-block px-2 py-1 rounded">
-          Injective Network
-        </div>
-      </div>
-
-      <div className="flex-1 px-4 space-y-2 mt-4">
-        {navItems.map((item, i) => (
-          <Link key={i} to={item.path} 
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${
-              item.active 
-                ? 'bg-[#0A3D62]/5 text-[#0A3D62]' 
-                : item.highlight 
-                  ? 'text-[#17B978] hover:bg-teal-50' 
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-            }`}>
-            {item.icon}
-            <span>{item.label}</span>
-          </Link>
-        ))}
-      </div>
-
-      <div className="p-6 border-t border-gray-100">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#17B978] to-[#0A3D62] shadow-inner border-2 border-white flex-shrink-0"></div>
-          <div className="overflow-hidden">
-            <p className="text-xs text-gray-500 font-medium">Connected Wallet</p>
-            <p className="text-sm font-semibold text-gray-800 truncate">
-              {address?.substring(0, 6)}...{address?.substring(38)}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+import { apiCall } from '../utils/api';
+import { Plus, Layout, Briefcase, User, LogOut, ExternalLink, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState('freelancer');
-  const navigate = useNavigate();
+    const { address, logout } = useWallet();
+    const navigate = useNavigate();
+    const [agreements, setAgreements] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('freelancer'); // 'freelancer' or 'client'
 
-  // Mock data for UI presentation
-  const mockAgreements = [
-    { id: '1', title: 'Logo Design for TechStartup', otherWallet: '0x123...abc', amount: '500.00', status: 'FUNDED', date: 'Oct 12' },
-    { id: '2', title: 'React Frontend Development', otherWallet: '0x456...def', amount: '1200.00', status: 'SUBMITTED', date: 'Oct 14' }
-  ];
+    useEffect(() => {
+        if (!address) {
+            navigate('/');
+            return;
+        }
+        fetchAgreements();
+    }, [address]);
 
-  const getStatusColor = (status) => {
-    switch(status) {
-      case 'FUNDED': return 'bg-blue-100 text-blue-700';
-      case 'SUBMITTED': return 'bg-amber-100 text-amber-700';
-      case 'COMPLETED': return 'bg-green-100 text-green-700';
-      default: return 'bg-gray-100 text-gray-700';
-    }
-  }
+    const fetchAgreements = async () => {
+        try {
+            setIsLoading(true);
+            const data = await apiCall('/api/agreements');
+            setAgreements(data || []);
+        } catch (error) {
+            console.error("Fetch error:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-  return (
-    <div className="min-h-screen bg-[#F5F5F5] flex">
-      <Sidebar />
-      <div className="flex-1 md:ml-64 p-6 lg:p-10">
-        <motion.div initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} className="max-w-5xl mx-auto">
-          
-          <h1 className="text-3xl font-bold text-[#0A3D62] mb-8">Dashboard</h1>
+    const filteredAgreements = agreements.filter(item => 
+        activeTab === 'freelancer' 
+        ? item.freelancer_address === address 
+        : item.client_address === address
+    );
 
-          {/* Top Summary Row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-              <p className="text-gray-500 font-medium mb-1">Active Agreements</p>
-              <h3 className="text-3xl font-bold text-blue-600">3</h3>
-            </div>
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-              <p className="text-gray-500 font-medium mb-1">Completed</p>
-              <h3 className="text-3xl font-bold text-green-500">12</h3>
-            </div>
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-              <p className="text-gray-500 font-medium mb-1">Total USDT Transacted</p>
-              <h3 className="text-3xl font-bold text-[#0A3D62]">$4,250</h3>
-            </div>
-          </div>
+    const getStatusColor = (status) => {
+        switch(status) {
+            case 0: return 'bg-gray-100 text-gray-600'; // PENDING
+            case 1: return 'bg-blue-100 text-blue-600'; // FUNDED
+            case 2: return 'bg-yellow-100 text-yellow-600'; // SUBMITTED
+            case 3: return 'bg-orange-100 text-orange-600'; // REVISION
+            case 4: return 'bg-green-100 text-green-600'; // COMPLETED
+            case 5: return 'bg-red-100 text-red-600'; // CANCELLED
+            default: return 'bg-gray-100 text-gray-600';
+        }
+    };
 
-          {/* Tab Switcher */}
-          <div className="flex border-b border-gray-200 mb-8 overflow-x-auto hide-scrollbar">
-            <button 
-              onClick={() => setActiveTab('freelancer')}
-              className={`px-8 py-4 font-semibold text-sm mr-4 border-b-2 transition-colors whitespace-nowrap ${activeTab === 'freelancer' ? 'border-[#17B978] text-[#0A3D62]' : 'border-transparent text-gray-400 hover:text-gray-700'}`}
-            >
-              As Freelancer
-            </button>
-            <button 
-              onClick={() => setActiveTab('client')}
-              className={`px-8 py-4 font-semibold text-sm border-b-2 transition-colors whitespace-nowrap ${activeTab === 'client' ? 'border-[#17B978] text-[#0A3D62]' : 'border-transparent text-gray-400 hover:text-gray-700'}`}
-            >
-              As Client
-            </button>
-          </div>
+    const getStatusText = (status) => {
+        const statuses = ['PENDING', 'FUNDED', 'SUBMITTED', 'REVISION', 'COMPLETED', 'CANCELLED'];
+        return statuses[status] || 'UNKNOWN';
+    };
 
-          {/* List */}
-          <div className="space-y-4">
-            {mockAgreements.map((item, i) => (
-              <motion.div 
-                initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} transition={{delay: i*0.1}}
-                key={item.id} 
-                className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center justify-between hover:shadow-md transition-shadow group cursor-pointer"
-                onClick={() => navigate(`/agreement/${item.id}`)}
-              >
-                <div className="flex items-center gap-6 w-full md:w-auto mb-4 md:mb-0">
-                  <span className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wide ${getStatusColor(item.status)}`}>
-                    {item.status}
-                  </span>
-                  <div>
-                    <h4 className="font-bold text-lg text-gray-900">{item.title}</h4>
-                    <p className="text-sm text-gray-500">Client: {item.otherWallet} • Created: {item.date}</p>
-                  </div>
+    return (
+        <div className="min-h-screen bg-[#F8FAFC] flex">
+            {/* Sidebar */}
+            <aside className="w-64 bg-navy text-white flex flex-col fixed h-full shadow-2xl z-20">
+                <div className="p-8 border-b border-white/10 flex items-center gap-3">
+                    <div className="w-8 h-8 bg-teal rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold">A</span>
+                    </div>
+                    <span className="text-xl font-bold tracking-tight italic">Accord</span>
                 </div>
                 
-                <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
-                  <div className="text-right">
-                    <span className="text-xl font-bold text-[#0A3D62]">{item.amount} USDT</span>
-                  </div>
-                  <button className="bg-[#17B978]/10 text-[#17B978] group-hover:bg-[#17B978] group-hover:text-white transition-colors p-3 rounded-xl">
-                    <ChevronRight size={20} />
-                  </button>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                <nav className="flex-1 p-4 space-y-2 mt-4">
+                    <Link to="/dashboard" className="flex items-center gap-3 px-4 py-3 bg-white/10 rounded-xl text-teal font-medium">
+                        <Layout className="w-5 h-5" /> Dashboard
+                    </Link>
+                    <Link to="/create" className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl transition-all">
+                        <Plus className="w-5 h-5" /> New Agreement
+                    </Link>
+                </nav>
 
-        </motion.div>
-      </div>
-      
-      {/* Mobile Create Floating Button */}
-      <button onClick={() => navigate('/create')} className="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-[#17B978] text-white rounded-full shadow-lg flex items-center justify-center">
-        <Plus size={24}/>
-      </button>
-    </div>
-  );
+                <div className="p-4 border-t border-white/10">
+                    <button 
+                        onClick={logout}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
+                    >
+                        <LogOut className="w-5 h-5" /> Disconnect
+                    </button>
+                </div>
+            </aside>
+
+            {/* Main Content */}
+            <main className="flex-1 ml-64 p-8">
+                {/* Header */}
+                <header className="flex justify-between items-center mb-10">
+                    <div>
+                        <h1 className="text-3xl font-bold text-navy">Welcome back</h1>
+                        <p className="text-gray-500 mt-1">Manage your professional service agreements</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <div className="px-4 py-2 bg-white border border-gray-200 rounded-full flex items-center gap-2 shadow-sm">
+                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                            <span className="text-sm font-medium text-gray-700">
+                                {address?.slice(0, 6)}...{address?.slice(-4)}
+                            </span>
+                        </div>
+                        <Link to="/create" className="px-5 py-2.5 bg-teal text-white rounded-full font-bold shadow-lg hover:shadow-teal/20 active:scale-95 transition-all flex items-center gap-2">
+                            <Plus className="w-5 h-5" /> Create
+                        </Link>
+                    </div>
+                </header>
+
+                {/* Tabs */}
+                <div className="flex gap-4 border-b border-gray-200 mb-8">
+                    <button 
+                        onClick={() => setActiveTab('freelancer')}
+                        className={`px-6 py-3 font-bold text-sm transition-all relative ${activeTab === 'freelancer' ? 'text-navy' : 'text-gray-400'}`}
+                    >
+                        <span className="flex items-center gap-2 italic">
+                            <Briefcase className="w-4 h-4" /> AS FREELANCER
+                        </span>
+                        {activeTab === 'freelancer' && <motion.div layoutId="tab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-teal" />}
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('client')}
+                        className={`px-6 py-3 font-bold text-sm transition-all relative ${activeTab === 'client' ? 'text-navy' : 'text-gray-400'}`}
+                    >
+                        <span className="flex items-center gap-2 italic">
+                            <User className="w-4 h-4" /> AS CLIENT
+                        </span>
+                        {activeTab === 'client' && <motion.div layoutId="tab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-teal" />}
+                    </button>
+                </div>
+
+                {/* Agreement Grid */}
+                {isLoading ? (
+                    <div className="flex flex-col items-center justify-center py-40 text-gray-400">
+                        <Loader2 className="w-10 h-10 animate-spin mb-4 text-teal" />
+                        <p className="font-medium">Loading your agreements...</p>
+                    </div>
+                ) : filteredAgreements.length === 0 ? (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-white border-2 border-dashed border-gray-200 rounded-[32px] py-32 flex flex-col items-center text-center px-6"
+                    >
+                        <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+                            <Layout className="w-10 h-10 text-gray-300" />
+                        </div>
+                        <h3 className="text-xl font-bold text-navy mb-2">No agreements found</h3>
+                        <p className="text-gray-500 max-w-sm mb-8 leading-relaxed italic">
+                            {activeTab === 'freelancer' 
+                                ? "You haven't created any agreements as a freelancer yet." 
+                                : "No one has sent you an agreement to fund yet."}
+                        </p>
+                        <Link to="/create" className="px-8 py-3 bg-navy text-white rounded-2xl font-bold shadow-lg active:scale-95 transition-all">
+                            Create your first Agreement
+                        </Link>
+                    </motion.div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <AnimatePresence mode='popLayout'>
+                        {filteredAgreements.map((deal) => (
+                            <motion.div 
+                                key={deal.id}
+                                layout
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group"
+                            >
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest ${getStatusColor(deal.status)}`}>
+                                        {getStatusText(deal.status)}
+                                    </div>
+                                    <span className="text-2xl font-black text-navy">{deal.amount || '0'} <span className="text-xs text-gray-400 font-bold tracking-normal">USDT</span></span>
+                                </div>
+                                
+                                <h3 className="text-xl font-bold text-navy mb-2 line-clamp-1 group-hover:text-teal transition-colors italic">
+                                    {deal.title || 'Untitled Project'}
+                                </h3>
+                                <p className="text-gray-500 text-sm mb-6 line-clamp-2 h-10">
+                                    {deal.description || 'No description provided.'}
+                                </p>
+
+                                <div className="pt-6 border-t border-gray-50 flex items-center justify-between">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider italic">
+                                            {activeTab === 'freelancer' ? 'Client' : 'Freelancer'}
+                                        </span>
+                                        <span className="text-xs font-bold text-navy">
+                                            {activeTab === 'freelancer' 
+                                                ? `${deal.client_address?.slice(0,6)}...${deal.client_address?.slice(-4)}`
+                                                : `${deal.freelancer_address?.slice(0,6)}...${deal.freelancer_address?.slice(-4)}`}
+                                        </span>
+                                    </div>
+                                    <Link 
+                                        to={`/deal/${deal.id}`}
+                                        className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-navy hover:bg-teal hover:text-white transition-all shadow-inner"
+                                    >
+                                        <ExternalLink className="w-4 h-4" />
+                                    </Link>
+                                </div>
+                            </motion.div>
+                        ))}
+                        </AnimatePresence>
+                    </div>
+                )}
+            </main>
+        </div>
+    );
 }

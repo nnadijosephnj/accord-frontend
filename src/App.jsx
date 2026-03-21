@@ -15,7 +15,8 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/create" element={<ProtectedRoute><CreateAgreement /></ProtectedRoute>} />
-          <Route path="/agreement/:id" element={<ProtectedRoute><AgreementRoom /></ProtectedRoute>} />
+          <Route path="/agreement/:id" element={<AgreementRoom />} />
+          <Route path="/deal/:id" element={<AgreementRoom />} />
         </Routes>
       </Router>
     </WalletProvider>
