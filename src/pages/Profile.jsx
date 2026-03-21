@@ -101,30 +101,44 @@ export default function Profile() {
                                     className="text-2xl font-black text-[#0A3D62] text-center bg-white border border-gray-200 rounded-xl px-4 py-2 outline-none focus:border-teal/50 shadow-sm transition-all"
                                     value={displayName}
                                     onChange={(e) => setDisplayName(e.target.value)}
-                                    placeholder="Add your name"
+                                    placeholder="e.g. Satoshi"
                                     autoFocus
                                 />
-                                <button 
-                                    onClick={handleSave}
-                                    disabled={saving}
-                                    className="bg-[#17B978] text-white text-xs font-black uppercase tracking-widest px-8 py-2.5 rounded-full shadow-lg hover:shadow-teal/20 active:scale-95 transition-all"
-                                >
-                                    {saving ? 'Saving...' : 'Save Name'}
-                                </button>
+                                <div className="flex gap-2">
+                                    <button 
+                                        onClick={handleSave}
+                                        disabled={saving}
+                                        className="bg-[#17B978] text-white text-xs font-black uppercase tracking-widest px-8 py-2.5 rounded-full shadow-lg hover:shadow-teal/20 active:scale-95 transition-all"
+                                    >
+                                        {saving ? 'Saving...' : 'Save Nickname'}
+                                    </button>
+                                    <button 
+                                        onClick={() => setIsEditing(false)}
+                                        className="bg-gray-100 text-gray-400 text-xs font-black uppercase tracking-widest px-8 py-2.5 rounded-full"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
                             </div>
                         ) : (
                             <>
-                                <h1 className="text-2xl font-black text-[#0A3D62]">
-                                    {userProfile?.display_name || 'Injective Explorer'}
+                                <h1 className="text-3xl font-black text-[#0A3D62] tracking-tight">
+                                    {userProfile?.display_name || 'Add Nickname'}
                                 </h1>
-                                <button onClick={() => setIsEditing(true)} className="p-1.5 text-gray-300 hover:text-teal transition-colors">
-                                    <Edit3 className="w-4 h-4" />
+                                <button 
+                                    onClick={() => {
+                                        setIsEditing(true);
+                                        setDisplayName(userProfile?.display_name || '');
+                                    }} 
+                                    className="p-2 bg-gray-50 rounded-lg text-gray-300 hover:text-teal transition-all hover:bg-white border border-transparent hover:border-gray-100"
+                                >
+                                    <Edit3 className="w-5 h-5" />
                                 </button>
                             </>
                         )}
                     </div>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[4px] mt-4">
-                        Member Since: {new Date(userProfile?.created_at).toLocaleDateString()}
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[4px] mt-4 flex items-center justify-center gap-2">
+                        Member Since: <span className="text-navy">{userProfile?.created_at ? new Date(userProfile.created_at).toLocaleDateString() : 'Active Now'}</span>
                     </p>
                 </div>
 
