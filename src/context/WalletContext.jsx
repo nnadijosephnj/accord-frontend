@@ -9,6 +9,7 @@ export function WalletProvider({ children }) {
     const [provider, setProvider] = useState(null);
     const [signer, setSigner] = useState(null);
     const [userProfile, setUserProfile] = useState(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('jwt_token'));
     const [isConnecting, setIsConnecting] = useState(false);
     
     // Automatically try to reconnect if there's a stored address
@@ -22,9 +23,13 @@ export function WalletProvider({ children }) {
         try {
             const profile = await apiCall('/api/auth/profile');
             setUserProfile(profile);
+            setIsLoggedIn(true);
             return profile;
         } catch (e) {
-            console.warn("Profile fetch failed:", e.message);
+            if (e.message !== 'AUTHENTICATION_REQUIRED') {
+                console.warn("Profile fetch failed:", e.message);
+            }
+            setIsLoggedIn(false);
             return null;
         }
     };
@@ -115,11 +120,12 @@ export function WalletProvider({ children }) {
         setProvider(null);
         setSigner(null);
         setUserProfile(null);
+        setIsLoggedIn(false);
         window.location.href = '/'; // Ensure we return to landing
     };
     
     return (
-        <WalletContext.Provider value={{ address, provider, signer, userProfile, fetchProfile, connectWallet, logout, isConnecting }}>
+        <WalletContext.Provider value={{ address, provider, signer, userProfile, isLoggedIn, fetchProfile, connectWallet, logout, isConnecting }}>
             {children}
         </WalletContext.Provider>
     );

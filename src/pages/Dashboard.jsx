@@ -89,7 +89,7 @@ function RoleModal({ isOpen, onClose }) {
 }
 
 export default function Home() {
-    const { userProfile, logout } = useWallet();
+    const { userProfile, logout, isLoggedIn, connectWallet, address } = useWallet();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const navigate = useNavigate();
 
@@ -108,20 +108,37 @@ export default function Home() {
                             Welcome back 👋
                         </h1>
                         <p className="text-gray-400 text-lg sm:text-xl font-bold italic">
-                            What would you like to do today?
+                            {isLoggedIn ? 'What would you like to do today?' : 'Please sign into your account'}
                         </p>
                     </motion.div>
                     
-                    <motion.button 
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.2 }}
-                        onClick={() => setIsModalOpen(true)}
-                        className="w-full bg-[#17B978] hover:bg-[#129A64] text-white font-black text-lg py-6 rounded-[20px] transition-all shadow-xl hover:shadow-[#17B978]/30 shadow-[#17B978]/10 active:scale-95 flex items-center justify-center gap-3 group"
-                    >
-                        <Plus className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" />
-                        CREATE AGREEMENT
-                    </motion.button>
+                    {!isLoggedIn ? (
+                        <motion.button 
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            onClick={() => connectWallet()}
+                            className="w-full bg-[#0A3D62] text-white font-black text-lg py-6 rounded-[20px] transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3"
+                        >
+                            <ShieldCheck className="w-6 h-6 text-teal" />
+                            SIGN IN TO ACCORD
+                        </motion.button>
+                    ) : (
+                        <motion.button 
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            onClick={() => setIsModalOpen(true)}
+                            className="w-full bg-[#17B978] hover:bg-[#129A64] text-white font-black text-lg py-6 rounded-[20px] transition-all shadow-xl hover:shadow-[#17B978]/30 shadow-[#17B978]/10 active:scale-95 flex items-center justify-center gap-3 group"
+                        >
+                            <Plus className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" />
+                            CREATE AGREEMENT
+                        </motion.button>
+                    )}
+                    
+                    {!isLoggedIn && (
+                        <p className="mt-6 text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">
+                            Secure signature required to access your agreements
+                        </p>
+                    )}
                 </div>
             </main>
 

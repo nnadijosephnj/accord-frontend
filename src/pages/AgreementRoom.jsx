@@ -13,7 +13,7 @@ import { CONTRACT_ADDRESS, CONTRACT_ABI, USDT_ADDRESS, USDT_ABI } from '../utils
 
 export default function AgreementRoom() {
     const { id } = useParams();
-    const { address, signer } = useWallet();
+    const { address, signer, isLoggedIn, connectWallet } = useWallet();
     const [agreement, setAgreement] = useState(null);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
@@ -27,7 +27,7 @@ export default function AgreementRoom() {
     useEffect(() => {
         loadAgreement();
         loadMessages();
-    }, [id]);
+    }, [id, isLoggedIn]); // Refresh when login state changes
 
     const loadAgreement = async () => {
         try {
@@ -39,7 +39,9 @@ export default function AgreementRoom() {
             const fileData = await apiCall(`/api/agreements/${id}/files`);
             setFiles(fileData || []);
         } catch (e) {
-            console.error(e);
+            if (e.message !== 'AUTHENTICATION_REQUIRED') {
+                console.warn(e.message);
+            }
         } finally {
             setLoading(false);
         }
@@ -50,7 +52,7 @@ export default function AgreementRoom() {
             const data = await apiCall(`/api/messages/${id}`);
             setMessages(data || []);
         } catch (e) {
-            console.error(e);
+            // Ignore auth errors for background sync
         }
     };
 
@@ -249,7 +251,21 @@ export default function AgreementRoom() {
                     <div className="absolute top-0 right-0 w-64 h-64 bg-teal/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
                     <div className="relative z-10 text-center max-w-lg mx-auto">
                         <AnimatePresence mode="wait">
-                            {isFreelancer ? (
+                            {(!isLoggedIn && (isFreelancer || isClient)) ? (
+                                <motion.div key="signin" initial={{opacity:0}} animate={{opacity:1}} className="space-y-6">
+                                    <Lock className="w-16 h-16 text-teal mx-auto mb-4" />
+                                    <h2 className="text-3xl font-black tracking-tight">Access Restricted</h2>
+                                    <p className="text-blue-100/60 font-bold text-sm max-w-sm mx-auto">
+                                        You are a participant in this agreement, but you must sign in to take any actions.
+                                    </p>
+                                    <button 
+                                        onClick={() => connectWallet()}
+                                        className="bg-teal text-white py-4 px-12 rounded-full font-black text-xs uppercase tracking-widest shadow-xl shadow-teal/20"
+                                    >
+                                        Sign In to Accord
+                                    </button>
+                                </motion.div>
+                            ) : isFreelancer ? (
                                 <motion.div key="freelancer" initial={{opacity:0, scale:0.95}} animate={{opacity:1, scale:1}}>
                                     {agreement.status === 'PENDING' && (
                                         <div className="space-y-6">
@@ -400,7 +416,7 @@ export default function AgreementRoom() {
                                         onClick={() => navigate('/')}
                                         className="bg-teal text-white py-4 px-10 rounded-full font-black text-xs uppercase tracking-widest"
                                     >
-                                        Connect to See More
+                                        Connect Wallet
                                     </button>
                                 </div>
                             )}
