@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiCall } from '../utils/api';
 
 export default function Profile() {
-    const { address, userProfile, fetchProfile, logout } = useWallet();
+    const { address, userProfile, fetchProfile, setUserProfile, logout } = useWallet();
     const [isEditing, setIsEditing] = useState(false);
     const [displayName, setDisplayName] = useState(userProfile?.display_name || '');
     const [copied, setCopied] = useState(false);
@@ -25,7 +25,7 @@ export default function Profile() {
     });
 
     useEffect(() => {
-        if (userProfile) setDisplayName(userProfile.display_name || '');
+        if (userProfile?.display_name) setDisplayName(userProfile.display_name);
         loadStats();
     }, [userProfile]);
 
@@ -50,14 +50,19 @@ export default function Profile() {
     const handleSave = async () => {
         try {
             setSaving(true);
-            await apiCall('/api/auth/profile', {
+            const updatedUser = await apiCall('/api/auth/profile', {
                 method: 'PATCH',
                 body: JSON.stringify({ display_name: displayName })
             });
-            await fetchProfile();
+            
+            if (updatedUser) {
+                setUserProfile(updatedUser);
+            }
+            
             setIsEditing(false);
         } catch (e) {
-            alert(e.message);
+            console.error(e);
+            alert("Save failed: " + e.message);
         } finally {
             setSaving(false);
         }

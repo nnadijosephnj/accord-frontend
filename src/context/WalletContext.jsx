@@ -143,7 +143,7 @@ export function WalletProvider({ children }) {
     };
     
     return (
-        <WalletContext.Provider value={{ address, provider, signer, userProfile, isLoggedIn, fetchProfile, connectWallet, logout, isConnecting }}>
+        <WalletContext.Provider value={{ address, provider, signer, userProfile, setUserProfile, isLoggedIn, fetchProfile, connectWallet, logout, isConnecting }}>
             {children}
         </WalletContext.Provider>
     );
