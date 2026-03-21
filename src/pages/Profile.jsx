@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiCall } from '../utils/api';
 
 export default function Profile() {
-    const { address, userProfile, fetchProfile, setUserProfile, logout } = useWallet();
+    const { address, userProfile, fetchProfile, setUserProfile, logout, isLoggedIn, connectWallet } = useWallet();
     const [isEditing, setIsEditing] = useState(false);
     const [displayName, setDisplayName] = useState(userProfile?.display_name || '');
     const [copied, setCopied] = useState(false);
@@ -32,24 +32,37 @@ export default function Profile() {
     const loadStats = async () => {
         try {
             const agreements = await apiCall('/api/agreements');
-            const total = agreements.length;
-            const completed = agreements.filter(a => a.status === 'COMPLETED' || a.status === 4).length;
-            const earned = agreements
-                .filter(a => (a.status === 'COMPLETED' || a.status === 4) && a.freelancer_wallet?.toLowerCase() === address?.toLowerCase())
-                .reduce((sum, a) => sum + Number(a.amount_usdt), 0);
-            const spent = agreements
-                .filter(a => (a.status === 'COMPLETED' || a.status === 4) && a.client_wallet?.toLowerCase() === address?.toLowerCase())
-                .reduce((sum, a) => sum + Number(a.amount_usdt), 0);
-            
-            setStats({ total, completed, earned, spent });
+            if (agreements) {
+                const total = agreements.length;
+                const completed = agreements.filter(a => a.status === 'COMPLETED').length;
+                const earned = agreements
+                    .filter(a => a.status === 'COMPLETED' && a.freelancer_wallet?.toLowerCase() === address?.toLowerCase())
+                    .reduce((sum, a) => sum + Number(a.amount_usdt), 0);
+                const spent = agreements
+                    .filter(a => a.status === 'COMPLETED' && a.client_wallet?.toLowerCase() === address?.toLowerCase())
+                    .reduce((sum, a) => sum + Number(a.amount_usdt), 0);
+                
+                setStats({ total, completed, earned, spent });
+            }
         } catch (e) {
-            console.error("Stats load failed:", e.message);
+            console.warn("Stats load failed (likely not signed in):", e.message);
         }
     };
 
     const handleSave = async () => {
         try {
             setSaving(true);
+            
+            // Just-in-time check: if No token, trigger signature first
+            if (!localStorage.getItem('jwt_token')) {
+                await connectWallet();
+                // If it still doesn't exist (user cancelled), stop
+                if (!localStorage.getItem('jwt_token')) {
+                    alert("Signature is required to save changes.");
+                    return;
+                }
+            }
+
             const updatedUser = await apiCall('/api/auth/profile', {
                 method: 'PATCH',
                 body: JSON.stringify({ display_name: displayName })
@@ -83,7 +96,7 @@ export default function Profile() {
                 <div className="max-w-2xl mx-auto flex items-center justify-between">
                     <button 
                         onClick={() => navigate('/dashboard')}
-                        className="p-2 text-gray-400 hover:text-[#0A3D62] transition-colors"
+                        className="p-2 text-gray-400 hover:text-[#0A3D62] transition-all"
                     >
                         <ArrowLeft className="w-6 h-6" />
                     </button>
@@ -196,3 +209,4 @@ export default function Profile() {
         </div>
     );
 }
+
