@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { 
-    ShieldCheck, ArrowLeft, Copy, Check, LogOut, Edit3, 
-    Handshake, CheckCircle, TrendingUp, WalletIcon, ExternalLink 
+    ShieldCheck, ArrowLeft, Copy, Check, LogOut, Edit3, Camera
 } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 import { useNavigate } from 'react-router-dom';
-import { apiCall } from '../utils/api';
+import { apiCall, uploadFileCall } from '../utils/api';
 
 export default function Profile() {
     const { address, userProfile, fetchProfile, setUserProfile, logout, isLoggedIn, connectWallet } = useWallet();
@@ -14,6 +13,9 @@ export default function Profile() {
     const [displayName, setDisplayName] = useState(userProfile?.display_name || '');
     const [copied, setCopied] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [showAvatarPopup, setShowAvatarPopup] = useState(false);
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    const fileInputRef = useRef(null);
     const navigate = useNavigate();
 
     // Stats from Supabase
@@ -87,7 +89,26 @@ export default function Profile() {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${address}`;
+    const handleAvatarFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+            setUploadingAvatar(true);
+            setShowAvatarPopup(false);
+            const formData = new FormData();
+            formData.append('avatar', file);
+            const result = await uploadFileCall('/api/auth/avatar', formData);
+            if (result?.user) setUserProfile(result.user);
+        } catch (e) {
+            alert('Avatar upload failed: ' + e.message);
+        } finally {
+            setUploadingAvatar(false);
+            // Reset so same file can be re-selected
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
+    const avatarUrl = userProfile?.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${address}`;
 
     return (
         <div className="min-h-screen bg-[#F5F5F5] font-sans pb-12">
@@ -106,10 +127,48 @@ export default function Profile() {
             </div>
 
             <main className="max-w-xl mx-auto px-6 mt-8">
+                {/* Hidden file input */}
+                <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    onChange={handleAvatarFileChange}
+                    className="hidden"
+                />
+
                 {/* Avatar Section */}
                 <div className="flex flex-col items-center mb-10">
-                    <div className="w-28 h-28 rounded-full border-4 border-white shadow-xl bg-white overflow-hidden mb-6 group relative">
-                        <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    <div className="relative mb-6">
+                        {/* Avatar circle */}
+                        <button
+                            onClick={() => setShowAvatarPopup(v => !v)}
+                            className="w-28 h-28 rounded-full border-4 border-white shadow-xl bg-white overflow-hidden block focus:outline-none"
+                            disabled={uploadingAvatar}
+                        >
+                            <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                            {uploadingAvatar && (
+                                <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center">
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                </div>
+                            )}
+                        </button>
+
+                        {/* Popup */}
+                        {showAvatarPopup && !uploadingAvatar && (
+                            <>
+                                {/* Backdrop to close */}
+                                <div className="fixed inset-0 z-40" onClick={() => setShowAvatarPopup(false)} />
+                                <div className="absolute left-1/2 -translate-x-1/2 top-[calc(100%+8px)] z-50 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 px-1 w-52">
+                                    <button
+                                        onClick={() => { setShowAvatarPopup(false); fileInputRef.current?.click(); }}
+                                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-all text-left"
+                                    >
+                                        <Camera className="w-4 h-4 text-[#17B978]" />
+                                        <span className="text-sm font-bold text-[#0A3D62]">Change Profile Picture</span>
+                                    </button>
+                                </div>
+                            </>
+                        )}
                     </div>
                     
                     <div className="text-center group flex items-center gap-2 justify-center">
