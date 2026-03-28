@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-    ArrowLeft, Copy, Check, LogOut, Edit3, Camera
+    ArrowLeft, Copy, Check, LogOut, Edit3, Camera, Moon, Sun
 } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
+import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { apiCall, uploadFileCall } from '../utils/api';
 import { useRef } from 'react';
 
 export default function Profile() {
     const { address, userProfile, fetchProfile, setUserProfile, logout, isLoggedIn, connectWallet } = useWallet();
+    const { isDark, toggle } = useTheme();
     const [isEditing, setIsEditing] = useState(false);
     const [displayName, setDisplayName] = useState(userProfile?.display_name || '');
     const [copied, setCopied] = useState(false);
@@ -96,21 +98,23 @@ export default function Profile() {
     const avatarUrl = userProfile?.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${address}`;
 
     return (
-        <div className="min-h-screen bg-[#f5f6f7] font-sans pb-16">
-            <div className="fixed top-0 right-0 w-[400px] h-[400px] bg-orange-200/20 rounded-full blur-[120px] -z-10" />
-            <div className="fixed bottom-0 left-0 w-[500px] h-[500px] bg-zinc-200/40 rounded-full blur-[150px] -z-10" />
+        <div className="min-h-screen bg-[#f5f6f7] dark:bg-[#0e0e0e] font-sans pb-16">
+            <div className="fixed top-0 right-0 w-[400px] h-[400px] bg-orange-200/20 dark:bg-orange-500/[0.04] rounded-full blur-[120px] -z-10" />
+            <div className="fixed bottom-0 left-0 w-[500px] h-[500px] bg-zinc-200/40 dark:bg-orange-500/[0.02] rounded-full blur-[150px] -z-10" />
 
             {/* Header */}
-            <nav className="bg-white/70 backdrop-blur-xl border-b border-white/20 shadow-[0_8px_32px_0_rgba(161,57,0,0.05)] py-4 px-6 sticky top-0 z-50">
+            <nav className="bg-white/70 dark:bg-neutral-950/60 backdrop-blur-xl border-b border-white/20 dark:border-orange-500/10 shadow-[0_8px_32px_0_rgba(161,57,0,0.05)] dark:shadow-none py-4 px-6 sticky top-0 z-50">
                 <div className="max-w-2xl mx-auto flex items-center justify-between">
                     <button
                         onClick={() => navigate('/dashboard')}
-                        className="p-2 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-xl transition-all"
+                        className="p-2 text-zinc-400 dark:text-neutral-500 hover:text-zinc-700 dark:hover:text-neutral-200 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl transition-all"
                     >
                         <ArrowLeft className="w-6 h-6" />
                     </button>
-                    <h1 className="text-base font-black text-zinc-900 uppercase tracking-tight">Profile</h1>
-                    <div className="w-10" />
+                    <h1 className="text-base font-black text-zinc-900 dark:text-white uppercase tracking-tight">Profile</h1>
+                    <button onClick={toggle} className="p-2 rounded-xl text-zinc-400 dark:text-neutral-500 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all" aria-label="Toggle theme">
+                        {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                    </button>
                 </div>
             </nav>
 
@@ -129,7 +133,7 @@ export default function Profile() {
                     <div className="relative mb-6">
                         <button
                             onClick={() => setShowAvatarPopup(v => !v)}
-                            className="w-28 h-28 rounded-full border-4 border-white shadow-xl bg-white overflow-hidden block focus:outline-none relative"
+                            className="w-28 h-28 rounded-full border-4 border-white dark:border-zinc-700 shadow-xl bg-white dark:bg-zinc-800 overflow-hidden block focus:outline-none relative"
                             disabled={uploadingAvatar}
                         >
                             <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
@@ -143,13 +147,13 @@ export default function Profile() {
                         {showAvatarPopup && !uploadingAvatar && (
                             <>
                                 <div className="fixed inset-0 z-40" onClick={() => setShowAvatarPopup(false)} />
-                                <div className="absolute left-1/2 -translate-x-1/2 top-[calc(100%+8px)] z-50 bg-white rounded-2xl shadow-xl border border-zinc-100 py-2 px-1 w-52">
+                                <div className="absolute left-1/2 -translate-x-1/2 top-[calc(100%+8px)] z-50 bg-white dark:bg-[#1a1919] rounded-2xl shadow-xl border border-zinc-100 dark:border-white/10 py-2 px-1 w-52">
                                     <button
                                         onClick={() => { setShowAvatarPopup(false); fileInputRef.current?.click(); }}
-                                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 transition-all text-left"
+                                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-all text-left"
                                     >
-                                        <Camera className="w-4 h-4 text-orange-600" />
-                                        <span className="text-sm font-bold text-zinc-800">Change Profile Picture</span>
+                                        <Camera className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                                        <span className="text-sm font-bold text-zinc-800 dark:text-white">Change Profile Picture</span>
                                     </button>
                                 </div>
                             </>
@@ -161,59 +165,49 @@ export default function Profile() {
                         {isEditing ? (
                             <div className="flex flex-col items-center gap-4">
                                 <input
-                                    className="text-2xl font-black text-zinc-900 text-center glass-input outline-none"
+                                    className="text-2xl font-black text-zinc-900 dark:text-white text-center glass-input outline-none"
                                     value={displayName}
                                     onChange={(e) => setDisplayName(e.target.value)}
                                     placeholder="e.g. Satoshi"
                                     autoFocus
                                 />
                                 <div className="flex gap-2">
-                                    <button
-                                        onClick={handleSave}
-                                        disabled={saving}
-                                        className="orange-glow-btn text-white text-xs font-black uppercase tracking-widest px-8 py-2.5 rounded-full"
-                                    >
+                                    <button onClick={handleSave} disabled={saving} className="orange-glow-btn text-white text-xs font-black uppercase tracking-widest px-8 py-2.5 rounded-full">
                                         {saving ? 'Saving...' : 'Save Nickname'}
                                     </button>
-                                    <button
-                                        onClick={() => setIsEditing(false)}
-                                        className="bg-zinc-100 text-zinc-400 text-xs font-black uppercase tracking-widest px-8 py-2.5 rounded-full hover:bg-zinc-200 transition-all"
-                                    >
+                                    <button onClick={() => setIsEditing(false)} className="bg-zinc-100 dark:bg-white/5 text-zinc-400 dark:text-neutral-500 text-xs font-black uppercase tracking-widest px-8 py-2.5 rounded-full hover:bg-zinc-200 dark:hover:bg-white/10 transition-all">
                                         Cancel
                                     </button>
                                 </div>
                             </div>
                         ) : (
                             <>
-                                <h1 className="text-3xl font-black text-zinc-900 tracking-tight">
+                                <h1 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">
                                     {userProfile?.display_name || 'Add Nickname'}
                                 </h1>
                                 <button
                                     onClick={() => { setIsEditing(true); setDisplayName(userProfile?.display_name || ''); }}
-                                    className="p-2 bg-zinc-100 rounded-lg text-zinc-400 hover:text-orange-600 transition-all hover:bg-orange-50"
+                                    className="p-2 bg-zinc-100 dark:bg-white/5 rounded-lg text-zinc-400 dark:text-neutral-500 hover:text-orange-600 dark:hover:text-orange-400 transition-all hover:bg-orange-50 dark:hover:bg-orange-500/10"
                                 >
                                     <Edit3 className="w-5 h-5" />
                                 </button>
                             </>
                         )}
                     </div>
-                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[4px] mt-4">
-                        Member Since: <span className="text-zinc-600">{userProfile?.created_at ? new Date(userProfile.created_at).toLocaleDateString() : 'Active Now'}</span>
+                    <p className="text-[10px] text-zinc-400 dark:text-neutral-500 font-bold uppercase tracking-[4px] mt-4">
+                        Member Since: <span className="text-zinc-600 dark:text-neutral-300">{userProfile?.created_at ? new Date(userProfile.created_at).toLocaleDateString() : 'Active Now'}</span>
                     </p>
                 </div>
 
                 {/* Wallet */}
                 <div className="glass-panel p-6 rounded-[1.75rem] mb-5">
-                    <p className="text-[10px] text-zinc-400 font-black uppercase tracking-widest mb-3">Connected Wallet</p>
+                    <p className="text-[10px] text-zinc-400 dark:text-neutral-500 font-black uppercase tracking-widest mb-3">Connected Wallet</p>
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3 overflow-hidden">
                             <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse flex-shrink-0" />
-                            <span className="text-xs font-bold text-zinc-700 truncate font-mono">{address}</span>
+                            <span className="text-xs font-bold text-zinc-700 dark:text-neutral-300 truncate font-mono">{address}</span>
                         </div>
-                        <button
-                            onClick={handleCopy}
-                            className="bg-zinc-100 p-2.5 rounded-xl text-zinc-400 hover:text-orange-600 hover:bg-orange-50 transition-all"
-                        >
+                        <button onClick={handleCopy} className="bg-zinc-100 dark:bg-white/5 p-2.5 rounded-xl text-zinc-400 dark:text-neutral-500 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-all">
                             {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                         </button>
                     </div>
@@ -228,10 +222,10 @@ export default function Profile() {
                         { label: 'Total Spent', value: stats.spent, unit: 'USDT' },
                     ].map((s, i) => (
                         <div key={i} className="glass-panel p-5 rounded-[1.5rem]">
-                            <p className="text-[9px] text-zinc-400 font-black uppercase tracking-widest mb-1.5 truncate">{s.label}</p>
-                            <h3 className={`text-2xl font-black ${s.highlight ? 'text-orange-600' : 'text-zinc-900'}`}>
+                            <p className="text-[9px] text-zinc-400 dark:text-neutral-500 font-black uppercase tracking-widest mb-1.5 truncate">{s.label}</p>
+                            <h3 className={`text-2xl font-black ${s.highlight ? 'text-orange-600 dark:text-orange-400' : 'text-zinc-900 dark:text-white'}`}>
                                 {s.value}
-                                {s.unit && <span className="text-[10px] font-bold text-orange-500 ml-1">{s.unit}</span>}
+                                {s.unit && <span className="text-[10px] font-bold text-orange-500 dark:text-orange-400 ml-1">{s.unit}</span>}
                             </h3>
                         </div>
                     ))}
@@ -240,7 +234,7 @@ export default function Profile() {
                 {/* Disconnect */}
                 <button
                     onClick={logout}
-                    className="w-full py-5 bg-white/70 backdrop-blur-sm border border-red-100 text-red-500 font-black text-xs uppercase tracking-widest rounded-3xl hover:bg-red-500 hover:text-white transition-all shadow-sm flex items-center justify-center gap-3 active:scale-95"
+                    className="w-full py-5 bg-white/70 dark:bg-black/30 backdrop-blur-sm border border-red-100 dark:border-red-500/20 text-red-500 dark:text-red-400 font-black text-xs uppercase tracking-widest rounded-3xl hover:bg-red-500 dark:hover:bg-red-500 hover:text-white transition-all shadow-sm flex items-center justify-center gap-3 active:scale-95"
                 >
                     <LogOut className="w-4 h-4" />
                     Disconnect Wallet

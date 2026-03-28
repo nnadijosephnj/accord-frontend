@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ShieldCheck, ArrowLeft, RefreshCw, Link as LinkIcon,
-    Briefcase, User, DollarSign, Calendar, Send
+    Briefcase, User, DollarSign, Calendar, Send, Moon, Sun
 } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
+import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { apiCall } from '../utils/api';
@@ -12,6 +13,7 @@ import { CONTRACT_ADDRESS, CONTRACT_ABI } from '../utils/contractABI';
 
 export default function CreateClient() {
     const { address, signer } = useWallet();
+    const { isDark, toggle } = useTheme();
     const [loading, setLoading] = useState(false);
     const [pasteLink, setPasteLink] = useState('');
     const navigate = useNavigate();
@@ -75,21 +77,23 @@ export default function CreateClient() {
     };
 
     return (
-        <div className="min-h-screen bg-[#f5f6f7] font-sans pb-16">
-            <div className="fixed top-0 right-0 w-[400px] h-[400px] bg-orange-200/20 rounded-full blur-[120px] -z-10" />
-            <div className="fixed bottom-0 left-0 w-[500px] h-[500px] bg-zinc-200/40 rounded-full blur-[150px] -z-10" />
+        <div className="min-h-screen bg-[#f5f6f7] dark:bg-[#0e0e0e] font-sans pb-16">
+            <div className="fixed top-0 right-0 w-[400px] h-[400px] bg-orange-200/20 dark:bg-orange-500/[0.04] rounded-full blur-[120px] -z-10" />
+            <div className="fixed bottom-0 left-0 w-[500px] h-[500px] bg-zinc-200/40 dark:bg-orange-500/[0.02] rounded-full blur-[150px] -z-10" />
 
             {/* Nav */}
-            <nav className="bg-white/70 backdrop-blur-xl border-b border-white/20 shadow-[0_8px_32px_0_rgba(161,57,0,0.05)] py-4 px-6 sticky top-0 z-50">
+            <nav className="bg-white/70 dark:bg-neutral-950/60 backdrop-blur-xl border-b border-white/20 dark:border-orange-500/10 shadow-[0_8px_32px_0_rgba(161,57,0,0.05)] dark:shadow-none py-4 px-6 sticky top-0 z-50">
                 <div className="max-w-2xl mx-auto flex items-center justify-between">
-                    <button onClick={() => navigate('/dashboard')} className="p-2 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-xl transition-all">
+                    <button onClick={() => navigate('/dashboard')} className="p-2 text-zinc-400 dark:text-neutral-500 hover:text-zinc-700 dark:hover:text-neutral-200 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl transition-all">
                         <ArrowLeft className="w-6 h-6" />
                     </button>
                     <div className="text-center">
-                        <h1 className="text-base font-black text-zinc-900 uppercase tracking-tight">Fund Work Agreement</h1>
-                        <p className="text-[10px] text-orange-600 font-black uppercase tracking-widest">As Client</p>
+                        <h1 className="text-base font-black text-zinc-900 dark:text-white uppercase tracking-tight">Fund Work Agreement</h1>
+                        <p className="text-[10px] text-orange-600 dark:text-orange-400 font-black uppercase tracking-widest">As Client</p>
                     </div>
-                    <div className="w-10" />
+                    <button onClick={toggle} className="p-2 rounded-xl text-zinc-400 dark:text-neutral-500 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all" aria-label="Toggle theme">
+                        {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                    </button>
                 </div>
             </nav>
 
@@ -98,12 +102,12 @@ export default function CreateClient() {
                 {/* Option A: Paste Link */}
                 <div className="glass-panel p-7 rounded-[2rem] mb-6">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="p-3 bg-orange-50 rounded-2xl text-orange-600">
+                        <div className="p-3 bg-orange-50 dark:bg-orange-500/10 rounded-2xl text-orange-600 dark:text-orange-400">
                             <LinkIcon className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="text-base font-black text-zinc-900 leading-tight">Option A — Have a link?</h2>
-                            <p className="text-xs text-zinc-400 font-medium">Your freelancer sent you an Accord link</p>
+                            <h2 className="text-base font-black text-zinc-900 dark:text-white leading-tight">Option A — Have a link?</h2>
+                            <p className="text-xs text-zinc-400 dark:text-neutral-500 font-medium">Your freelancer sent you an Accord link</p>
                         </div>
                     </div>
 
@@ -121,68 +125,35 @@ export default function CreateClient() {
                 </div>
 
                 <div className="flex items-center gap-4 mb-6">
-                    <div className="flex-1 h-px bg-zinc-200" />
-                    <span className="text-[10px] text-zinc-400 font-black uppercase tracking-[4px]">OR</span>
-                    <div className="flex-1 h-px bg-zinc-200" />
+                    <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-700/50" />
+                    <span className="text-[10px] text-zinc-400 dark:text-neutral-500 font-black uppercase tracking-[4px]">OR</span>
+                    <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-700/50" />
                 </div>
 
                 {/* Option B: Create and Invite */}
                 <div className="glass-panel p-7 rounded-[2rem]">
                     <div className="flex items-center gap-3 mb-7">
-                        <div className="p-3 bg-orange-50 rounded-2xl text-orange-600">
+                        <div className="p-3 bg-orange-50 dark:bg-orange-500/10 rounded-2xl text-orange-600 dark:text-orange-400">
                             <Briefcase className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="text-base font-black text-zinc-900 leading-tight">Option B — Create & Invite</h2>
-                            <p className="text-xs text-zinc-400 font-medium">Create agreement and invite your freelancer</p>
+                            <h2 className="text-base font-black text-zinc-900 dark:text-white leading-tight">Option B — Create & Invite</h2>
+                            <p className="text-xs text-zinc-400 dark:text-neutral-500 font-medium">Create agreement and invite your freelancer</p>
                         </div>
                     </div>
 
                     <form onSubmit={handleCreateSubmit} className="space-y-4">
-                        <input
-                            required
-                            className="glass-input"
-                            placeholder="Job Title"
-                            value={form.title}
-                            onChange={(e) => setForm({...form, title: e.target.value})}
-                        />
-                        <textarea
-                            required
-                            rows="3"
-                            className="glass-input resize-none"
-                            placeholder="Job Description"
-                            value={form.description}
-                            onChange={(e) => setForm({...form, description: e.target.value})}
-                        />
+                        <input required className="glass-input" placeholder="Job Title" value={form.title} onChange={(e) => setForm({...form, title: e.target.value})} />
+                        <textarea required rows="3" className="glass-input resize-none" placeholder="Job Description" value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} />
                         <div className="relative">
-                            <input
-                                required
-                                className="glass-input pl-12 font-mono"
-                                placeholder="Freelancer Wallet Address (0x...)"
-                                value={form.freelancerAddress}
-                                onChange={(e) => setForm({...form, freelancerAddress: e.target.value})}
-                            />
-                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-300" />
+                            <input required className="glass-input pl-12 font-mono" placeholder="Freelancer Wallet Address (0x...)" value={form.freelancerAddress} onChange={(e) => setForm({...form, freelancerAddress: e.target.value})} />
+                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-300 dark:text-neutral-600" />
                         </div>
                         <div className="relative">
-                            <input
-                                required
-                                type="number"
-                                className="glass-input pr-16"
-                                placeholder="Payment Amount"
-                                value={form.amount}
-                                onChange={(e) => setForm({...form, amount: e.target.value})}
-                            />
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-orange-600 tracking-widest uppercase">USDT</span>
+                            <input required type="number" className="glass-input pr-16" placeholder="Payment Amount" value={form.amount} onChange={(e) => setForm({...form, amount: e.target.value})} />
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-orange-600 dark:text-orange-400 tracking-widest uppercase">USDT</span>
                         </div>
-                        <div className="relative">
-                            <input
-                                type="date"
-                                className="glass-input"
-                                value={form.deadline}
-                                onChange={(e) => setForm({...form, deadline: e.target.value})}
-                            />
-                        </div>
+                        <input type="date" className="glass-input" value={form.deadline} onChange={(e) => setForm({...form, deadline: e.target.value})} />
 
                         <button
                             disabled={loading}
