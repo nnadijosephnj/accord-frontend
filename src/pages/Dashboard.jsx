@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Plus, User, X, Moon, Sun } from 'lucide-react';
+import { Plus, User, X, Moon, Sun } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate, Link } from 'react-router-dom';
@@ -14,10 +14,10 @@ function Navbar() {
     return (
         <nav className="fixed w-full top-0 left-0 z-50 bg-white/70 dark:bg-neutral-950/60 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(161,57,0,0.05)] dark:shadow-none border-b border-white/20 dark:border-orange-500/10">
             <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                <Link to="/dashboard" className="flex items-center gap-2">
-                    <ShieldCheck className="w-7 h-7 text-orange-600 dark:text-orange-500" />
-                    <span className="text-xl font-extrabold tracking-tight text-orange-700 dark:text-orange-500">ACCORD</span>
-                </Link>
+                <Link to="/dashboard" className="flex items-center">
+            <img src="/logo-light.svg" alt="Accord" className="h-9 dark:hidden" />
+            <img src="/logo-dark.svg" alt="Accord" className="h-9 hidden dark:block" />
+          </Link>
                 <div className="flex items-center gap-2">
                     {/* Wallet pill */}
                     {address && (

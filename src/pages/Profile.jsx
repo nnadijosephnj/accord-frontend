@@ -111,7 +111,10 @@ export default function Profile() {
                     >
                         <ArrowLeft className="w-6 h-6" />
                     </button>
-                    <h1 className="text-base font-black text-zinc-900 dark:text-white uppercase tracking-tight">Profile</h1>
+                    <div className="flex items-center justify-center">
+                        <img src="/logo-light.svg" alt="Accord" className="h-7 dark:hidden" />
+                        <img src="/logo-dark.svg" alt="Accord" className="h-7 hidden dark:block" />
+                    </div>
                     <button onClick={toggle} className="p-2 rounded-xl text-zinc-400 dark:text-neutral-500 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all" aria-label="Toggle theme">
                         {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                     </button>
