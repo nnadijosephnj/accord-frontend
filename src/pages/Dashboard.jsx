@@ -15,8 +15,8 @@ function Navbar() {
         <nav className="fixed w-full top-0 left-0 z-50 bg-white/70 dark:bg-neutral-950/60 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(161,57,0,0.05)] dark:shadow-none border-b border-white/20 dark:border-orange-500/10">
             <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                 <Link to="/dashboard" className="flex items-center">
-            <img src="/logo-light.png" alt="Accord" className="h-9 dark:hidden" />
-            <img src="/logo-dark.png" alt="Accord" className="h-9 hidden dark:block" />
+            <img src="/logo-light.png" alt="Accord" className="h-14 dark:hidden" />
+            <img src="/logo-dark.png" alt="Accord" className="h-14 hidden dark:block" />
           </Link>
                 <div className="flex items-center gap-2">
                     {/* Wallet pill */}
@@ -165,3 +165,4 @@ export default function Home() {
         </div>
     );
 }
+
