@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-    ShieldCheck, ArrowLeft, Copy, Check, LogOut, Edit3, Camera
+import {
+    ArrowLeft, Copy, Check, LogOut, Edit3, Camera
 } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 import { useNavigate } from 'react-router-dom';
 import { apiCall, uploadFileCall } from '../utils/api';
+import { useRef } from 'react';
 
 export default function Profile() {
     const { address, userProfile, fetchProfile, setUserProfile, logout, isLoggedIn, connectWallet } = useWallet();
@@ -18,13 +19,7 @@ export default function Profile() {
     const fileInputRef = useRef(null);
     const navigate = useNavigate();
 
-    // Stats from Supabase
-    const [stats, setStats] = useState({
-        total: 0,
-        completed: 0,
-        earned: 0,
-        spent: 0
-    });
+    const [stats, setStats] = useState({ total: 0, completed: 0, earned: 0, spent: 0 });
 
     useEffect(() => {
         if (userProfile?.display_name) setDisplayName(userProfile.display_name);
@@ -43,37 +38,28 @@ export default function Profile() {
                 const spent = agreements
                     .filter(a => a.status === 'COMPLETED' && a.client_wallet?.toLowerCase() === address?.toLowerCase())
                     .reduce((sum, a) => sum + Number(a.amount_usdt), 0);
-                
                 setStats({ total, completed, earned, spent });
             }
         } catch (e) {
-            console.warn("Stats load failed (likely not signed in):", e.message);
+            console.warn("Stats load failed:", e.message);
         }
     };
 
     const handleSave = async () => {
         try {
             setSaving(true);
-            
-            // Just-in-time check: if No token, trigger signature first
             if (!localStorage.getItem('jwt_token')) {
                 await connectWallet();
-                // If it still doesn't exist (user cancelled), stop
                 if (!localStorage.getItem('jwt_token')) {
                     alert("Signature is required to save changes.");
                     return;
                 }
             }
-
             const updatedUser = await apiCall('/api/auth/profile', {
                 method: 'PATCH',
                 body: JSON.stringify({ display_name: displayName })
             });
-            
-            if (updatedUser) {
-                setUserProfile(updatedUser);
-            }
-            
+            if (updatedUser) setUserProfile(updatedUser);
             setIsEditing(false);
         } catch (e) {
             console.error(e);
@@ -103,7 +89,6 @@ export default function Profile() {
             alert('Avatar upload failed: ' + e.message);
         } finally {
             setUploadingAvatar(false);
-            // Reset so same file can be re-selected
             if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
@@ -111,23 +96,26 @@ export default function Profile() {
     const avatarUrl = userProfile?.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${address}`;
 
     return (
-        <div className="min-h-screen bg-[#F5F5F5] font-sans pb-12">
+        <div className="min-h-screen bg-[#f5f6f7] font-sans pb-16">
+            <div className="fixed top-0 right-0 w-[400px] h-[400px] bg-orange-200/20 rounded-full blur-[120px] -z-10" />
+            <div className="fixed bottom-0 left-0 w-[500px] h-[500px] bg-zinc-200/40 rounded-full blur-[150px] -z-10" />
+
             {/* Header */}
-            <div className="bg-white border-b border-gray-100 py-6 px-6 sticky top-0 z-50">
+            <nav className="bg-white/70 backdrop-blur-xl border-b border-white/20 shadow-[0_8px_32px_0_rgba(161,57,0,0.05)] py-4 px-6 sticky top-0 z-50">
                 <div className="max-w-2xl mx-auto flex items-center justify-between">
-                    <button 
+                    <button
                         onClick={() => navigate('/dashboard')}
-                        className="p-2 text-gray-400 hover:text-[#0A3D62] transition-all"
+                        className="p-2 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-xl transition-all"
                     >
                         <ArrowLeft className="w-6 h-6" />
                     </button>
-                    <h1 className="text-xl font-black text-[#0A3D62] tracking-tight">Profile</h1>
-                    <div className="w-10"></div>
+                    <h1 className="text-base font-black text-zinc-900 uppercase tracking-tight">Profile</h1>
+                    <div className="w-10" />
                 </div>
-            </div>
+            </nav>
 
             <main className="max-w-xl mx-auto px-6 mt-8">
-                {/* Hidden file input */}
+                {/* Hidden file input for avatar */}
                 <input
                     type="file"
                     accept="image/*"
@@ -137,12 +125,11 @@ export default function Profile() {
                 />
 
                 {/* Avatar Section */}
-                <div className="flex flex-col items-center mb-10">
+                <div className="flex flex-col items-center mb-8">
                     <div className="relative mb-6">
-                        {/* Avatar circle */}
                         <button
                             onClick={() => setShowAvatarPopup(v => !v)}
-                            className="w-28 h-28 rounded-full border-4 border-white shadow-xl bg-white overflow-hidden block focus:outline-none"
+                            className="w-28 h-28 rounded-full border-4 border-white shadow-xl bg-white overflow-hidden block focus:outline-none relative"
                             disabled={uploadingAvatar}
                         >
                             <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
@@ -153,45 +140,44 @@ export default function Profile() {
                             )}
                         </button>
 
-                        {/* Popup */}
                         {showAvatarPopup && !uploadingAvatar && (
                             <>
-                                {/* Backdrop to close */}
                                 <div className="fixed inset-0 z-40" onClick={() => setShowAvatarPopup(false)} />
-                                <div className="absolute left-1/2 -translate-x-1/2 top-[calc(100%+8px)] z-50 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 px-1 w-52">
+                                <div className="absolute left-1/2 -translate-x-1/2 top-[calc(100%+8px)] z-50 bg-white rounded-2xl shadow-xl border border-zinc-100 py-2 px-1 w-52">
                                     <button
                                         onClick={() => { setShowAvatarPopup(false); fileInputRef.current?.click(); }}
-                                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-all text-left"
+                                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 transition-all text-left"
                                     >
-                                        <Camera className="w-4 h-4 text-[#17B978]" />
-                                        <span className="text-sm font-bold text-[#0A3D62]">Change Profile Picture</span>
+                                        <Camera className="w-4 h-4 text-orange-600" />
+                                        <span className="text-sm font-bold text-zinc-800">Change Profile Picture</span>
                                     </button>
                                 </div>
                             </>
                         )}
                     </div>
-                    
-                    <div className="text-center group flex items-center gap-2 justify-center">
+
+                    {/* Name */}
+                    <div className="text-center flex items-center gap-2 justify-center">
                         {isEditing ? (
                             <div className="flex flex-col items-center gap-4">
-                                <input 
-                                    className="text-2xl font-black text-[#0A3D62] text-center bg-white border border-gray-200 rounded-xl px-4 py-2 outline-none focus:border-teal/50 shadow-sm transition-all"
+                                <input
+                                    className="text-2xl font-black text-zinc-900 text-center glass-input outline-none"
                                     value={displayName}
                                     onChange={(e) => setDisplayName(e.target.value)}
                                     placeholder="e.g. Satoshi"
                                     autoFocus
                                 />
                                 <div className="flex gap-2">
-                                    <button 
+                                    <button
                                         onClick={handleSave}
                                         disabled={saving}
-                                        className="bg-[#17B978] text-white text-xs font-black uppercase tracking-widest px-8 py-2.5 rounded-full shadow-lg hover:shadow-teal/20 active:scale-95 transition-all"
+                                        className="orange-glow-btn text-white text-xs font-black uppercase tracking-widest px-8 py-2.5 rounded-full"
                                     >
                                         {saving ? 'Saving...' : 'Save Nickname'}
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => setIsEditing(false)}
-                                        className="bg-gray-100 text-gray-400 text-xs font-black uppercase tracking-widest px-8 py-2.5 rounded-full"
+                                        className="bg-zinc-100 text-zinc-400 text-xs font-black uppercase tracking-widest px-8 py-2.5 rounded-full hover:bg-zinc-200 transition-all"
                                     >
                                         Cancel
                                     </button>
@@ -199,67 +185,62 @@ export default function Profile() {
                             </div>
                         ) : (
                             <>
-                                <h1 className="text-3xl font-black text-[#0A3D62] tracking-tight">
+                                <h1 className="text-3xl font-black text-zinc-900 tracking-tight">
                                     {userProfile?.display_name || 'Add Nickname'}
                                 </h1>
-                                <button 
-                                    onClick={() => {
-                                        setIsEditing(true);
-                                        setDisplayName(userProfile?.display_name || '');
-                                    }} 
-                                    className="p-2 bg-gray-50 rounded-lg text-gray-300 hover:text-teal transition-all hover:bg-white border border-transparent hover:border-gray-100"
+                                <button
+                                    onClick={() => { setIsEditing(true); setDisplayName(userProfile?.display_name || ''); }}
+                                    className="p-2 bg-zinc-100 rounded-lg text-zinc-400 hover:text-orange-600 transition-all hover:bg-orange-50"
                                 >
                                     <Edit3 className="w-5 h-5" />
                                 </button>
                             </>
                         )}
                     </div>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[4px] mt-4 flex items-center justify-center gap-2">
-                        Member Since: <span className="text-navy">{userProfile?.created_at ? new Date(userProfile.created_at).toLocaleDateString() : 'Active Now'}</span>
+                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[4px] mt-4">
+                        Member Since: <span className="text-zinc-600">{userProfile?.created_at ? new Date(userProfile.created_at).toLocaleDateString() : 'Active Now'}</span>
                     </p>
                 </div>
 
-                {/* Wallet Section */}
-                <div className="bg-white p-6 rounded-[28px] shadow-sm border border-gray-100 mb-8">
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-3">Connected Wallet</p>
+                {/* Wallet */}
+                <div className="glass-panel p-6 rounded-[1.75rem] mb-5">
+                    <p className="text-[10px] text-zinc-400 font-black uppercase tracking-widest mb-3">Connected Wallet</p>
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3 overflow-hidden">
-                            <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse flex-shrink-0"></div>
-                            <span className="text-xs font-bold text-navy truncate font-mono">{address}</span>
+                            <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse flex-shrink-0" />
+                            <span className="text-xs font-bold text-zinc-700 truncate font-mono">{address}</span>
                         </div>
-                        <button 
+                        <button
                             onClick={handleCopy}
-                            className="bg-gray-50 p-2.5 rounded-xl text-gray-400 hover:text-[#17B978] transition-all"
+                            className="bg-zinc-100 p-2.5 rounded-xl text-zinc-400 hover:text-orange-600 hover:bg-orange-50 transition-all"
                         >
                             {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                         </button>
                     </div>
                 </div>
 
-                {/* Stats Section */}
-                <div className="grid grid-cols-2 gap-4 mb-10">
-                    <div className="bg-white p-5 rounded-[24px] border border-gray-100">
-                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">Agreements</p>
-                        <h3 className="text-2xl font-black text-navy">{stats.total}</h3>
-                    </div>
-                    <div className="bg-white p-5 rounded-[24px] border border-gray-100">
-                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">Completed</p>
-                        <h3 className="text-2xl font-black text-emerald-500 underline decoration-teal/20 underline-offset-4">{stats.completed}</h3>
-                    </div>
-                    <div className="bg-white p-5 rounded-[24px] border border-gray-100">
-                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-1.5 whitespace-nowrap overflow-hidden">Total Earned</p>
-                        <h3 className="text-2xl font-black text-navy">{stats.earned} <span className="text-[10px] font-bold text-teal">USDT</span></h3>
-                    </div>
-                    <div className="bg-white p-5 rounded-[24px] border border-gray-100">
-                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-1.5 whitespace-nowrap overflow-hidden">Total Spent</p>
-                        <h3 className="text-2xl font-black text-navy">{stats.spent} <span className="text-[10px] font-bold text-teal">USDT</span></h3>
-                    </div>
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                    {[
+                        { label: 'Agreements', value: stats.total, unit: null },
+                        { label: 'Completed', value: stats.completed, unit: null, highlight: true },
+                        { label: 'Total Earned', value: stats.earned, unit: 'USDT' },
+                        { label: 'Total Spent', value: stats.spent, unit: 'USDT' },
+                    ].map((s, i) => (
+                        <div key={i} className="glass-panel p-5 rounded-[1.5rem]">
+                            <p className="text-[9px] text-zinc-400 font-black uppercase tracking-widest mb-1.5 truncate">{s.label}</p>
+                            <h3 className={`text-2xl font-black ${s.highlight ? 'text-orange-600' : 'text-zinc-900'}`}>
+                                {s.value}
+                                {s.unit && <span className="text-[10px] font-bold text-orange-500 ml-1">{s.unit}</span>}
+                            </h3>
+                        </div>
+                    ))}
                 </div>
 
                 {/* Disconnect */}
-                <button 
+                <button
                     onClick={logout}
-                    className="w-full py-5 bg-white border border-red-50 text-red-500 font-black text-xs uppercase tracking-widest rounded-3xl hover:bg-red-500 hover:text-white transition-all shadow-sm hover:shadow-red-500/10 flex items-center justify-center gap-3 active:scale-95"
+                    className="w-full py-5 bg-white/70 backdrop-blur-sm border border-red-100 text-red-500 font-black text-xs uppercase tracking-widest rounded-3xl hover:bg-red-500 hover:text-white transition-all shadow-sm flex items-center justify-center gap-3 active:scale-95"
                 >
                     <LogOut className="w-4 h-4" />
                     Disconnect Wallet
@@ -268,4 +249,3 @@ export default function Profile() {
         </div>
     );
 }
-
