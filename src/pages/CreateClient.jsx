@@ -89,8 +89,8 @@ export default function CreateClient() {
                     </button>
                     <div className="text-center">
                         <div className="flex items-center justify-center">
-                            <img src="/logo-light.svg" alt="Accord" className="h-7 dark:hidden" />
-                            <img src="/logo-dark.svg" alt="Accord" className="h-7 hidden dark:block" />
+                            <img src="/logo-light.png" alt="Accord" className="h-7 dark:hidden" />
+                            <img src="/logo-dark.png" alt="Accord" className="h-7 hidden dark:block" />
                         </div>
                         <p className="text-[10px] text-orange-600 dark:text-orange-400 font-black uppercase tracking-widest">As Client</p>
                     </div>

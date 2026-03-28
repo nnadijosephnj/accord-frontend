@@ -27,8 +27,8 @@ export default function Landing() {
       <nav className="fixed w-full z-50 bg-white/70 dark:bg-neutral-950/60 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(161,57,0,0.05)] dark:shadow-none border-b border-white/20 dark:border-orange-500/10">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center">
-            <img src="/logo-light.svg" alt="Accord" className="h-9 dark:hidden" />
-            <img src="/logo-dark.svg" alt="Accord" className="h-9 hidden dark:block" />
+            <img src="/logo-light.png" alt="Accord" className="h-9 dark:hidden" />
+            <img src="/logo-dark.png" alt="Accord" className="h-9 hidden dark:block" />
           </div>
           <div className="flex items-center gap-2">
             {/* Theme toggle */}
@@ -126,8 +126,8 @@ export default function Landing() {
       <footer className="py-12 border-t border-zinc-200/50 dark:border-white/5">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-3">
-            <img src="/logo-light.svg" alt="Accord" className="h-7 dark:hidden" />
-            <img src="/logo-dark.svg" alt="Accord" className="h-7 hidden dark:block" />
+            <img src="/logo-light.png" alt="Accord" className="h-7 dark:hidden" />
+            <img src="/logo-dark.png" alt="Accord" className="h-7 hidden dark:block" />
           </div>
           <span className="text-sm text-zinc-400 dark:text-neutral-500 border border-zinc-200 dark:border-white/10 rounded-full px-4 py-1.5 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
