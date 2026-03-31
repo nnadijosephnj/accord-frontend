@@ -97,7 +97,7 @@ export default function Landing() {
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
       transition: { staggerChildren: 0.1 }
     }
@@ -105,10 +105,10 @@ export default function Landing() {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { duration: 0.8, ease: "easeOut" } 
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.8, ease: "easeOut" }
     }
   };
 
@@ -117,9 +117,9 @@ export default function Landing() {
 
   return (
     <div className="relative min-h-screen bg-[#f5f6f7] dark:bg-[#0e0e0e] font-sans overflow-x-hidden text-zinc-900 dark:text-white selection:bg-orange-500/30">
-      
+
       {/* Custom Cursor Glow (only visible on desktop, pointer-events-none) */}
-      <motion.div 
+      <motion.div
         className="fixed top-0 left-0 w-[400px] h-[400px] bg-orange-500/20 dark:bg-[#ff9157]/10 rounded-full blur-[100px] pointer-events-none z-0 hidden md:block"
         animate={{ x: mousePos.x - 200, y: mousePos.y - 200 }}
         transition={{ type: "tween", ease: "linear", duration: 0 }}
@@ -136,8 +136,8 @@ export default function Landing() {
       <nav className="fixed w-full z-50 bg-white/40 dark:bg-[#0e0e0e]/40 backdrop-blur-2xl border-b border-white/20 dark:border-white/5 transition-all">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo-light.png" alt="Accord" className="h-11 dark:hidden" />
-            <img src="/logo-dark.png" alt="Accord" className="h-11 hidden dark:block" />
+            <img src="/logo-light.png" alt="Accord" className="h-10 dark:hidden" />
+            <img src="/logo-dark.png" alt="Accord" className="h-10 hidden dark:block" />
           </div>
           <div className="flex items-center gap-4">
             <button
@@ -164,14 +164,14 @@ export default function Landing() {
         {/* HERO SECTION */}
         <section className="relative min-h-screen flex flex-col items-center justify-center pt-20 px-6 overflow-hidden">
           <div className="max-w-5xl mx-auto w-full flex flex-col items-center text-center">
-            
+
             {/* The Floating '3D' Shield (CSS Layered Parallax) */}
-            <motion.div 
+            <motion.div
               className="relative w-48 h-48 md:w-64 md:h-64 mb-12 flex items-center justify-center perspective-[1000px]"
               animate={{ y: [0, -20, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
             >
-              <motion.div 
+              <motion.div
                 className="absolute inset-0 rounded-[3rem] bg-gradient-to-br from-orange-400/30 to-orange-600/10 backdrop-blur-3xl border border-white/40 dark:border-white/10 shadow-[0_0_80px_rgba(234,88,12,0.3)] dark:shadow-[0_0_100px_rgba(255,145,87,0.15)] flex items-center justify-center"
                 style={{ rotateX: mousePos.y / 50 - 10, rotateY: mousePos.x / 50 - 10 }}
               >
@@ -193,11 +193,11 @@ export default function Landing() {
                   The Standard for Web3 Escrow
                 </span>
               </motion.div>
-              
+
               <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-black tracking-tighter leading-[1.05] mb-8">
                 {headlineWords.map((word, i) => (
-                  <motion.span 
-                    key={i} 
+                  <motion.span
+                    key={i}
                     variants={itemVariants}
                     className="inline-block mr-3"
                   >
@@ -211,11 +211,11 @@ export default function Landing() {
                   </motion.span>
                 ))}
               </h1>
-              
+
               <motion.p variants={itemVariants} className="text-xl md:text-2xl text-zinc-500 dark:text-neutral-400 font-medium mb-12 max-w-2xl mx-auto leading-relaxed">
                 Create a deal. Share a link. Get paid safely. <br className="hidden md:block" /> No middlemen. Fully onchain.
               </motion.p>
-              
+
               <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button
                   onClick={() => connectWallet()}
@@ -254,7 +254,7 @@ export default function Landing() {
         {/* HOW IT WORKS SECTION */}
         <section className="py-32 relative z-10">
           <div className="max-w-7xl mx-auto px-6">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
@@ -269,23 +269,23 @@ export default function Landing() {
               <div className="hidden md:block absolute top-[48px] left-[15%] right-[15%] h-0.5 border-t-2 border-dashed border-zinc-300 dark:border-zinc-800 z-0" />
 
               {[
-                { 
-                  num: '01', 
-                  title: 'Create Agreement', 
-                  desc: 'Freelancer frames the terms and payment amount.', 
-                  icon: <UserCheck className="w-10 h-10" /> 
+                {
+                  num: '01',
+                  title: 'Create Agreement',
+                  desc: 'Freelancer frames the terms and payment amount.',
+                  icon: <UserCheck className="w-10 h-10" />
                 },
-                { 
-                  num: '02', 
-                  title: 'Lock Payment', 
-                  desc: 'Client deposits USDT into the smart contract escrow.', 
-                  icon: <LockKeyhole className="w-10 h-10" /> 
+                {
+                  num: '02',
+                  title: 'Lock Payment',
+                  desc: 'Client deposits USDT into the smart contract escrow.',
+                  icon: <LockKeyhole className="w-10 h-10" />
                 },
-                { 
-                  num: '03', 
-                  title: 'Get Paid Safely', 
-                  desc: 'Deliver work, client approves, instant payout.', 
-                  icon: <Coins className="w-10 h-10" /> 
+                {
+                  num: '03',
+                  title: 'Get Paid Safely',
+                  desc: 'Deliver work, client approves, instant payout.',
+                  icon: <Coins className="w-10 h-10" />
                 }
               ].map((step, i) => (
                 <motion.div
@@ -302,8 +302,8 @@ export default function Landing() {
                       {step.num}
                     </div>
                     {/* Animated Icon Container */}
-                    <motion.div 
-                      animate={{ y: [0, -5, 0] }} 
+                    <motion.div
+                      animate={{ y: [0, -5, 0] }}
                       transition={{ duration: 3, repeat: Infinity, delay: i * 0.5 }}
                     >
                       {step.icon}
@@ -321,7 +321,7 @@ export default function Landing() {
         <section className="py-32 relative z-10 bg-zinc-50/50 dark:bg-[#111111]/30 border-y border-zinc-200/50 dark:border-white/5 backdrop-blur-md">
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, x: -50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -337,7 +337,7 @@ export default function Landing() {
                     { title: "Instant Payment", desc: "Payment releases the moment client approves. 0 delay.", icon: <Zap className="w-6 h-6" /> },
                     { title: "File Protection", desc: "Watermarked preview shown first. Full file only after payment.", icon: <Lock className="w-6 h-6" /> }
                   ].map((item, i) => (
-                    <motion.li 
+                    <motion.li
                       key={i}
                       whileHover={{ x: 10 }}
                       className="group flex gap-5 items-start p-5 rounded-3xl bg-white/40 dark:bg-black/20 hover:bg-white dark:hover:bg-[#1a1919] hover:shadow-[0_10px_30px_rgba(234,88,12,0.05)] border border-transparent hover:border-zinc-200 dark:hover:border-white/10 transition-all duration-300 backdrop-blur-md"
@@ -355,7 +355,7 @@ export default function Landing() {
               </motion.div>
 
               {/* Injective Banner Feature */}
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
@@ -396,7 +396,7 @@ export default function Landing() {
           </div>
           <h2 className="text-2xl md:text-3xl font-black tracking-tight mb-4">Secure agreements for digital work, onchain.</h2>
           <p className="text-zinc-500 font-medium mb-10 max-w-sm">No trust required. Let smart contracts handle the escrow.</p>
-          
+
           <div className="flex gap-6 mb-12">
             <a href="#" className="font-bold text-zinc-400 hover:text-white transition-colors">Twitter (X)</a>
             <a href="#" className="font-bold text-zinc-400 hover:text-white transition-colors">GitHub</a>
