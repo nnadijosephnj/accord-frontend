@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, useInView, animate } from 'framer-motion';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
-import { loadSlim } from '@tsparticles/engine';
+import { loadSlim } from '@tsparticles/slim';
 import { ShieldCheck, LockKeyhole, Coins, ArrowRight, UserCheck, Moon, Sun, Shield, Zap, Lock } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 import { useTheme } from '../context/ThemeContext';
