@@ -80,7 +80,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen flex bg-[#f5f6f7] dark:bg-[#0a0a0a] font-sans selection:bg-orange-500/30 text-zinc-900 dark:text-white">
+    <div className="min-h-screen flex bg-[#f5f6f7] dark:bg-[#0a0a0a] font-sans selection:bg-orange-500/30 text-zinc-900 dark:text-white overflow-x-hidden max-w-[100vw]">
       
       {/* Mobile Sidebar Overlay Backdrop */}
       {isSidebarOpen && (
@@ -149,7 +149,7 @@ export default function Dashboard() {
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <main className="flex-1 lg:ml-72 flex flex-col min-h-screen relative">
+      <main className="flex-1 lg:ml-72 flex flex-col min-h-screen relative w-full lg:max-w-[calc(100vw-18rem)] min-w-0">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-500/5 dark:bg-[#ff9157]/5 rounded-full blur-[150px] -z-10 pointer-events-none" />
 
         {/* TOP HEADER */}
