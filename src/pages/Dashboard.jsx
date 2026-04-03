@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, Moon, Sun, LayoutDashboard, FileText, Wallet, Bell, Settings, LogOut, Clock, CheckCircle2, Shield, Search, ChevronDown, ArrowRight } from 'lucide-react';
+import { Plus, X, Moon, Sun, LayoutDashboard, FileText, Wallet, Bell, Settings, LogOut, Clock, CheckCircle2, Shield, Search, ChevronDown, ArrowRight, Menu } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
@@ -65,6 +65,7 @@ export default function Dashboard() {
   const { userProfile, address } = useWallet();
   const { isDark, toggle } = useTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
 
   const avatarUrl = userProfile?.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${address}`;
@@ -81,13 +82,24 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen flex bg-[#f5f6f7] dark:bg-[#0a0a0a] font-sans selection:bg-orange-500/30 text-zinc-900 dark:text-white">
       
-      {/* SIDEBAR (Desktop) */}
-      <aside className="hidden lg:flex w-72 flex-col fixed inset-y-0 left-0 bg-white/70 dark:bg-[#111111]/80 backdrop-blur-2xl border-r border-zinc-200/50 dark:border-white/5 z-40">
-        <div className="p-6 h-20 flex items-center border-b border-zinc-100 dark:border-white/5">
+      {/* Mobile Sidebar Overlay Backdrop */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* SIDEBAR (Responsive) */}
+      <aside className={`fixed lg:sticky top-0 h-screen w-72 flex-col bg-white/95 dark:bg-[#111111]/95 lg:bg-white/70 lg:dark:bg-[#111111]/80 backdrop-blur-2xl border-r border-zinc-200/50 dark:border-white/5 z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} flex`}>
+        <div className="p-6 h-20 flex items-center justify-between border-b border-zinc-100 dark:border-white/5">
           <Link to="/" className="flex items-center">
-            <img src="/logo-light.png" alt="Accord" className="h-11 dark:hidden" />
-            <img src="/logo-dark.png" alt="Accord" className="h-11 hidden dark:block" />
+            <img src="/logo-light.png" alt="Accord" className="h-10 dark:hidden" />
+            <img src="/logo-dark.png" alt="Accord" className="h-10 hidden dark:block" />
           </Link>
+          <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 text-zinc-400 hover:text-zinc-800 dark:hover:text-white">
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         <div className="p-6">
@@ -141,8 +153,11 @@ export default function Dashboard() {
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-500/5 dark:bg-[#ff9157]/5 rounded-full blur-[150px] -z-10 pointer-events-none" />
 
         {/* TOP HEADER */}
-        <header className="h-20 px-6 sm:px-10 flex items-center justify-between sticky top-0 bg-[#f5f6f7]/80 dark:bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-white/5 z-30">
-          <div className="flex items-center gap-2">
+        <header className="h-20 px-4 sm:px-10 flex items-center justify-between sticky top-0 bg-[#f5f6f7]/80 dark:bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-zinc-200/50 dark:border-white/5 z-30">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 rounded-xl bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-white hover:text-orange-500 transition-all">
+              <Menu className="w-5 h-5" />
+            </button>
             <h1 className="text-xl sm:text-2xl font-black tracking-tight">
               Hi, <span className="uppercase text-orange-600 dark:text-[#ff9157]">{userName}</span>
             </h1>
@@ -273,37 +288,6 @@ export default function Dashboard() {
 
         </div>
       </main>
-
-      {/* MOBILE BOTTOM NAV */}
-      <nav className="lg:hidden fixed bottom-0 left-0 w-full bg-white/80 dark:bg-[#0a0a0a]/90 backdrop-blur-2xl border-t border-zinc-200/50 dark:border-white/10 z-50 px-6 py-4 flex items-center justify-between overflow-x-auto gap-4">
-        {[
-          { label: "Home", icon: <LayoutDashboard className="w-6 h-6" />, path: "/dashboard" },
-          { label: "Docs", icon: <FileText className="w-6 h-6" />, path: "#" },
-        ].map((item, i) => (
-          <Link key={i} to={item.path} className={`flex flex-col items-center gap-1 ${location.pathname === item.path ? 'text-orange-600 dark:text-[#ff9157]' : 'text-zinc-400'}`}>
-            {item.icon}
-            <span className="text-[10px] font-bold">{item.label}</span>
-          </Link>
-        ))}
-        {/* Floating Action Button (Mobile) */}
-        <div className="-mt-12">
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 text-white flex items-center justify-center shadow-[0_10px_20px_rgba(234,88,12,0.4)] hover:scale-110 active:scale-95 transition-all"
-          >
-            <Plus className="w-8 h-8" />
-          </button>
-        </div>
-        {[
-          { label: "Wallet", icon: <Wallet className="w-6 h-6" />, path: "#" },
-          { label: "Settings", icon: <Settings className="w-6 h-6" />, path: "/profile" },
-        ].map((item, i) => (
-          <Link key={i} to={item.path} className={`flex flex-col items-center gap-1 ${location.pathname === item.path ? 'text-orange-600 dark:text-[#ff9157]' : 'text-zinc-400'}`}>
-            {item.icon}
-            <span className="text-[10px] font-bold">{item.label}</span>
-          </Link>
-        ))}
-      </nav>
 
       <RoleModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
