@@ -96,10 +96,12 @@ export default function Dashboard() {
       const usdtBal = await contract.getVaultBalance(address, USDT_ADDRESS);
       const usdcBal = await contract.getVaultBalance(address, USDC_ADDRESS);
       
-      setVaultBalances({
-        usdt: ethers.formatUnits(usdtBal, 6),
-        usdc: ethers.formatUnits(usdcBal, 6)
-      });
+      if (usdtBal !== undefined && usdcBal !== undefined) {
+        setVaultBalances({
+          usdt: ethers.formatUnits(usdtBal, 6),
+          usdc: ethers.formatUnits(usdcBal, 6)
+        });
+      }
     } catch (e) {
       console.warn("Vault load error:", e);
     }
@@ -326,30 +328,30 @@ export default function Dashboard() {
                               🤝
                             </div>
                             <div>
-                              <p className="text-sm font-black text-zinc-900 dark:text-white truncate max-w-[200px]">{item.title}</p>
+                              <p className="text-sm font-black text-zinc-900 dark:text-white truncate max-w-[200px]">{item?.title || "Untitled Agreement"}</p>
                               <p className="text-[10px] text-zinc-400 dark:text-neutral-500 font-bold uppercase tracking-tight">Standard Escrow</p>
                             </div>
                           </div>
                         </td>
                         <td className="px-8 py-6 font-mono text-xs font-bold text-zinc-400 group-hover:text-orange-500 transition-colors">
-                          #{item.id.slice(0, 8)}
+                          #{item?.id?.slice(0, 8) || "N/A"}
                         </td>
                         <td className="px-8 py-6">
                           <div className="flex flex-col gap-1">
-                            <span className="text-xs font-bold text-zinc-700 dark:text-neutral-300">Client: {item.client_wallet.slice(0, 6)}...</span>
-                            <span className="text-xs font-bold text-zinc-400 dark:text-neutral-500 italic">Dev: {item.freelancer_wallet.slice(0, 6)}...</span>
+                            <span className="text-xs font-bold text-zinc-700 dark:text-neutral-300">Client: {item?.client_wallet?.slice(0, 6)}...</span>
+                            <span className="text-xs font-bold text-zinc-400 dark:text-neutral-500 italic">Dev: {item?.freelancer_wallet?.slice(0, 6)}...</span>
                           </div>
                         </td>
                         <td className="px-8 py-6 text-sm font-black text-zinc-900 dark:text-white">
-                          ${item.amount || item.amount_usdt} <span className="text-[10px] text-orange-600 dark:text-orange-400 ml-1">{item.token_address?.toLowerCase() === USDC_ADDRESS.toLowerCase() ? 'USDC' : 'USDT'}</span>
+                          ${item?.amount || item?.amount_usdt || "0"} <span className="text-[10px] text-orange-600 dark:text-orange-400 ml-1">{item?.token_address?.toLowerCase() === USDC_ADDRESS?.toLowerCase() ? 'USDC' : 'USDT'}</span>
                         </td>
                         <td className="px-8 py-6">
                            <span className={`px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-zinc-100 text-zinc-500 dark:bg-zinc-800/60 dark:text-neutral-300`}>
-                             {item.status}
+                             {item?.status || "PENDING"}
                            </span>
                         </td>
                         <td className="px-8 py-6 text-xs font-bold text-zinc-400">
-                          {new Date(item.created_at).toLocaleDateString()}
+                          {item?.created_at ? new Date(item.created_at).toLocaleDateString() : '---'}
                         </td>
                         <td className="px-8 py-6 text-right">
                           <button className="p-2 text-zinc-300 hover:text-orange-500 transition-colors">
