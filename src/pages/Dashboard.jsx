@@ -30,17 +30,20 @@ function RoleModal({ isOpen, onClose }) {
           <p className="text-zinc-500 dark:text-neutral-400 font-medium text-sm mb-8">Choose how you want to create the agreement</p>
 
           <div className="grid sm:grid-cols-2 gap-4">
-            {/* Freelancer */}
+            {/* Freelancer (Recommended) */}
             <div
               onClick={() => navigate('/create/freelancer')}
-              className="group cursor-pointer bg-white/50 dark:bg-black/40 border-2 border-transparent hover:border-orange-500/50 p-6 rounded-[1.5rem] transition-all"
+              className="group relative cursor-pointer bg-white dark:bg-zinc-800/80 border-2 border-orange-500/30 hover:border-orange-500 p-7 rounded-[2rem] transition-all shadow-xl shadow-orange-500/[0.05]"
             >
-              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-500/10 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
-                👨‍💻
+              <div className="absolute -top-3 -right-3 px-3 py-1 bg-orange-500 text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-lg">
+                Recommended
               </div>
-              <h3 className="text-base font-black text-zinc-900 dark:text-white mb-1">Freelancer</h3>
+              <div className="w-14 h-14 bg-orange-100 dark:bg-orange-500/10 rounded-2xl flex items-center justify-center text-orange-600 mb-6 group-hover:scale-110 transition-transform">
+                <LayoutDashboard className="w-7 h-7" />
+              </div>
+              <h3 className="text-lg font-black text-zinc-900 dark:text-white mb-2">Freelancer</h3>
               <p className="text-xs text-zinc-500 dark:text-neutral-400 font-medium leading-relaxed">
-                I will do the work and receive payment
+                Create agreement, share link, and get paid securely via escrow.
               </p>
             </div>
 

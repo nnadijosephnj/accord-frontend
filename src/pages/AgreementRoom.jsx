@@ -1,45 +1,46 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    ShieldCheck, ArrowLeft, CheckCircle2, Circle, Clock,
-    Lock, Check, Send, ExternalLink, Paperclip,
-    MessageSquare, DollarSign, User, Calendar as CalendarIcon, X, AlertCircle, RefreshCw, Moon, Sun
+    ShieldCheck, ArrowLeft, Clock, DollarSign, CheckCircle2,
+    Lock, FileText, Send, MessageSquare, ExternalLink,
+    AlertCircle, ChevronRight, Paperclip, Download, Info
 } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 import { useTheme } from '../context/ThemeContext';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ethers } from 'ethers';
-import { apiCall, uploadFileCall } from '../utils/api';
+import * as ethers from 'ethers';
+import { apiCall } from '../utils/api';
 import { CONTRACT_ADDRESS, CONTRACT_ABI, USDT_ADDRESS, USDC_ADDRESS, TOKEN_ABI } from '../utils/contractABI';
 
 export default function AgreementRoom() {
     const { id } = useParams();
-    const { address, signer, isLoggedIn, connectWallet } = useWallet();
-    const { isDark, toggle } = useTheme();
-    const [agreement, setAgreement] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [actionLoading, setActionLoading] = useState(false);
-    const [message, setMessage] = useState('');
-    const [messages, setMessages] = useState([]);
-    const [files, setFiles] = useState([]);
-    const [selectedFile, setSelectedFile] = useState(null);
-    const fileInputRef = useRef(null);
+    const { address, signer } = useWallet();
+    const { isDark } = useTheme();
     const navigate = useNavigate();
 
+    const [agreement, setAgreement] = useState(null);
+    const [messages, setMessages] = useState([]);
+    const [files, setFiles] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [actionLoading, setActionLoading] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [message, setMessage] = useState('');
+
     useEffect(() => {
-        loadAgreement();
-        loadMessages();
-    }, [id, isLoggedIn]);
+        if (id) {
+            loadAgreement();
+            loadMessages();
+        }
+    }, [id]);
 
     const loadAgreement = async () => {
         try {
             setLoading(true);
             const data = await apiCall(`/api/agreements/${id}`);
             setAgreement(data);
-            const fileData = await apiCall(`/api/agreements/${id}/files`);
-            setFiles(fileData || []);
-        } catch (e) {
-            if (e.message !== 'AUTHENTICATION_REQUIRED') console.warn(e.message);
+            if (data.files) setFiles(data.files);
+        } catch (error) {
+            console.error(error);
         } finally {
             setLoading(false);
         }
@@ -49,74 +50,94 @@ export default function AgreementRoom() {
         try {
             const data = await apiCall(`/api/messages/${id}`);
             setMessages(data || []);
-        } catch (e) {}
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
-        if (!message.trim()) return;
+        if (!message) return;
         try {
-            const newMessage = await apiCall('/api/messages', {
+            await apiCall('/api/messages', {
                 method: 'POST',
-                body: JSON.stringify({ agreement_id: id, content: message })
+                body: JSON.stringify({
+                    agreement_id: id,
+                    content: message,
+                    sender: address.toLowerCase()
+                })
             });
-            setMessages([...messages, newMessage]);
             setMessage('');
-        } catch (e) {
-            alert(e.message);
+            loadMessages();
+        } catch (error) {
+            console.error(error);
         }
     };
 
     const handleAction = async (action) => {
+        if (!signer || !agreement) return;
         try {
             setActionLoading(true);
             const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-            
-            // Use the specific token address from the agreement (USDT or USDC)
-            const tokenAddress = agreement.token_address || USDT_ADDRESS;
-            const tokenContract = new ethers.Contract(tokenAddress, TOKEN_ABI, signer);
             const contractId = agreement.contract_agreement_id;
 
             if (action === 'FUND') {
-                const amountInUnits = ethers.parseUnits(agreement.amount_usdt || agreement.amount || '0', 6);
-                
-                // 1. Check & Approve Token Allowance
-                const allowance = await tokenContract.allowance(address, CONTRACT_ADDRESS);
-                if (allowance < amountInUnits) {
-                    const approveTx = await tokenContract.approve(CONTRACT_ADDRESS, amountInUnits);
-                    await approveTx.wait();
-                }
+                const tokenAddress = agreement.token_address;
+                const tokenContract = new ethers.Contract(tokenAddress, TOKEN_ABI, signer);
+                const amountInUnits = ethers.parseUnits(agreement.amount.toString(), 6);
 
-                // 2. Create Agreement on-chain (this locks the funds)
+                // 1. Approve
+                const approveTx = await tokenContract.approve(CONTRACT_ADDRESS, amountInUnits);
+                await approveTx.wait();
+
+                // 2. Create Agreement on-chain
                 const tx = await contract.createAgreement(
                     contractId, 
                     agreement.freelancer_wallet,
                     tokenAddress,
-                    amountInUnits
+                    amountInUnits,
+                    agreement.max_revisions || 3
                 );
                 await tx.wait();
 
                 await apiCall(`/api/agreements/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'FUNDED' }) });
-            } else if (action === 'SUBMIT') {
-                if (!selectedFile) return alert("Select a preview file first!");
-                
-                // 1. Upload to IPFS first
+            } 
+            else if (action === 'SUBMIT') {
+                if (!selectedFile) return alert("Select a file first");
                 const formData = new FormData();
-                formData.append('preview', selectedFile);
-                formData.append('agreementId', id);
-                const uploadResult = await uploadFileCall('/api/upload', formData);
-                
-                // 2. Register delivery on blockchain
-                const ipfsHash = uploadResult.ipfs_hash || ""; 
-                const tx = await contract.deliverWork(contractId, ipfsHash);
+                formData.append('file', selectedFile);
+                formData.append('agreement_id', id);
+                formData.append('file_type', 'preview');
+
+                const uploadRes = await apiCall('/api/upload', {
+                    method: 'POST',
+                    body: formData,
+                    isFormData: true
+                });
+
+                const tx = await contract.deliverWork(contractId, uploadRes.ipfs_hash);
                 await tx.wait();
                 
                 await apiCall(`/api/agreements/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'SUBMITTED' }) });
-            } else if (action === 'APPROVE') {
-                // In a real V3 we'd pass the final link here, for now it's empty string or a placeholder
+            } 
+            else if (action === 'APPROVE') {
                 const tx = await contract.approveWork(contractId, "FINAL_LINK_PLACEHOLDER");
                 await tx.wait();
                 await apiCall(`/api/agreements/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'COMPLETED' }) });
+            } 
+            else if (action === 'REVISION') {
+                const tx = await contract.requestRevision(contractId);
+                await tx.wait();
+                await apiCall(`/api/agreements/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'REVISION' }) });
+            } 
+            else if (action === 'CANCEL_REQUEST') {
+                const tx = await contract.requestCancel(contractId);
+                await tx.wait();
+            } 
+            else if (action === 'REFUND') {
+                const tx = await contract.executeRefund(contractId);
+                await tx.wait();
+                await apiCall(`/api/agreements/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'CANCELLED' }) });
             }
 
             await loadAgreement();
@@ -128,23 +149,11 @@ export default function AgreementRoom() {
         }
     };
 
-    if (loading || !agreement) return (
-        <div className="min-h-screen flex items-center justify-center bg-[#f5f6f7] dark:bg-[#0e0e0e]">
-            <div className="flex flex-col items-center gap-4 text-zinc-400 dark:text-neutral-500">
-                <RefreshCw className="w-10 h-10 animate-spin text-orange-400" />
-                <span className="text-sm font-bold uppercase tracking-widest">Loading...</span>
-            </div>
-        </div>
-    );
-
-    const isFreelancer = address?.toLowerCase() === agreement.freelancer_wallet?.toLowerCase();
-    const isClient = address?.toLowerCase() === agreement.client_wallet?.toLowerCase();
-
     const getStatusInfo = (status) => {
         const s = status?.toUpperCase();
         switch(s) {
             case 'PENDING':   return { label: 'Pending Payment',  color: 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800/60 dark:text-neutral-300',             step: 1 };
-            case 'FUNDED':    return { label: 'Funded / Locked',  color: 'bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400 dark:border dark:border-orange-500/20',   step: 2 };
+            case 'FUNDED':    return { label: 'Funded / Locked',  color: 'bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400',         step: 2 };
             case 'SUBMITTED': return { label: 'Work Submitted',   color: 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',             step: 3 };
             case 'REVISION':  return { label: 'Revision Needed',  color: 'bg-orange-100 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400',         step: 3 };
             case 'COMPLETED': return { label: 'Completed',        color: 'bg-emerald-100 text-emerald-700 dark:bg-green-500/10 dark:text-green-400',         step: 5 };
@@ -153,225 +162,192 @@ export default function AgreementRoom() {
         }
     };
 
+    if (loading || !agreement) return (
+        <div className="min-h-screen flex items-center justify-center bg-[#f5f6f7] dark:bg-[#0e0e0e]">
+            <div className="flex flex-col items-center gap-4 text-zinc-400 dark:text-neutral-500">
+                <div className="w-12 h-12 border-4 border-orange-500/20 border-t-orange-600 rounded-full animate-spin" />
+                <span className="text-xs font-black uppercase tracking-widest">Securing Connection...</span>
+            </div>
+        </div>
+    );
+
+    const isFreelancer = address?.toLowerCase() === agreement.freelancer_wallet.toLowerCase();
+    const isClient = address?.toLowerCase() === agreement.client_wallet.toLowerCase();
     const statusInfo = getStatusInfo(agreement.status);
 
     return (
-        <div className="min-h-screen bg-[#f5f6f7] dark:bg-[#0e0e0e] font-sans pb-24">
-            <div className="fixed top-0 right-0 w-[400px] h-[400px] bg-orange-200/20 dark:bg-orange-500/[0.04] rounded-full blur-[120px] -z-10" />
-            <div className="fixed bottom-0 left-0 w-[500px] h-[500px] bg-zinc-200/40 dark:bg-orange-500/[0.02] rounded-full blur-[150px] -z-10" />
-
-            {/* Header */}
-            <div className="bg-white/70 dark:bg-neutral-950/60 backdrop-blur-xl border-b border-white/20 dark:border-orange-500/10 shadow-[0_8px_32px_0_rgba(161,57,0,0.05)] dark:shadow-none py-4 px-6 sticky top-0 z-50">
-                <div className="max-w-4xl mx-auto flex items-center justify-between">
-                    <button onClick={() => navigate('/dashboard')} className="p-2 text-zinc-400 dark:text-neutral-500 hover:text-zinc-700 dark:hover:text-neutral-200 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl transition-all">
-                        <ArrowLeft className="w-6 h-6" />
+        <div className="min-h-screen bg-[#f5f6f7] dark:bg-[#0a0a0a] font-sans pb-20">
+            <nav className="fixed w-full z-50 bg-white/70 dark:bg-[#0a0a0a]/70 backdrop-blur-2xl border-b border-zinc-200/50 dark:border-white/5 py-5 px-6 sm:px-10 flex items-center justify-between">
+                <div className="flex items-center gap-6">
+                    <button onClick={() => navigate('/dashboard')} className="p-2.5 rounded-2xl bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-neutral-400 hover:text-orange-600 dark:hover:text-orange-400 transition-all border border-transparent hover:border-orange-500/10">
+                        <ArrowLeft className="w-5 h-5" />
                     </button>
-                    <div className="text-center flex-1">
-                        <h1 className="text-base sm:text-xl font-black text-zinc-900 dark:text-white tracking-tight">{agreement.title}</h1>
-                        <div className="flex items-center justify-center gap-2 mt-1">
-                            <span className={`px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${statusInfo.color}`}>
-                                {statusInfo.label}
-                            </span>
-                            <span className="text-[10px] text-zinc-300 dark:text-neutral-600 font-bold uppercase tracking-tighter">#{agreement.id?.slice(0, 8)}</span>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button onClick={toggle} className="p-2 rounded-xl text-zinc-400 dark:text-neutral-500 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all" aria-label="Toggle theme">
-                            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                        </button>
-                        <div className="flex flex-col items-end">
-                            <span className="text-[10px] text-zinc-400 dark:text-neutral-500 font-bold uppercase tracking-widest">Amount</span>
-                            <span className="text-lg font-black text-zinc-900 dark:text-white">
-                                {agreement.amount || agreement.amount_usdt} 
-                                <span className="text-sm border border-orange-500/20 px-2 py-0.5 rounded-lg ml-2 font-bold text-orange-600 dark:text-orange-400">
-                                    {agreement.token_address?.toLowerCase() === USDC_ADDRESS.toLowerCase() ? 'USDC' : 'USDT'}
-                                </span>
-                            </span>
-                        </div>
+                    <div className="hidden sm:block overflow-hidden max-w-[300px]">
+                        <h1 className="text-lg font-black tracking-tight truncate">{agreement.title}</h1>
+                        <p className="text-[10px] font-bold text-zinc-400 dark:text-neutral-500 uppercase tracking-widest font-mono">ID: #{agreement.id?.slice(0, 8)}</p>
                     </div>
                 </div>
-            </div>
+                <div className="flex items-center gap-3">
+                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${statusInfo.color}`}>
+                        {statusInfo.label}
+                    </span>
+                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white dark:border-white/10 shadow-sm ml-2">
+                        <img src={`https://api.dicebear.com/7.x/identicon/svg?seed=${address}`} alt="Me" />
+                    </div>
+                </div>
+            </nav>
 
-            <main className="max-w-4xl mx-auto px-6 mt-8">
-
-                {/* Timeline */}
-                <div className="glass-panel p-8 rounded-[2rem] mb-6 overflow-hidden">
-                    <div className="flex items-center justify-between relative">
-                        <div className="absolute top-[28px] left-[10%] right-[10%] h-[2px] bg-zinc-100 dark:bg-zinc-800 z-0">
-                            <motion.div
-                                className="h-full thermal-gradient"
-                                initial={{ width: '0%' }}
-                                animate={{ width: `${(statusInfo.step - 1) * 25}%` }}
-                            />
+            <main className="max-w-7xl mx-auto px-6 sm:px-10 pt-32 grid lg:grid-cols-3 gap-10">
+                <div className="lg:col-span-2 space-y-8">
+                    <div className="glass-panel p-8 sm:p-10 rounded-[2.5rem] relative overflow-hidden backdrop-blur-3xl">
+                        <div className="absolute top-0 right-0 p-8 opacity-5">
+                            <ShieldCheck className="w-32 h-32" />
                         </div>
-
-                        {[
-                            { label: 'Created', step: 1 },
-                            { label: 'Funded', step: 2 },
-                            { label: 'Submitted', step: 3 },
-                            { label: 'Reviewed', step: 4 },
-                            { label: 'Completed', step: 5 }
-                        ].map((s, i) => (
-                            <div key={i} className="flex flex-col items-center gap-3 relative z-10">
-                                <div className={`w-12 h-12 rounded-full flex items-center justify-center border-[3px] transition-all duration-500 bg-white dark:bg-[#1a1919] ${
-                                    statusInfo.step >= s.step
-                                        ? 'border-orange-500 shadow-[0_0_15px_rgba(234,88,12,0.25)] dark:shadow-[0_0_15px_rgba(255,145,87,0.2)]'
-                                        : 'border-zinc-100 dark:border-zinc-700/50'
-                                }`}>
-                                    {statusInfo.step > s.step ? (
-                                        <Check className="w-5 h-5 text-orange-500" />
-                                    ) : (
-                                        <div className={`w-3 h-3 rounded-full ${statusInfo.step === s.step ? 'bg-orange-500 animate-pulse' : 'bg-zinc-100 dark:bg-zinc-700'}`} />
-                                    )}
-                                </div>
-                                <span className={`text-[10px] font-black uppercase tracking-widest ${statusInfo.step >= s.step ? 'text-zinc-800 dark:text-white' : 'text-zinc-300 dark:text-neutral-600'}`}>
-                                    {s.label}
-                                </span>
+                        <div className="flex flex-wrap gap-4 mb-10">
+                            <div className="px-5 py-2.5 rounded-2xl bg-orange-50 dark:bg-orange-500/10 border border-orange-500/10 flex items-center gap-3">
+                                <DollarSign className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                                <span className="text-sm font-black text-orange-600 dark:text-orange-400">{agreement.amount} {agreement.token_address?.toLowerCase() === USDC_ADDRESS.toLowerCase() ? 'USDC' : 'USDT'}</span>
                             </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Detail Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div className="glass-panel p-5 rounded-[1.5rem]">
-                        <p className="text-[9px] text-zinc-400 dark:text-neutral-500 font-black uppercase tracking-widest mb-1.5">Freelancer</p>
-                        <a href={`https://testnet.blockscout.injective.network/address/${agreement.freelancer_wallet}`} target="_blank" className="text-xs font-bold text-zinc-700 dark:text-neutral-300 truncate hover:text-orange-600 dark:hover:text-orange-400 transition-all flex items-center gap-1.5">
-                            {agreement.freelancer_wallet?.slice(0, 8)}... <ExternalLink className="w-3 h-3" />
-                        </a>
-                    </div>
-                    <div className="glass-panel p-5 rounded-[1.5rem]">
-                        <p className="text-[9px] text-zinc-400 dark:text-neutral-500 font-black uppercase tracking-widest mb-1.5">Client</p>
-                        <a href={`https://testnet.blockscout.injective.network/address/${agreement.client_wallet}`} target="_blank" className="text-xs font-bold text-zinc-700 dark:text-neutral-300 truncate hover:text-orange-600 dark:hover:text-orange-400 transition-all flex items-center gap-1.5">
-                            {agreement.client_wallet?.slice(0, 8)}... <ExternalLink className="w-3 h-3" />
-                        </a>
-                    </div>
-                    <div className="glass-panel p-5 rounded-[1.5rem]">
-                        <p className="text-[9px] text-zinc-400 dark:text-neutral-500 font-black uppercase tracking-widest mb-1.5">Created</p>
-                        <p className="text-xs font-bold text-zinc-700 dark:text-neutral-300 uppercase truncate">
-                            {new Date(agreement.created_at).toLocaleDateString()}
+                            <div className="px-5 py-2.5 rounded-2xl bg-zinc-100 dark:bg-white/5 border border-zinc-200/50 dark:border-white/5 flex items-center gap-3">
+                                <Clock className="w-4 h-4 text-zinc-400" />
+                                <span className="text-sm font-bold text-zinc-500 dark:text-neutral-400">{agreement.deadline || 'No deadline'}</span>
+                            </div>
+                        </div>
+                        <h2 className="text-4xl font-black mb-6 tracking-tight">{agreement.title}</h2>
+                        <p className="text-lg text-zinc-600 dark:text-neutral-400 font-medium leading-relaxed mb-10 whitespace-pre-wrap">
+                            {agreement.description}
                         </p>
+                        <div className="grid sm:grid-cols-2 gap-6 pt-8 border-t border-zinc-100 dark:border-white/5">
+                            <div className="space-y-4">
+                                <p className="text-[10px] text-zinc-400 dark:text-neutral-500 font-black uppercase tracking-[3px]">Freelancer</p>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-600 font-black text-xs">DEV</div>
+                                    <span className="text-xs font-mono font-bold text-zinc-400">{agreement.freelancer_wallet}</span>
+                                </div>
+                            </div>
+                            <div className="space-y-4">
+                                <p className="text-[10px] text-zinc-400 dark:text-neutral-500 font-black uppercase tracking-[3px]">Client</p>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-zinc-500/10 flex items-center justify-center text-zinc-600 font-black text-xs">CLT</div>
+                                    <span className="text-xs font-mono font-bold text-zinc-400">{agreement.client_wallet}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="glass-panel p-5 rounded-[1.5rem]">
-                        <p className="text-[9px] text-zinc-400 dark:text-neutral-500 font-black uppercase tracking-widest mb-1.5">Status</p>
-                        <span className={`inline-flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-full ${statusInfo.color}`}>
-                            <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
-                            {statusInfo.step === 5 ? 'Finished' : 'In Progress'}
-                        </span>
+                    <div className="px-10">
+                        <div className="flex justify-between items-center mb-5">
+                            <p className="text-[10px] text-zinc-400 dark:text-neutral-500 font-black uppercase tracking-[3px]">Transaction Flow</p>
+                            <span className="text-[10px] font-black text-orange-600 dark:text-orange-400 uppercase">{statusInfo.step * 20}% Complete</span>
+                        </div>
+                        <div className="h-3 bg-zinc-200 dark:bg-white/5 rounded-full overflow-hidden p-0.5 border border-white/40 dark:border-white/5">
+                            <motion.div initial={{ width: 0 }} animate={{ width: `${statusInfo.step * 20}%` }} className="h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-full shadow-[0_0_15px_rgba(234,88,12,0.4)]" />
+                        </div>
                     </div>
                 </div>
 
-                {/* Main Action Panel */}
-                <div className="bg-zinc-900 text-white p-10 sm:p-14 rounded-[2.5rem] shadow-2xl shadow-zinc-900/20 mb-6 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 opacity-20 rounded-full blur-3xl -mr-32 -mt-32 thermal-gradient" />
-                    <div className="relative z-10 text-center max-w-lg mx-auto">
+                <div className="space-y-8">
+                    <div className="glass-panel p-8 rounded-[2.5rem] border-orange-500/10 shadow-2xl shadow-orange-500/[0.03]">
                         <AnimatePresence mode="wait">
-                            {(!isLoggedIn && (isFreelancer || isClient)) ? (
-                                <motion.div key="signin" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                                    <Lock className="w-16 h-16 text-orange-400 mx-auto mb-4" />
-                                    <h2 className="text-3xl font-black tracking-tight">Access Restricted</h2>
-                                    <p className="text-zinc-400 font-medium text-sm max-w-sm mx-auto">You are a participant but must sign in to take actions.</p>
-                                    <button onClick={() => connectWallet()} className="orange-glow-btn text-white py-4 px-12 rounded-full font-black text-xs uppercase tracking-widest">
-                                        Sign In to Accord
-                                    </button>
-                                </motion.div>
-                            ) : isFreelancer ? (
+                            {isFreelancer ? (
                                 <motion.div key="freelancer" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
                                     {agreement.status === 'PENDING' && (
-                                        <div className="space-y-6">
-                                            <ShieldCheck className="w-16 h-16 text-orange-400 mx-auto mb-6" />
-                                            <h2 className="text-3xl font-black tracking-tight leading-tight">Waiting for client<br />to fund this agreement</h2>
-                                            <p className="text-zinc-400 font-medium text-sm max-w-sm mx-auto">The client must deposit {agreement.amount || agreement.amount_usdt} {agreement.token_address?.toLowerCase() === USDC_ADDRESS.toLowerCase() ? 'USDC' : 'USDT'} into the Injective Escrow before you start work.</p>
-                                            <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/deal/${id}`); alert("Link copied!"); }} className="bg-white/10 hover:bg-white/20 border border-white/10 px-8 py-4 rounded-3xl font-black text-xs uppercase tracking-widest transition-all">
-                                                Copy Share Link
-                                            </button>
+                                        <div className="text-center py-6 space-y-6">
+                                            <div className="w-20 h-20 bg-zinc-100 dark:bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                                                <Clock className="w-10 h-10 text-zinc-400" />
+                                            </div>
+                                            <h2 className="text-3xl font-black tracking-tight">Awaiting Client</h2>
+                                            <p className="text-zinc-400 font-medium text-sm">Agreement is created. Share the link with your client so they can fund the escrow.</p>
                                         </div>
                                     )}
                                     {(agreement.status === 'FUNDED' || agreement.status === 'REVISION') && (
                                         <div className="space-y-8">
-                                            <div className="w-20 h-20 bg-orange-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-orange-500/20">
-                                                <Paperclip className="w-9 h-9 text-orange-400" />
+                                            <div className="w-20 h-20 bg-emerald-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-emerald-500/20">
+                                                <Lock className="w-9 h-9 text-emerald-400" />
                                             </div>
-                                            <h2 className="text-3xl font-bold tracking-tight">Payment locked!<br />Start working 🔒</h2>
-                                            <p className="text-zinc-400 font-medium text-sm">Upload your preview as watermarked or high-quality proof.</p>
-                                            <div className="flex flex-col gap-4 mt-8">
-                                                <input type="file" ref={fileInputRef} className="hidden" onChange={(e) => setSelectedFile(e.target.files[0])} />
-                                                <div onClick={() => fileInputRef.current.click()} className="bg-zinc-800/50 border-2 border-dashed border-white/10 p-8 rounded-[2rem] cursor-pointer hover:border-orange-500/40 transition-all flex flex-col items-center gap-2">
-                                                    <Paperclip className="w-6 h-6 text-orange-400" />
-                                                    <span className="text-sm font-bold text-zinc-400 truncate w-full text-center">{selectedFile ? selectedFile.name : 'Select work preview file'}</span>
-                                                </div>
-                                                <button disabled={actionLoading || !selectedFile} onClick={() => handleAction('SUBMIT')} className="w-full py-5 orange-glow-btn text-white font-black text-sm uppercase tracking-[4px] rounded-[1.5rem]">
-                                                    {actionLoading ? 'Uploading to IPFS...' : 'Submit Work'}
+                                            <div className="text-center">
+                                                <h2 className="text-4xl font-black mb-3">Funds Locked</h2>
+                                                <p className="text-zinc-400 font-medium text-sm">Escrow is secure. You can now start the work and submit deliverables when ready.</p>
+                                            </div>
+                                            <div className="space-y-4">
+                                                <label className="block text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/10 p-10 cursor-pointer hover:border-orange-500 hover:bg-orange-500/5 transition-all">
+                                                    <input type="file" className="hidden" onChange={(e) => setSelectedFile(e.target.files[0])} />
+                                                    <div className="flex flex-col items-center gap-4">
+                                                        <div className="p-4 bg-orange-100 dark:bg-orange-500/10 rounded-2xl text-orange-600">
+                                                            <Paperclip className="w-6 h-6" />
+                                                        </div>
+                                                        <span className="text-xs font-black uppercase text-zinc-500 tracking-widest">{selectedFile ? selectedFile.name : 'Choose Asset'}</span>
+                                                    </div>
+                                                </label>
+                                                <button disabled={actionLoading || !selectedFile} onClick={() => handleAction('SUBMIT')} className="w-full py-5 orange-glow-btn text-white font-black text-sm uppercase tracking-[4px] rounded-[1.5rem] shadow-xl">
+                                                    {actionLoading ? 'Uploading...' : 'Deliver Work'}
                                                 </button>
                                             </div>
                                         </div>
                                     )}
+                                    {agreement.status === 'SUBMITTED' && (
+                                        <div className="text-center py-10 space-y-6">
+                                            <div className="w-20 h-20 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto border border-amber-500/20">
+                                                <FileText className="w-9 h-9 text-amber-500" />
+                                            </div>
+                                            <h2 className="text-3xl font-black tracking-tight">Review Pending</h2>
+                                            <p className="text-zinc-400 font-medium text-sm">You have submitted the work. Waiting for the client to approve or request revision.</p>
+                                        </div>
+                                    )}
                                     {agreement.status === 'COMPLETED' && (
-                                        <div className="space-y-6">
+                                        <div className="space-y-6 text-center">
                                             <CheckCircle2 className="w-20 h-20 text-orange-400 mx-auto" />
-                                            <h2 className="text-4xl font-black tracking-tight">Payment received! 🎉</h2>
-                                            <p className="text-zinc-400 font-medium text-sm">Agreement successfully settled on Injective.</p>
+                                            <h2 className="text-4xl font-black tracking-tight">Work Completed</h2>
+                                            <p className="text-zinc-400 font-medium text-sm">Agreement settled on Injective.</p>
                                         </div>
                                     )}
                                 </motion.div>
                             ) : isClient ? (
                                 <motion.div key="client" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
                                     {agreement.status === 'PENDING' && (
-                                        <div className="space-y-8">
+                                        <div className="space-y-8 text-center">
                                             <div className="w-20 h-20 bg-orange-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-orange-500/20">
                                                 <DollarSign className="w-9 h-9 text-orange-400" />
                                             </div>
-                                            <h2 className="text-4xl font-black tracking-tight leading-tight">Fund This<br />Agreement</h2>
-                                            <p className="text-zinc-400 font-medium text-sm mt-4">Depositing {agreement.amount || agreement.amount_usdt} {agreement.token_address?.toLowerCase() === USDC_ADDRESS.toLowerCase() ? 'USDC' : 'USDT'} into Accord Escrow. Funds stay locked until you approve the work.</p>
+                                            <h2 className="text-4xl font-black tracking-tight">Fund Agreement</h2>
+                                            <p className="text-zinc-400 font-medium text-sm mt-4">Depositing {agreement.amount} into Accord Escrow. Funds stay locked until you approve the work.</p>
                                             <button disabled={actionLoading} onClick={() => handleAction('FUND')} className="w-full py-5 orange-glow-btn text-white font-black text-sm uppercase tracking-[4px] rounded-[1.5rem]">
-                                                {actionLoading ? 'Approving Token & Depositing...' : `Deposit ${agreement.amount || agreement.amount_usdt} ${agreement.token_address?.toLowerCase() === USDC_ADDRESS.toLowerCase() ? 'USDC' : 'USDT'}`}
+                                                {actionLoading ? 'Processing...' : `Deposit ${agreement.amount}`}
                                             </button>
                                         </div>
                                     )}
                                     {agreement.status === 'SUBMITTED' && (
-                                        <div className="space-y-8">
+                                        <div className="space-y-8 text-center">
                                             <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center mx-auto">
                                                 <Clock className="w-10 h-10 text-amber-400" />
                                             </div>
                                             <h2 className="text-3xl font-black tracking-tight">Work Submitted!</h2>
-                                            <p className="text-zinc-400 font-medium text-sm">Review the deliverables and decide whether to approve or request revision.</p>
-                                            {files.length > 0 && (
-                                                <div className="bg-zinc-800/50 p-5 rounded-2xl border border-white/10 flex items-center justify-between mb-6">
-                                                    <div className="flex items-center gap-4 truncate">
-                                                        <Paperclip className="w-5 h-5 text-orange-400" />
-                                                        <div className="text-left overflow-hidden">
-                                                            <p className="text-xs font-black text-white truncate max-w-[200px]">{files[0].file_name}</p>
-                                                            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-tighter italic">Preview on IPFS</p>
-                                                        </div>
-                                                    </div>
-                                                    <a href={`https://gateway.pinata.cloud/ipfs/${files[0].ipfs_hash}`} target="_blank" rel="noreferrer" className="orange-glow-btn text-white text-xs font-bold px-4 py-2 rounded-xl">View Proof</a>
-                                                </div>
-                                            )}
+                                            <p className="text-zinc-400 font-medium text-sm">Review deliverables and decide whether to approve or request revision.</p>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <button disabled={actionLoading} onClick={() => handleAction('APPROVE')} className="w-full py-4 orange-glow-btn text-white font-black text-xs uppercase tracking-widest rounded-2xl">
-                                                    {actionLoading ? 'Releasing Funds...' : 'Approve Work ✅'}
+                                                    Approve Work
                                                 </button>
-                                                <button className="w-full py-4 bg-zinc-800/50 border border-amber-500/40 text-amber-400 font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-amber-500 hover:text-white transition-all">
-                                                    Request Revision 🔄
+                                                <button disabled={actionLoading} onClick={() => handleAction('REVISION')} className="w-full py-4 bg-zinc-800/50 border border-amber-500/40 text-amber-400 font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-amber-500 hover:text-white transition-all">
+                                                    Request Revision
                                                 </button>
                                             </div>
-                                            <button className="opacity-40 hover:opacity-100 transition-opacity text-[10px] font-black uppercase tracking-[3px] mt-4 underline underline-offset-4">Cancel & Dispute ❌</button>
+                                            <button disabled={actionLoading} onClick={() => handleAction('CANCEL_REQUEST')} className="opacity-40 hover:opacity-100 transition-opacity text-[10px] font-black uppercase tracking-[3px] mt-4 underline underline-offset-4">
+                                                Cancel & Dispute
+                                            </button>
                                         </div>
                                     )}
                                     {agreement.status === 'COMPLETED' && (
-                                        <div className="space-y-6">
+                                        <div className="space-y-6 text-center">
                                             <CheckCircle2 className="w-20 h-20 text-orange-400 mx-auto" />
-                                            <h2 className="text-4xl font-black tracking-tight">Work Completed!</h2>
-                                            <p className="text-zinc-400 font-medium text-sm mb-8">You can now download the final asset below.</p>
-                                            <button className="orange-glow-btn text-white py-4 px-10 rounded-full font-black text-xs uppercase tracking-widest">Download Final File 🔗</button>
+                                            <h2 className="text-4xl font-black tracking-tight">Work Completed</h2>
+                                            <p className="text-zinc-400 font-medium text-sm mb-8">You can now download the final asset.</p>
+                                            <button className="orange-glow-btn text-white py-4 px-10 rounded-full font-black text-xs uppercase tracking-widest text-center">Download Final File</button>
                                         </div>
                                     )}
                                 </motion.div>
                             ) : (
-                                <div className="space-y-6 py-10">
+                                <div className="space-y-6 py-10 text-center">
                                     <AlertCircle className="w-16 h-16 text-orange-400 mx-auto mb-4" />
                                     <h2 className="text-3xl font-black tracking-tight">Viewing as Guest</h2>
-                                    <p className="text-zinc-400 font-medium text-sm max-w-sm mx-auto">Connecting your wallet allows you to see your role and take actions.</p>
                                     <button onClick={() => navigate('/')} className="orange-glow-btn text-white py-4 px-10 rounded-full font-black text-xs uppercase tracking-widest">Connect Wallet</button>
                                 </div>
                             )}
@@ -379,7 +355,6 @@ export default function AgreementRoom() {
                     </div>
                 </div>
 
-                {/* Messages Feed */}
                 <div className="glass-panel rounded-[2rem] overflow-hidden">
                     <div className="p-7 border-b border-white/20 dark:border-white/5 flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -388,7 +363,6 @@ export default function AgreementRoom() {
                             </div>
                             <h3 className="text-lg font-black text-zinc-900 dark:text-white tracking-tight">Project Notes</h3>
                         </div>
-                        <span className="text-[10px] font-bold text-zinc-400 dark:text-neutral-500 uppercase tracking-widest">Log Thread</span>
                     </div>
 
                     <div className="h-[360px] overflow-y-auto p-7 space-y-5 bg-zinc-50/30 dark:bg-black/20">
@@ -401,9 +375,6 @@ export default function AgreementRoom() {
                                 }`}>
                                     {m.content}
                                 </div>
-                                <span className="text-[9px] font-black text-zinc-300 dark:text-neutral-600 mt-2 uppercase tracking-tighter">
-                                    {m.sender?.slice(0, 6)}... · {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </span>
                             </div>
                         )) : (
                             <div className="text-center py-16 text-zinc-300 dark:text-neutral-600">
@@ -415,7 +386,7 @@ export default function AgreementRoom() {
                     <form onSubmit={handleSendMessage} className="p-5 bg-white/80 dark:bg-[#131313]/80 border-t border-white/20 dark:border-white/5 flex gap-3">
                         <input
                             className="flex-1 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-white/5 rounded-2xl px-5 py-3.5 text-sm font-semibold text-zinc-800 dark:text-white outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-orange-300 dark:focus:border-orange-500/40 transition-all placeholder:text-zinc-400 dark:placeholder:text-neutral-600"
-                            placeholder="Add a progress update or note..."
+                            placeholder="Add a progress update..."
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                         />
@@ -428,4 +399,3 @@ export default function AgreementRoom() {
         </div>
     );
 }
-

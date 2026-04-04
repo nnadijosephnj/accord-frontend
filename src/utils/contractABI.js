@@ -7,14 +7,15 @@ export const CONTRACT_ABI = [
   "function deposit(address token, uint256 amount) external",
   "function withdraw(address token, uint256 amount) external",
   "function getVaultBalance(address user, address token) external view returns (uint256)",
-  "function createAgreement(bytes32 id, address freelancer, address token, uint256 amount) external",
-  "function createAgreementFromVault(bytes32 id, address freelancer, address token, uint256 amount) external",
+  "function createAgreement(bytes32 id, address freelancer, address token, uint256 amount, uint256 maxRevisions) external",
   "function deliverWork(bytes32 id, string previewIpfsHash) external",
   "function approveWork(bytes32 id, string cleanIpfsHash) external",
   "function raiseDispute(bytes32 id) external",
   "function resolveDispute(bytes32 id, bool payFreelancer) external",
-  "function cancelAgreement(bytes32 id) external",
-  "function getAgreement(bytes32 id) external view returns (tuple(bytes32 id, address freelancer, address client, address token, uint256 amount, uint8 status, string previewIpfsHash, string cleanIpfsHash))"
+  "function requestRevision(bytes32 id) external",
+  "function requestCancel(bytes32 id) external",
+  "function executeRefund(bytes32 id) external",
+  "function getAgreement(bytes32 id) external view returns (tuple(bytes32 id, address freelancer, address client, address token, uint256 amount, uint8 status, string previewIpfsHash, string cleanIpfsHash, uint256 maxRevisions, uint256 revisionCount, uint256 cancelRequestTimestamp))"
 ];
 
 export const TOKEN_ABI = [
