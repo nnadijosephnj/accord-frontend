@@ -4,9 +4,10 @@ import { motion as Motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, FileText, Wallet, Bell, Settings,
   AlertTriangle, ChevronDown, Plus, X, Menu,
-  Link2, DollarSign, ArrowDownUp
+  Link2, DollarSign, ArrowDownUp, Sun, Moon
 } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
+import { useTheme } from '../context/ThemeContext';
 
 function shortenAddress(addr) {
   if (!addr) return '';
@@ -50,7 +51,8 @@ const NAV_ITEMS = [
 ];
 
 export default function DashboardLayout({ children }) {
-  const { address, logout } = useWallet();
+  const { address, logout, userProfile } = useWallet();
+  const { isDark, toggle: toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -179,14 +181,20 @@ export default function DashboardLayout({ children }) {
       {/* Bottom: Wallet Info */}
       <div className="px-4 py-4 border-t border-zinc-100 dark:border-white/5 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center text-white font-bold text-xs shrink-0">
-            {address ? address.slice(2, 4).toUpperCase() : 'AC'}
+          <div className="w-9 h-9 rounded-xl overflow-hidden border border-zinc-200 dark:border-white/10 shrink-0">
+            {userProfile?.avatar_url ? (
+              <img src={userProfile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center text-white font-bold text-xs">
+                {address ? address.slice(2, 4).toUpperCase() : 'AC'}
+              </div>
+            )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-zinc-800 dark:text-white truncate font-mono">
-              {shortenAddress(address)}
+            <p className="text-xs font-bold text-zinc-800 dark:text-white truncate">
+              {userProfile?.display_name || 'User'}
             </p>
-            <p className="text-[10px] text-zinc-400 dark:text-zinc-500">Keplr Wallet</p>
+            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 truncate font-mono">{shortenAddress(address)}</p>
           </div>
           <button
             onClick={logout}
@@ -235,15 +243,25 @@ export default function DashboardLayout({ children }) {
             >
               <Menu className="w-4 h-4" />
             </button>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 flex items-center gap-2">
               Hi,{' '}
-              <span className="font-bold text-zinc-900 dark:text-white font-mono">
-                {shortenAddress(address)}
-              </span>
+              <Link to="/dashboard/settings" className="group flex items-center gap-1.5 min-w-0">
+                <span className="font-bold text-zinc-900 dark:text-white uppercase transition-colors group-hover:text-orange-600 dark:group-hover:text-orange-400 truncate">
+                  {userProfile?.display_name || 'User'}
+                </span>
+                <Settings className="w-3.5 h-3.5 text-zinc-400 group-hover:text-orange-500 transition-colors" />
+              </Link>
               <span className="hidden sm:inline">, here&apos;s what&apos;s happening today</span>
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-all"
+              aria-label="Toggle theme"
+            >
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
             <Link
               to="/dashboard/notifications"
               className="relative p-2 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-all"

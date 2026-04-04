@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Wallet, CheckCircle2, AlertTriangle, Save } from 'lucide-react';
 import { useWallet } from '../../context/WalletContext';
-import { apiCall } from '../../utils/api';
+import { apiCall, uploadFileCall } from '../../utils/api';
+import { useRef, useEffect } from 'react';
 
 export default function Settings() {
   const { address, userProfile, setUserProfile, logout } = useWallet();
@@ -10,8 +11,34 @@ export default function Settings() {
   const [email, setEmail] = useState(userProfile?.email || '');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [stats, setStats] = useState({ total: 0, completed: 0, earned: 0, spent: 0 });
+  const fileInputRef = useRef(null);
 
-  const initials = address ? address.slice(2, 4).toUpperCase() : 'AC';
+  const avatarUrl = userProfile?.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${address}`;
+
+  useEffect(() => {
+    loadStats();
+  }, [address]);
+
+  const loadStats = async () => {
+    try {
+      const agreements = await apiCall('/api/agreements');
+      if (agreements) {
+        const total = agreements.length;
+        const completed = agreements.filter(a => a.status === 'COMPLETED').length;
+        const earned = agreements
+          .filter(a => a.status === 'COMPLETED' && a.freelancer_wallet?.toLowerCase() === address?.toLowerCase())
+          .reduce((sum, a) => sum + Number(a.amount || 0), 0);
+        const spent = agreements
+          .filter(a => a.status === 'COMPLETED' && a.client_wallet?.toLowerCase() === address?.toLowerCase())
+          .reduce((sum, a) => sum + Number(a.amount || 0), 0);
+        setStats({ total, completed, earned, spent });
+      }
+    } catch (e) {
+      console.warn("Stats load failed:", e.message);
+    }
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -29,6 +56,26 @@ export default function Settings() {
       alert('Failed to save: ' + err.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      setUploadingAvatar(true);
+      const formData = new FormData();
+      formData.append('avatar', file);
+      const result = await uploadFileCall('/api/auth/avatar', formData);
+      if (result?.user) setUserProfile(result.user);
+    } catch (e) {
+      alert('Avatar upload failed: ' + err.message);
+    } finally {
+      setUploadingAvatar(false);
     }
   };
 
@@ -67,12 +114,28 @@ export default function Settings() {
 
             {/* Avatar */}
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center text-white font-black text-xl">
-                {initials}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleAvatarFileChange}
+                accept="image/*"
+                className="hidden"
+              />
+              <div 
+                onClick={handleAvatarClick}
+                className="relative w-16 h-16 rounded-2xl overflow-hidden border-2 border-zinc-200 dark:border-white/10 shadow-sm transition-transform hover:scale-105 cursor-pointer group"
+              >
+                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" style={{ display: uploadingAvatar ? 'block' : 'none' }} />
+                  {!uploadingAvatar && <div className="text-[8px] font-black text-white uppercase">Upload</div>}
+                </div>
               </div>
               <div>
-                <p className="text-sm font-semibold text-zinc-900 dark:text-white">{displayName || 'Unnamed'}</p>
-                <p className="text-xs text-zinc-400 font-mono">{address ? `${address.slice(0, 8)}...${address.slice(-6)}` : '—'}</p>
+                <p className="text-sm font-semibold text-zinc-900 dark:text-white">{displayName || 'User'}</p>
+                <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-0.5">
+                  Member Since: <span className="text-zinc-600 dark:text-zinc-300 transition-colors uppercase">{userProfile?.created_at ? new Date(userProfile.created_at).toLocaleDateString() : 'Active Now'}</span>
+                </p>
               </div>
             </div>
 
@@ -105,6 +168,21 @@ export default function Settings() {
                 {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
               </button>
             </form>
+          </div>
+
+          {/* User Stats Mini Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
+            {[
+              { label: 'Total Jobs', value: stats.total },
+              { label: 'Completed', value: stats.completed },
+              { label: 'Earned ($)', value: stats.earned.toFixed(2) },
+              { label: 'Spent ($)', value: stats.spent.toFixed(2) },
+            ].map((s) => (
+              <div key={s.label} className="bg-white dark:bg-[#1a1a1a] p-4 rounded-2xl border border-zinc-200 dark:border-white/5 shadow-sm text-center">
+                <p className="text-lg font-black text-zinc-900 dark:text-white">{s.value}</p>
+                <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-1 truncate">{s.label}</p>
+              </div>
+            ))}
           </div>
         </div>
       )}
