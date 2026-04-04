@@ -4,9 +4,9 @@ import { Plus, X, Moon, Sun, LayoutDashboard, FileText, Wallet, Bell, Settings, 
 import { useWallet } from '../context/WalletContext';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
+import * as ethers from 'ethers';
 import { apiCall } from '../utils/api';
 import { CONTRACT_ADDRESS, CONTRACT_ABI, USDT_ADDRESS, USDC_ADDRESS } from '../utils/contractABI';
-import { ethers } from 'ethers';
 
 function RoleModal({ isOpen, onClose }) {
   const navigate = useNavigate();
@@ -93,14 +93,20 @@ export default function Dashboard() {
       if (!signer) return;
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
       
-      const usdtBal = await contract.getVaultBalance(address, USDT_ADDRESS);
-      const usdcBal = await contract.getVaultBalance(address, USDC_ADDRESS);
+      const usdtVal = await contract.getVaultBalance(address, USDT_ADDRESS);
+      const usdcVal = await contract.getVaultBalance(address, USDC_ADDRESS);
       
-      if (usdtBal !== undefined && usdcBal !== undefined) {
-        setVaultBalances({
-          usdt: ethers.formatUnits(usdtBal, 6),
-          usdc: ethers.formatUnits(usdcBal, 6)
-        });
+      if (usdtVal !== undefined && usdtVal !== null) {
+        setVaultBalances(prev => ({
+          ...prev,
+          usdt: ethers.formatUnits(usdtVal, 6)
+        }));
+      }
+      if (usdcVal !== undefined && usdcVal !== null) {
+        setVaultBalances(prev => ({
+          ...prev,
+          usdc: ethers.formatUnits(usdcVal, 6)
+        }));
       }
     } catch (e) {
       console.warn("Vault load error:", e);
@@ -319,7 +325,7 @@ export default function Dashboard() {
                     agreements.map((item, i) => (
                       <tr 
                         key={i} 
-                        onClick={() => navigate(`/deal/${item.id}`)}
+                        onClick={() => { if (item?.id) navigate(`/deal/${item.id}`); }}
                         className="group border-b border-zinc-100 dark:border-white/5 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all cursor-pointer"
                       >
                         <td className="px-8 py-6">
