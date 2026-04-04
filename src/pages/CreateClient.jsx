@@ -9,7 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { apiCall } from '../utils/api';
-import { CONTRACT_ADDRESS, CONTRACT_ABI } from '../utils/contractABI';
+import { CONTRACT_ADDRESS, CONTRACT_ABI, USDT_ADDRESS, USDC_ADDRESS } from '../utils/contractABI';
 
 export default function CreateClient() {
     const { address, signer } = useWallet();
@@ -23,6 +23,7 @@ export default function CreateClient() {
         description: '',
         freelancerAddress: '',
         amount: '',
+        tokenAddress: USDT_ADDRESS,
         deadline: ''
     });
 
@@ -42,16 +43,9 @@ export default function CreateClient() {
         try {
             setLoading(true);
 
-            const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-            const amountInUnits = ethers.parseUnits(form.amount || '0', 6);
-
-            const tx = await contract.createAgreement(
-                address,
-                amountInUnits,
-                3
-            );
-
-            const receipt = await tx.wait();
+            // In V2, we generate a random bytes32 ID locally. 
+            // The client will fund it on-chain in the Agreement Room.
+            const contractAgreementId = ethers.hexlify(ethers.randomBytes(32));
 
             const agreement = await apiCall('/api/agreements', {
                 method: 'POST',
@@ -60,9 +54,11 @@ export default function CreateClient() {
                     description: form.description,
                     client_wallet: address.toLowerCase(),
                     freelancer_wallet: form.freelancerAddress.toLowerCase(),
-                    amount_usdt: form.amount,
+                    amount: form.amount,
+                    token_address: form.tokenAddress,
                     max_revisions: 3,
                     deadline: form.deadline,
+                    contract_agreement_id: contractAgreementId,
                     status: 'PENDING'
                 })
             });
@@ -153,8 +149,15 @@ export default function CreateClient() {
                             <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-300 dark:text-neutral-600" />
                         </div>
                         <div className="relative">
-                            <input required type="number" className="glass-input pr-16" placeholder="Payment Amount" value={form.amount} onChange={(e) => setForm({...form, amount: e.target.value})} />
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-orange-600 dark:text-orange-400 tracking-widest uppercase">USDT</span>
+                            <input required type="number" className="glass-input pr-24" placeholder="Payment Amount" value={form.amount} onChange={(e) => setForm({...form, amount: e.target.value})} />
+                            <select 
+                                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/50 dark:bg-black/30 border border-white/20 dark:border-white/5 rounded-xl px-2 py-1.5 text-[10px] font-black text-orange-600 dark:text-orange-400 outline-none cursor-pointer hover:bg-white/80 dark:hover:bg-white/10 transition-all"
+                                value={form.tokenAddress}
+                                onChange={(e) => setForm({...form, tokenAddress: e.target.value})}
+                            >
+                                <option value={USDT_ADDRESS}>USDT</option>
+                                <option value={USDC_ADDRESS}>USDC</option>
+                            </select>
                         </div>
                         <input type="date" className="glass-input" value={form.deadline} onChange={(e) => setForm({...form, deadline: e.target.value})} />
 

@@ -4,6 +4,9 @@ import { Plus, X, Moon, Sun, LayoutDashboard, FileText, Wallet, Bell, Settings, 
 import { useWallet } from '../context/WalletContext';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { apiCall } from '../utils/api';
+import { CONTRACT_ADDRESS, CONTRACT_ABI, USDT_ADDRESS, USDC_ADDRESS } from '../utils/contractABI';
+import { ethers } from 'ethers';
 
 function RoleModal({ isOpen, onClose }) {
   const navigate = useNavigate();
@@ -70,6 +73,48 @@ export default function Dashboard() {
 
   const avatarUrl = userProfile?.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${address}`;
   const userName = userProfile?.display_name || "User";
+
+  const [vaultBalances, setVaultBalances] = useState({ usdt: '0.00', usdc: '0.00' });
+  const [agreements, setAgreements] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const { signer } = useWallet();
+
+  useEffect(() => {
+    if (address) {
+      loadStats();
+      loadAgreements();
+    }
+  }, [address]);
+
+  const loadStats = async () => {
+    try {
+      if (!signer) return;
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+      
+      const usdtBal = await contract.getVaultBalance(address, USDT_ADDRESS);
+      const usdcBal = await contract.getVaultBalance(address, USDC_ADDRESS);
+      
+      setVaultBalances({
+        usdt: ethers.formatUnits(usdtBal, 6),
+        usdc: ethers.formatUnits(usdcBal, 6)
+      });
+    } catch (e) {
+      console.warn("Vault load error:", e);
+    }
+  };
+
+  const loadAgreements = async () => {
+    try {
+      setLoading(true);
+      const data = await apiCall('/api/agreements');
+      setAgreements(data || []);
+    } catch (e) {
+      console.warn(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const navItems = [
     { label: "Overview", icon: <LayoutDashboard className="w-5 h-5" />, path: "/dashboard" },
@@ -194,25 +239,25 @@ export default function Dashboard() {
             <div className="relative p-6 rounded-3xl bg-gradient-to-br from-orange-500 to-orange-700 text-white overflow-hidden shadow-[0_15px_30px_rgba(234,88,12,0.2)] dark:shadow-[0_15px_30px_rgba(255,145,87,0.15)] group">
               <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
               <div className="flex justify-between items-start mb-4 relative z-10">
-                <p className="text-xs font-black uppercase tracking-widest text-orange-100">Amount in Escrow</p>
+                <p className="text-xs font-black uppercase tracking-widest text-orange-100">Agreements List</p>
                 <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
                   <Shield className="w-4 h-4 text-white" />
                 </div>
               </div>
-              <h2 className="text-4xl font-black mb-1 relative z-10 font-mono tracking-tight">$0.00</h2>
-              <p className="text-sm font-medium text-orange-200 relative z-10">Total held securely</p>
+              <h2 className="text-4xl font-black mb-1 relative z-10 font-mono tracking-tight">{agreements.length}</h2>
+              <p className="text-sm font-medium text-orange-200 relative z-10">Total active / history</p>
             </div>
 
-            {/* PENDING TRANSACTIONS */}
+            {/* USDT VAULT BALANCE */}
             <div className="p-6 rounded-3xl bg-white dark:bg-[#111111] border border-zinc-200 dark:border-white/5 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start mb-4">
-                <p className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-neutral-500">Pending Overview</p>
+                <p className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-neutral-500">USDT Vault</p>
                 <div className="p-2 bg-zinc-100 dark:bg-white/5 rounded-xl">
                   <Clock className="w-4 h-4 text-zinc-400" />
                 </div>
               </div>
-              <h2 className="text-4xl font-black mb-1 font-mono text-zinc-900 dark:text-white">0</h2>
-              <p className="text-sm font-medium text-zinc-500">Awaiting action</p>
+              <h2 className="text-4xl font-black mb-1 font-mono text-zinc-900 dark:text-white">{Number(vaultBalances.usdt).toFixed(2)}</h2>
+              <p className="text-sm font-medium text-zinc-500 italic">Available in Injective</p>
             </div>
 
             {/* AWAITING APPROVAL */}
@@ -227,16 +272,16 @@ export default function Dashboard() {
               <p className="text-sm font-medium text-zinc-500">Requires review</p>
             </div>
 
-            {/* WALLET BALANCE */}
+            {/* USDC VAULT BALANCE */}
             <div className="p-6 rounded-3xl bg-zinc-100 dark:bg-[#111111]/50 border border-zinc-200 dark:border-white/5 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start mb-4">
-                <p className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-neutral-500">Wallet Balance</p>
+                <p className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-neutral-500">USDC Vault</p>
                 <div className="p-2 bg-white dark:bg-black/50 rounded-xl shadow-sm">
                   <Wallet className="w-4 h-4 text-zinc-400" />
                 </div>
               </div>
-              <h2 className="text-4xl font-black mb-1 font-mono text-zinc-900 dark:text-white">$0.00</h2>
-              <p className="text-sm font-medium text-zinc-500">Available USDT</p>
+              <h2 className="text-4xl font-black mb-1 font-mono text-zinc-900 dark:text-white">{Number(vaultBalances.usdc).toFixed(2)}</h2>
+              <p className="text-sm font-medium text-zinc-500 italic">Available in Injective</p>
             </div>
           </div>
 
@@ -267,20 +312,66 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* Empty State */}
-                  <tr>
-                    <td colSpan="7" className="px-8 py-24 text-center">
-                      <div className="flex flex-col items-center justify-center">
-                        <div className="w-16 h-16 bg-zinc-100 dark:bg-white/5 rounded-2xl flex items-center justify-center mb-4 text-zinc-300 dark:text-white/10">
-                          <FileText className="w-8 h-8" />
+                  {agreements.length > 0 ? (
+                    agreements.map((item, i) => (
+                      <tr 
+                        key={i} 
+                        onClick={() => navigate(`/deal/${item.id}`)}
+                        className="group border-b border-zinc-100 dark:border-white/5 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all cursor-pointer"
+                      >
+                        <td className="px-8 py-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-orange-100 dark:bg-orange-500/10 rounded-xl flex items-center justify-center text-lg">
+                              🤝
+                            </div>
+                            <div>
+                              <p className="text-sm font-black text-zinc-900 dark:text-white truncate max-w-[200px]">{item.title}</p>
+                              <p className="text-[10px] text-zinc-400 dark:text-neutral-500 font-bold uppercase tracking-tight">Standard Escrow</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-8 py-6 font-mono text-xs font-bold text-zinc-400 group-hover:text-orange-500 transition-colors">
+                          #{item.id.slice(0, 8)}
+                        </td>
+                        <td className="px-8 py-6">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-xs font-bold text-zinc-700 dark:text-neutral-300">Client: {item.client_wallet.slice(0, 6)}...</span>
+                            <span className="text-xs font-bold text-zinc-400 dark:text-neutral-500 italic">Dev: {item.freelancer_wallet.slice(0, 6)}...</span>
+                          </div>
+                        </td>
+                        <td className="px-8 py-6 text-sm font-black text-zinc-900 dark:text-white">
+                          ${item.amount || item.amount_usdt} <span className="text-[10px] text-orange-600 dark:text-orange-400 ml-1">{item.token_address?.toLowerCase() === USDC_ADDRESS.toLowerCase() ? 'USDC' : 'USDT'}</span>
+                        </td>
+                        <td className="px-8 py-6">
+                           <span className={`px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-zinc-100 text-zinc-500 dark:bg-zinc-800/60 dark:text-neutral-300`}>
+                             {item.status}
+                           </span>
+                        </td>
+                        <td className="px-8 py-6 text-xs font-bold text-zinc-400">
+                          {new Date(item.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-8 py-6 text-right">
+                          <button className="p-2 text-zinc-300 hover:text-orange-500 transition-colors">
+                            <ArrowRight className="w-5 h-5" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7" className="px-8 py-24 text-center">
+                        <div className="flex flex-col items-center justify-center">
+                          <div className="w-16 h-16 bg-zinc-100 dark:bg-white/5 rounded-2xl flex items-center justify-center mb-4 text-zinc-300 dark:text-white/10">
+                            <FileText className="w-8 h-8" />
+                          </div>
+                          <h4 className="text-lg font-black text-zinc-900 dark:text-white mb-1">No transactions found</h4>
+                          <p className="text-sm font-medium text-zinc-500 dark:text-neutral-400 max-w-xs mx-auto">
+                            Agreements will appear here once you create or receive an invite.
+                          </p>
                         </div>
-                        <h4 className="text-lg font-black text-zinc-900 dark:text-white mb-1">No transactions found</h4>
-                        <p className="text-sm font-medium text-zinc-500 dark:text-neutral-400 max-w-xs mx-auto">
-                          Agreements will appear here once you create or receive an invite.
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

@@ -9,7 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { apiCall } from '../utils/api';
-import { CONTRACT_ADDRESS, CONTRACT_ABI } from '../utils/contractABI';
+import { CONTRACT_ADDRESS, CONTRACT_ABI, USDT_ADDRESS, USDC_ADDRESS } from '../utils/contractABI';
 
 export default function CreateFreelancer() {
     const { address, signer } = useWallet();
@@ -24,6 +24,7 @@ export default function CreateFreelancer() {
         description: '',
         clientAddress: '',
         amount: '',
+        tokenAddress: USDT_ADDRESS,
         maxRevisions: 3,
         deadline: ''
     });
@@ -33,21 +34,9 @@ export default function CreateFreelancer() {
         try {
             setLoading(true);
 
-            const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-            const amountInUnits = ethers.parseUnits(form.amount || '0', 6);
-
-            const tx = await contract.createAgreement(
-                form.clientAddress,
-                amountInUnits,
-                form.maxRevisions
-            );
-
-            const receipt = await tx.wait();
-
-            const event = receipt.logs.find(log => {
-                try { return contract.interface.parseLog(log).name === 'AgreementCreated'; } catch(e){return false;}
-            });
-            const contractAgreementId = contract.interface.parseLog(event).args.id.toString();
+            // In V2, we generate a random bytes32 ID locally. 
+            // The client will fund it on-chain in the Agreement Room.
+            const contractAgreementId = ethers.hexlify(ethers.randomBytes(32));
 
             const agreement = await apiCall('/api/agreements', {
                 method: 'POST',
@@ -56,7 +45,8 @@ export default function CreateFreelancer() {
                     description: form.description,
                     client_wallet: form.clientAddress.toLowerCase(),
                     freelancer_wallet: address.toLowerCase(),
-                    amount_usdt: form.amount,
+                    amount: form.amount,
+                    token_address: form.tokenAddress,
                     max_revisions: form.maxRevisions,
                     deadline: form.deadline,
                     contract_agreement_id: contractAgreementId,
@@ -192,12 +182,19 @@ export default function CreateFreelancer() {
                                     required
                                     type="number"
                                     step="0.01"
-                                    className="glass-input pr-16"
+                                    className="glass-input pr-24"
                                     placeholder="0.00"
                                     value={form.amount}
                                     onChange={(e) => setForm({...form, amount: e.target.value})}
                                 />
-                                <span className="absolute right-4 top-1/2 -translate-y-1/2 font-black text-orange-600 dark:text-orange-400 text-xs tracking-widest">USDT</span>
+                                <select 
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/50 dark:bg-black/30 border border-white/20 dark:border-white/5 rounded-xl px-2 py-1.5 text-[10px] font-black text-orange-600 dark:text-orange-400 outline-none cursor-pointer hover:bg-white/80 dark:hover:bg-white/10 transition-all"
+                                    value={form.tokenAddress}
+                                    onChange={(e) => setForm({...form, tokenAddress: e.target.value})}
+                                >
+                                    <option value={USDT_ADDRESS}>USDT</option>
+                                    <option value={USDC_ADDRESS}>USDC</option>
+                                </select>
                             </div>
                         </div>
                         <div className="glass-panel p-6 rounded-[1.75rem]">
@@ -235,7 +232,7 @@ export default function CreateFreelancer() {
                         disabled={loading}
                         className="w-full py-5 orange-glow-btn text-white font-black text-sm uppercase tracking-[4px] rounded-[1.5rem]"
                     >
-                        {loading ? 'Executing on Injective...' : 'Create & Share Link'}
+                        {loading ? 'Creating Secure Link...' : 'Create & Share Link'}
                     </button>
                 </form>
             </main>

@@ -10,7 +10,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { apiCall, uploadFileCall } from '../utils/api';
-import { CONTRACT_ADDRESS, CONTRACT_ABI, USDT_ADDRESS, USDT_ABI } from '../utils/contractABI';
+import { CONTRACT_ADDRESS, CONTRACT_ABI, USDT_ADDRESS, USDC_ADDRESS, TOKEN_ABI } from '../utils/contractABI';
 
 export default function AgreementRoom() {
     const { id } = useParams();
@@ -71,32 +71,52 @@ export default function AgreementRoom() {
         try {
             setActionLoading(true);
             const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-            const usdtContract = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
+            
+            // Use the specific token address from the agreement (USDT or USDC)
+            const tokenAddress = agreement.token_address || USDT_ADDRESS;
+            const tokenContract = new ethers.Contract(tokenAddress, TOKEN_ABI, signer);
             const contractId = agreement.contract_agreement_id;
 
             if (action === 'FUND') {
-                const amountInUnits = ethers.parseUnits(agreement.amount_usdt, 6);
-                const allowance = await usdtContract.allowance(address, CONTRACT_ADDRESS);
+                const amountInUnits = ethers.parseUnits(agreement.amount_usdt || agreement.amount || '0', 6);
+                
+                // 1. Check & Approve Token Allowance
+                const allowance = await tokenContract.allowance(address, CONTRACT_ADDRESS);
                 if (allowance < amountInUnits) {
-                    const approveTx = await usdtContract.approve(CONTRACT_ADDRESS, amountInUnits);
+                    const approveTx = await tokenContract.approve(CONTRACT_ADDRESS, amountInUnits);
                     await approveTx.wait();
                 }
-                const tx = await contract.depositFunds(contractId);
+
+                // 2. Create Agreement on-chain (this locks the funds)
+                const tx = await contract.createAgreement(
+                    contractId, 
+                    agreement.freelancer_wallet,
+                    tokenAddress,
+                    amountInUnits
+                );
                 await tx.wait();
+
                 await apiCall(`/api/agreements/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'FUNDED' }) });
-            } else if (action === 'APPROVE') {
-                const tx = await contract.approveWork(contractId);
-                await tx.wait();
-                await apiCall(`/api/agreements/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'COMPLETED' }) });
             } else if (action === 'SUBMIT') {
                 if (!selectedFile) return alert("Select a preview file first!");
-                const tx = await contract.submitWork(contractId);
-                await tx.wait();
+                
+                // 1. Upload to IPFS first
                 const formData = new FormData();
                 formData.append('preview', selectedFile);
                 formData.append('agreementId', id);
-                await uploadFileCall('/api/upload', formData);
+                const uploadResult = await uploadFileCall('/api/upload', formData);
+                
+                // 2. Register delivery on blockchain
+                const ipfsHash = uploadResult.ipfs_hash || ""; 
+                const tx = await contract.deliverWork(contractId, ipfsHash);
+                await tx.wait();
+                
                 await apiCall(`/api/agreements/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'SUBMITTED' }) });
+            } else if (action === 'APPROVE') {
+                // In a real V3 we'd pass the final link here, for now it's empty string or a placeholder
+                const tx = await contract.approveWork(contractId, "FINAL_LINK_PLACEHOLDER");
+                await tx.wait();
+                await apiCall(`/api/agreements/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'COMPLETED' }) });
             }
 
             await loadAgreement();
@@ -161,7 +181,12 @@ export default function AgreementRoom() {
                         </button>
                         <div className="flex flex-col items-end">
                             <span className="text-[10px] text-zinc-400 dark:text-neutral-500 font-bold uppercase tracking-widest">Amount</span>
-                            <span className="text-lg font-black text-zinc-900 dark:text-white">{agreement.amount_usdt} <span className="text-sm font-bold text-orange-600 dark:text-orange-400">USDT</span></span>
+                            <span className="text-lg font-black text-zinc-900 dark:text-white">
+                                {agreement.amount || agreement.amount_usdt} 
+                                <span className="text-sm border border-orange-500/20 px-2 py-0.5 rounded-lg ml-2 font-bold text-orange-600 dark:text-orange-400">
+                                    {agreement.token_address?.toLowerCase() === USDC_ADDRESS.toLowerCase() ? 'USDC' : 'USDT'}
+                                </span>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -256,7 +281,7 @@ export default function AgreementRoom() {
                                         <div className="space-y-6">
                                             <ShieldCheck className="w-16 h-16 text-orange-400 mx-auto mb-6" />
                                             <h2 className="text-3xl font-black tracking-tight leading-tight">Waiting for client<br />to fund this agreement</h2>
-                                            <p className="text-zinc-400 font-medium text-sm max-w-sm mx-auto">The client must deposit ${agreement.amount_usdt} USDT into the Injective Escrow before you start work.</p>
+                                            <p className="text-zinc-400 font-medium text-sm max-w-sm mx-auto">The client must deposit {agreement.amount || agreement.amount_usdt} {agreement.token_address?.toLowerCase() === USDC_ADDRESS.toLowerCase() ? 'USDC' : 'USDT'} into the Injective Escrow before you start work.</p>
                                             <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/deal/${id}`); alert("Link copied!"); }} className="bg-white/10 hover:bg-white/20 border border-white/10 px-8 py-4 rounded-3xl font-black text-xs uppercase tracking-widest transition-all">
                                                 Copy Share Link
                                             </button>
@@ -297,9 +322,9 @@ export default function AgreementRoom() {
                                                 <DollarSign className="w-9 h-9 text-orange-400" />
                                             </div>
                                             <h2 className="text-4xl font-black tracking-tight leading-tight">Fund This<br />Agreement</h2>
-                                            <p className="text-zinc-400 font-medium text-sm mt-4">Depositing ${agreement.amount_usdt} USDT into Accord Escrow. Funds stay locked until you approve the work.</p>
+                                            <p className="text-zinc-400 font-medium text-sm mt-4">Depositing {agreement.amount || agreement.amount_usdt} {agreement.token_address?.toLowerCase() === USDC_ADDRESS.toLowerCase() ? 'USDC' : 'USDT'} into Accord Escrow. Funds stay locked until you approve the work.</p>
                                             <button disabled={actionLoading} onClick={() => handleAction('FUND')} className="w-full py-5 orange-glow-btn text-white font-black text-sm uppercase tracking-[4px] rounded-[1.5rem]">
-                                                {actionLoading ? 'Approving USDT & Depositing...' : `Deposit ${agreement.amount_usdt} USDT`}
+                                                {actionLoading ? 'Approving Token & Depositing...' : `Deposit ${agreement.amount || agreement.amount_usdt} ${agreement.token_address?.toLowerCase() === USDC_ADDRESS.toLowerCase() ? 'USDC' : 'USDT'}`}
                                             </button>
                                         </div>
                                     )}
