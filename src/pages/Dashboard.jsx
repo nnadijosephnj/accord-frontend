@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, Moon, Sun, LayoutDashboard, FileText, Wallet, Bell, Settings, LogOut, Clock, CheckCircle2, Shield, Search, ChevronDown, ArrowRight, Menu } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
