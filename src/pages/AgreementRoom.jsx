@@ -58,14 +58,20 @@ export default function AgreementRoom() {
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
-        if (!message) return;
+        if (!message || !agreement) return;
+
+        // Validation for frontend safety (backend handles it strictly)
+        const allowedStatuses = ['FUNDED', 'SUBMITTED', 'REVISION', 'COMPLETED'];
+        if (!allowedStatuses.includes(agreement.status.toUpperCase())) {
+            return;
+        }
+
         try {
             await apiCall('/api/messages', {
                 method: 'POST',
                 body: JSON.stringify({
                     agreement_id: id,
-                    content: message,
-                    sender: address.toLowerCase()
+                    content: message
                 })
             });
             setMessage('');
@@ -175,6 +181,9 @@ export default function AgreementRoom() {
 
     const isFreelancer = address?.toLowerCase() === agreement.freelancer_wallet.toLowerCase();
     const isClient = address?.toLowerCase() === agreement.client_wallet.toLowerCase();
+    const isParticipant = isFreelancer || isClient;
+    const allowedStatuses = ['FUNDED', 'SUBMITTED', 'REVISION', 'COMPLETED'];
+    const canMessage = isParticipant && allowedStatuses.includes(agreement.status?.toUpperCase());
     const statusInfo = getStatusInfo(agreement.status);
 
     return (
@@ -357,8 +366,8 @@ export default function AgreementRoom() {
                     </div>
                 </div>
 
-                <div className="glass-panel rounded-[2rem] overflow-hidden">
-                    <div className="p-7 border-b border-white/20 dark:border-white/5 flex items-center justify-between">
+                <div className="glass-panel rounded-[2rem] overflow-hidden flex flex-col h-[525px] border-zinc-200 dark:border-white/5 shadow-xl">
+                    <div className="p-7 border-b border-white/20 dark:border-white/5 flex items-center justify-between shrink-0 bg-white dark:bg-[#111111]">
                         <div className="flex items-center gap-3">
                             <div className="w-9 h-9 bg-orange-50 dark:bg-orange-500/10 rounded-xl flex items-center justify-center">
                                 <MessageSquare className="w-5 h-5 text-orange-600 dark:text-orange-400" />
@@ -367,16 +376,23 @@ export default function AgreementRoom() {
                         </div>
                     </div>
 
-                    <div className="h-[360px] overflow-y-auto p-7 space-y-5 bg-zinc-50/30 dark:bg-black/20">
-                        {messages.length > 0 ? messages.map((m, i) => (
+                    <div className="flex-1 overflow-y-auto p-7 space-y-5 bg-zinc-50/30 dark:bg-black/20">
+                        {!isParticipant ? (
+                             <div className="text-center py-16 text-zinc-300 dark:text-neutral-600">
+                                <Info className="w-10 h-10 mx-auto mb-4 opacity-20" />
+                                <span className="text-xs font-black uppercase tracking-[5px]">Private Chat</span>
+                                <p className="text-[10px] mt-2 opacity-60">Locked for non-participants</p>
+                             </div>
+                        ) : messages.length > 0 ? messages.map((m, i) => (
                             <div key={i} className={`flex flex-col ${m.sender === address?.toLowerCase() ? 'items-end' : 'items-start'}`}>
-                                <div className={`max-w-[80%] p-4 rounded-[1.25rem] text-sm font-semibold shadow-sm ${
+                                <div className={`max-w-[85%] p-4 rounded-[1.25rem] text-sm font-semibold shadow-sm ${
                                     m.sender === address?.toLowerCase()
                                         ? 'bg-zinc-900 text-white rounded-br-none'
                                         : 'bg-white dark:bg-[#1a1919] text-zinc-800 dark:text-white border border-zinc-100 dark:border-white/5 rounded-bl-none'
                                 }`}>
                                     {m.content}
                                 </div>
+                                <span className="text-[8px] text-zinc-400 dark:text-neutral-600 mt-1.5 uppercase font-bold px-1">{m.sender === address?.toLowerCase() ? 'You' : 'Team Member'}</span>
                             </div>
                         )) : (
                             <div className="text-center py-16 text-zinc-300 dark:text-neutral-600">
@@ -385,17 +401,30 @@ export default function AgreementRoom() {
                         )}
                     </div>
 
-                    <form onSubmit={handleSendMessage} className="p-5 bg-white/80 dark:bg-[#131313]/80 border-t border-white/20 dark:border-white/5 flex gap-3">
-                        <input
-                            className="flex-1 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-white/5 rounded-2xl px-5 py-3.5 text-sm font-semibold text-zinc-800 dark:text-white outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-orange-300 dark:focus:border-orange-500/40 transition-all placeholder:text-zinc-400 dark:placeholder:text-neutral-600"
-                            placeholder="Add a progress update..."
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                        />
-                        <button className="orange-glow-btn text-white p-3.5 rounded-2xl">
-                            <Send className="w-5 h-5" />
-                        </button>
-                    </form>
+                    {isParticipant && (
+                        <div className="p-5 bg-white dark:bg-[#131313] border-t border-white/20 dark:border-white/5">
+                            {canMessage ? (
+                                <form onSubmit={handleSendMessage} className="flex gap-3">
+                                    <input
+                                        className="flex-1 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-white/5 rounded-2xl px-5 py-3.5 text-sm font-semibold text-zinc-800 dark:text-white outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-orange-300 dark:focus:border-orange-500/40 transition-all placeholder:text-zinc-400 dark:placeholder:text-neutral-600"
+                                        placeholder="Add a progress update..."
+                                        value={message}
+                                        onChange={(e) => setMessage(e.target.value)}
+                                    />
+                                    <button className="orange-glow-btn text-white p-3.5 rounded-2xl">
+                                        <Send className="w-5 h-5" />
+                                    </button>
+                                </form>
+                            ) : (
+                                <div className="text-center py-2 px-4 rounded-xl bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/5">
+                                    <p className="text-[10px] items-center justify-center flex gap-2 font-black text-zinc-400 uppercase tracking-widest">
+                                        <Lock className="w-3 h-3" />
+                                        Messaging Locked until Funded
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </main>
         </div>
