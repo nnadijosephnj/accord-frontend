@@ -17,7 +17,7 @@ export default function VaultPage() {
   const loadBalance = async () => {
     try {
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-      const bal = await contract.getVaultBalance(address, USDC_ADDRESS);
+      const bal = await contract.vaultBalances(address, USDC_ADDRESS);
       if (bal !== undefined) setVaultBalance(Number(ethers.formatUnits(bal, 6)).toFixed(2));
     } catch (e) {
       console.warn('Vault load error:', e);

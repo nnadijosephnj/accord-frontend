@@ -96,8 +96,8 @@ export default function Dashboard() {
       if (!signer) return;
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
       
-      const usdtVal = await contract.getVaultBalance(address, USDT_ADDRESS);
-      const usdcVal = await contract.getVaultBalance(address, USDC_ADDRESS);
+      const usdtVal = await contract.vaultBalances(address, USDT_ADDRESS);
+      const usdcVal = await contract.vaultBalances(address, USDC_ADDRESS);
       
       if (usdtVal !== undefined && usdtVal !== null) {
         setVaultBalances(prev => ({

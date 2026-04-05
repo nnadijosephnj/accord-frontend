@@ -9,7 +9,7 @@ import { useWallet } from '../context/WalletContext';
 import { useTheme } from '../context/ThemeContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as ethers from 'ethers';
-import { apiCall } from '../utils/api';
+import { apiCall, uploadFileCall } from '../utils/api';
 import { CONTRACT_ADDRESS, CONTRACT_ABI, USDT_ADDRESS, USDC_ADDRESS, TOKEN_ABI } from '../utils/contractABI';
 
 export default function AgreementRoom() {
@@ -25,6 +25,7 @@ export default function AgreementRoom() {
     const [actionLoading, setActionLoading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [message, setMessage] = useState('');
+    const agreementAmount = agreement?.amount ?? agreement?.amount_usdt ?? 0;
 
     useEffect(() => {
         if (id) {
@@ -84,7 +85,7 @@ export default function AgreementRoom() {
             if (action === 'FUND') {
                 const tokenAddress = agreement.token_address;
                 const tokenContract = new ethers.Contract(tokenAddress, TOKEN_ABI, signer);
-                const amountInUnits = ethers.parseUnits(agreement.amount.toString(), 6);
+                const amountInUnits = ethers.parseUnits(agreementAmount.toString(), 6);
 
                 // 1. Approve
                 const approveTx = await tokenContract.approve(CONTRACT_ADDRESS, amountInUnits);
@@ -109,13 +110,14 @@ export default function AgreementRoom() {
                 formData.append('agreement_id', id);
                 formData.append('file_type', 'preview');
 
-                const uploadRes = await apiCall('/api/upload', {
-                    method: 'POST',
-                    body: formData,
-                    isFormData: true
-                });
+                const uploadRes = await uploadFileCall('/api/upload', formData);
+                const uploadedFile = Array.isArray(uploadRes) ? uploadRes[0] : uploadRes;
 
-                const tx = await contract.deliverWork(contractId, uploadRes.ipfs_hash);
+                if (!uploadedFile?.ipfs_hash) {
+                    throw new Error('Upload succeeded but no IPFS hash was returned');
+                }
+
+                const tx = await contract.deliverWork(contractId, uploadedFile.ipfs_hash);
                 await tx.wait();
                 
                 await apiCall(`/api/agreements/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'SUBMITTED' }) });
@@ -206,7 +208,7 @@ export default function AgreementRoom() {
                         <div className="flex flex-wrap gap-4 mb-10">
                             <div className="px-5 py-2.5 rounded-2xl bg-orange-50 dark:bg-orange-500/10 border border-orange-500/10 flex items-center gap-3">
                                 <DollarSign className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                                <span className="text-sm font-black text-orange-600 dark:text-orange-400">{agreement.amount} {agreement.token_address?.toLowerCase() === USDC_ADDRESS.toLowerCase() ? 'USDC' : 'USDT'}</span>
+                                <span className="text-sm font-black text-orange-600 dark:text-orange-400">{agreementAmount} {agreement.token_address?.toLowerCase() === USDC_ADDRESS.toLowerCase() ? 'USDC' : 'USDT'}</span>
                             </div>
                             <div className="px-5 py-2.5 rounded-2xl bg-zinc-100 dark:bg-white/5 border border-zinc-200/50 dark:border-white/5 flex items-center gap-3">
                                 <Clock className="w-4 h-4 text-zinc-400" />
@@ -309,9 +311,9 @@ export default function AgreementRoom() {
                                                 <DollarSign className="w-9 h-9 text-orange-400" />
                                             </div>
                                             <h2 className="text-4xl font-black tracking-tight">Fund Agreement</h2>
-                                            <p className="text-zinc-400 font-medium text-sm mt-4">Depositing {agreement.amount} into Accord Escrow. Funds stay locked until you approve the work.</p>
+                                            <p className="text-zinc-400 font-medium text-sm mt-4">Depositing {agreementAmount} into Accord Escrow. Funds stay locked until you approve the work.</p>
                                             <button disabled={actionLoading} onClick={() => handleAction('FUND')} className="w-full py-5 orange-glow-btn text-white font-black text-sm uppercase tracking-[4px] rounded-[1.5rem]">
-                                                {actionLoading ? 'Processing...' : `Deposit ${agreement.amount}`}
+                                                {actionLoading ? 'Processing...' : `Deposit ${agreementAmount}`}
                                             </button>
                                         </div>
                                     )}

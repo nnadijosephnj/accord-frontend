@@ -6,7 +6,7 @@ export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://accord-b
 export const CONTRACT_ABI = [
   "function deposit(address token, uint256 amount) external",
   "function withdraw(address token, uint256 amount) external",
-  "function getVaultBalance(address user, address token) external view returns (uint256)",
+  "function vaultBalances(address user, address token) external view returns (uint256)",
   "function createAgreement(bytes32 id, address freelancer, address token, uint256 amount, uint256 maxRevisions) external",
   "function deliverWork(bytes32 id, string previewIpfsHash) external",
   "function approveWork(bytes32 id, string cleanIpfsHash) external",
