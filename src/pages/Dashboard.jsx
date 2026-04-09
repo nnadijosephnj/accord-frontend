@@ -6,7 +6,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import * as ethers from 'ethers';
 import { apiCall } from '../utils/api';
-import { CONTRACT_ADDRESS, CONTRACT_ABI, USDT_ADDRESS, USDC_ADDRESS } from '../utils/contractABI';
+import { CONTRACT_ADDRESS, CONTRACT_ABI, USDC_ADDRESS } from '../utils/contractABI';
 
 function RoleModal({ isOpen, onClose }) {
   const navigate = useNavigate();
@@ -78,7 +78,7 @@ export default function Dashboard() {
   const avatarUrl = userProfile?.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${address}`;
   const userName = userProfile?.display_name || "User";
 
-  const [vaultBalances, setVaultBalances] = useState({ usdt: '0.00', usdc: '0.00' });
+  const [vaultBalances, setVaultBalances] = useState({ usdc: '0.00' });
   const [agreements, setAgreements] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -96,15 +96,7 @@ export default function Dashboard() {
       if (!signer) return;
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
       
-      const usdtVal = await contract.vaultBalances(address, USDT_ADDRESS);
       const usdcVal = await contract.vaultBalances(address, USDC_ADDRESS);
-      
-      if (usdtVal !== undefined && usdtVal !== null) {
-        setVaultBalances(prev => ({
-          ...prev,
-          usdt: ethers.formatUnits(usdtVal, 6)
-        }));
-      }
       if (usdcVal !== undefined && usdcVal !== null) {
         setVaultBalances(prev => ({
           ...prev,
@@ -226,7 +218,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-4">
             {/* Currency selector dummy */}
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 text-sm font-bold">
-              USDT <ChevronDown className="w-4 h-4 text-zinc-400" />
+              USDC <ChevronDown className="w-4 h-4 text-zinc-400" />
             </div>
             <button
               onClick={toggle}
@@ -260,17 +252,6 @@ export default function Dashboard() {
               <p className="text-sm font-medium text-orange-200 relative z-10">Total active / history</p>
             </div>
 
-            {/* USDT VAULT BALANCE */}
-            <div className="p-6 rounded-3xl bg-white dark:bg-[#111111] border border-zinc-200 dark:border-white/5 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex justify-between items-start mb-4">
-                <p className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-neutral-500">USDT Vault</p>
-                <div className="p-2 bg-zinc-100 dark:bg-white/5 rounded-xl">
-                  <Clock className="w-4 h-4 text-zinc-400" />
-                </div>
-              </div>
-              <h2 className="text-4xl font-black mb-1 font-mono text-zinc-900 dark:text-white">{Number(vaultBalances.usdt).toFixed(2)}</h2>
-              <p className="text-sm font-medium text-zinc-500 italic">Available in Injective</p>
-            </div>
 
             {/* AWAITING APPROVAL */}
             <div className="p-6 rounded-3xl bg-white dark:bg-[#111111] border border-zinc-200 dark:border-white/5 shadow-sm hover:shadow-md transition-shadow">
@@ -352,7 +333,7 @@ export default function Dashboard() {
                           </div>
                         </td>
                         <td className="px-8 py-6 text-sm font-black text-zinc-900 dark:text-white">
-                          ${item?.amount || item?.amount_usdt || "0"} <span className="text-[10px] text-orange-600 dark:text-orange-400 ml-1">{item?.token_address?.toLowerCase() === USDC_ADDRESS?.toLowerCase() ? 'USDC' : 'USDT'}</span>
+                          ${item?.amount || "0"} <span className="text-[10px] text-orange-600 dark:text-orange-400 ml-1">USDC</span>
                         </td>
                         <td className="px-8 py-6">
                            <span className={`px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-zinc-100 text-zinc-500 dark:bg-zinc-800/60 dark:text-neutral-300`}>

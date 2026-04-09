@@ -9,7 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { apiCall } from '../utils/api';
-import { CONTRACT_ADDRESS, CONTRACT_ABI, USDT_ADDRESS, USDC_ADDRESS } from '../utils/contractABI';
+import { CONTRACT_ADDRESS, CONTRACT_ABI, USDC_ADDRESS } from '../utils/contractABI';
 
 export default function CreateClient() {
     const { address, signer } = useWallet();
@@ -23,7 +23,7 @@ export default function CreateClient() {
         description: '',
         freelancerAddress: '',
         amount: '',
-        tokenAddress: USDT_ADDRESS,
+        tokenAddress: USDC_ADDRESS,
         deadline: ''
     });
 
@@ -155,7 +155,6 @@ export default function CreateClient() {
                                 value={form.tokenAddress}
                                 onChange={(e) => setForm({...form, tokenAddress: e.target.value})}
                             >
-                                <option value={USDT_ADDRESS}>USDT</option>
                                 <option value={USDC_ADDRESS}>USDC</option>
                             </select>
                         </div>

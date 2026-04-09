@@ -10,7 +10,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as ethers from 'ethers';
 import { apiCall, uploadFileCall } from '../utils/api';
-import { CONTRACT_ADDRESS, CONTRACT_ABI, USDT_ADDRESS, USDC_ADDRESS, TOKEN_ABI } from '../utils/contractABI';
+import { CONTRACT_ADDRESS, CONTRACT_ABI, USDC_ADDRESS, TOKEN_ABI } from '../utils/contractABI';
 
 export default function AgreementRoom() {
     const { id } = useParams();
@@ -25,7 +25,7 @@ export default function AgreementRoom() {
     const [actionLoading, setActionLoading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [message, setMessage] = useState('');
-    const agreementAmount = agreement?.amount ?? agreement?.amount_usdt ?? 0;
+    const agreementAmount = agreement?.amount ?? 0;
 
     useEffect(() => {
         if (id) {
@@ -217,7 +217,7 @@ export default function AgreementRoom() {
                         <div className="flex flex-wrap gap-4 mb-10">
                             <div className="px-5 py-2.5 rounded-2xl bg-orange-50 dark:bg-orange-500/10 border border-orange-500/10 flex items-center gap-3">
                                 <DollarSign className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                                <span className="text-sm font-black text-orange-600 dark:text-orange-400">{agreementAmount} {agreement.token_address?.toLowerCase() === USDC_ADDRESS.toLowerCase() ? 'USDC' : 'USDT'}</span>
+                                <span className="text-sm font-black text-orange-600 dark:text-orange-400">{agreementAmount} USDC</span>
                             </div>
                             <div className="px-5 py-2.5 rounded-2xl bg-zinc-100 dark:bg-white/5 border border-zinc-200/50 dark:border-white/5 flex items-center gap-3">
                                 <Clock className="w-4 h-4 text-zinc-400" />

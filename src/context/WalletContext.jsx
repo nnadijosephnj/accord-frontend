@@ -1,149 +1,49 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { ethers } from 'ethers';
-import { apiCall } from '../utils/api';
+import { useAuth } from './AuthContext';
+import { useActiveAccount } from "thirdweb/react";
+import { ethers6Adapter } from "thirdweb/adapters/ethers6";
+import { client } from "../lib/thirdwebClient";
+import { defineChain } from "thirdweb/chains";
 
 const WalletContext = createContext();
 
 export function WalletProvider({ children }) {
-    const [address, setAddress] = useState(localStorage.getItem('wallet_address'));
+    const { user, isConnected } = useAuth();
+    const account = useActiveAccount();
     const [provider, setProvider] = useState(null);
     const [signer, setSigner] = useState(null);
-    const [userProfile, setUserProfile] = useState(null);
-    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('jwt_token'));
-    const [isConnecting, setIsConnecting] = useState(false);
-    
-    // Automatically try to reconnect if there's a stored address
+
     useEffect(() => {
-        if (address && !provider) {
-            connectWallet(true); // silent/background connect
+        if (account) {
+            ethers6Adapter.signer.toEthers({
+                client,
+                chain: defineChain(1439),
+                account
+            }).then(setSigner).catch(console.error);
+        } else {
+            setSigner(null);
         }
-    }, []);
-
-    const fetchProfile = async () => {
-        try {
-            const profile = await apiCall('/api/auth/profile');
-            setUserProfile(profile);
-            setIsLoggedIn(true);
-            return profile;
-        } catch (e) {
-            if (e.message !== 'AUTHENTICATION_REQUIRED') {
-                console.warn("Profile fetch failed:", e.message);
-            }
-            setIsLoggedIn(false);
-            return null;
-        }
-    };
-
-    const connectWallet = async (isReconnect = false) => {
-        try {
-            if (!isReconnect) setIsConnecting(true);
-            let detectedProvider;
-            
-            if (window.keplr && window.keplr.ethereum) {
-                detectedProvider = window.keplr.ethereum;
-            } else if (window.leap && window.leap.ethereum) {
-                detectedProvider = window.leap.ethereum;
-            } else if (window.ethereum) {
-                detectedProvider = window.ethereum;
-            } else if (!isReconnect) {
-                alert("Please install Keplr wallet from keplr.app to continue");
-                return;
-            } else {
-                return; // Silently fail on reconnect
-            }
-            
-            const ethersProvider = new ethers.BrowserProvider(detectedProvider);
-            
-            // Switch to Injective Testnet
-            try {
-                await detectedProvider.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: '0x59f' }]
-                });
-            } catch (switchError) {
-                if (switchError.code === 4902) {
-                    await detectedProvider.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [{
-                            chainId: '0x59f',
-                            chainName: 'Injective EVM Testnet',
-                            rpcUrls: ['https://k8s.testnet.json-rpc.injective.network/'],
-                            nativeCurrency: { name: 'Injective', symbol: 'INJ', decimals: 18 },
-                            blockExplorerUrls: ['https://testnet.blockscout.injective.network/']
-                        }]
-                    });
-                }
-            }
-            
-            await ethersProvider.send('eth_requestAccounts', []);
-            const ethersSigner = await ethersProvider.getSigner();
-            const addr = await ethersSigner.getAddress();
-            
-            // Perform login signature if we don't have a token or it's a new connection
-            const existingToken = localStorage.getItem('jwt_token');
-            const needsSignature = !existingToken || localStorage.getItem('wallet_address') !== addr.toLowerCase();
-
-            if (needsSignature) {
-                // We only prompt for signature in FORCED connection (not background reconnect)
-                if (!isReconnect) {
-                    try {
-                        const message = `Welcome to Accord! Sign this message to log in securely.\n\nWallet: ${addr.toLowerCase()}\nTimestamp: ${Date.now()}`;
-                        const signature = await ethersSigner.signMessage(message);
-                        
-                        const { token } = await apiCall('/api/auth/verify', {
-                            method: 'POST',
-                            body: JSON.stringify({ address: addr, signature, message })
-                        });
-                        
-                        localStorage.setItem('jwt_token', token.toString());
-                        setIsLoggedIn(true);
-                    } catch (authError) {
-                        console.error("Signature failed:", authError);
-                        throw new Error("Signature required to unlock Dashboard. " + authError.message);
-                    }
-                }
-            } else {
-                setIsLoggedIn(true);
-            }
-            
-            localStorage.setItem('wallet_address', addr.toLowerCase());
-            setProvider(ethersProvider);
-            setSigner(ethersSigner);
-            setAddress(addr.toLowerCase());
-            
-            // Force profile refresh silently
-            try {
-                const profile = await apiCall('/api/auth/profile');
-                setUserProfile(profile);
-                setIsLoggedIn(true);
-            } catch (pErr) {
-                if (pErr.message.includes('token')) {
-                    setIsLoggedIn(false);
-                    localStorage.removeItem('jwt_token');
-                }
-            }
-            
-        } catch (error) {
-            console.error("Connection error:", error);
-            if (!isReconnect) alert("Connection Error: " + error.message);
-        } finally {
-            setIsConnecting(false);
-        }
-    };
+    }, [account]);
 
     const logout = () => {
-        localStorage.removeItem('wallet_address');
-        localStorage.removeItem('jwt_token');
-        setAddress(null);
-        setProvider(null);
-        setSigner(null);
-        setUserProfile(null);
-        setIsLoggedIn(false);
-        window.location.href = '/'; 
+        window.location.href = '/login'; 
     };
-    
+
+    const connectWallet = () => {
+        window.location.href = '/login'; 
+    };
+
     return (
-        <WalletContext.Provider value={{ address, provider, signer, userProfile, setUserProfile, isLoggedIn, fetchProfile, connectWallet, logout, isConnecting }}>
+        <WalletContext.Provider value={{ 
+            address: account?.address?.toLowerCase(), 
+            provider, 
+            signer, 
+            userProfile: user, 
+            isLoggedIn: isConnected,
+            logout,
+            connectWallet,
+            isConnecting: false
+        }}>
             {children}
         </WalletContext.Provider>
     );

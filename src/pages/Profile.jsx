@@ -36,10 +36,10 @@ export default function Profile() {
                 const completed = agreements.filter(a => a.status === 'COMPLETED').length;
                 const earned = agreements
                     .filter(a => a.status === 'COMPLETED' && a.freelancer_wallet?.toLowerCase() === address?.toLowerCase())
-                    .reduce((sum, a) => sum + Number(a.amount_usdt), 0);
+                    .reduce((sum, a) => sum + Number(a.amount), 0);
                 const spent = agreements
                     .filter(a => a.status === 'COMPLETED' && a.client_wallet?.toLowerCase() === address?.toLowerCase())
-                    .reduce((sum, a) => sum + Number(a.amount_usdt), 0);
+                    .reduce((sum, a) => sum + Number(a.amount), 0);
                 setStats({ total, completed, earned, spent });
             }
         } catch (e) {
@@ -221,8 +221,8 @@ export default function Profile() {
                     {[
                         { label: 'Agreements', value: stats.total, unit: null },
                         { label: 'Completed', value: stats.completed, unit: null, highlight: true },
-                        { label: 'Total Earned', value: stats.earned, unit: 'USDT' },
-                        { label: 'Total Spent', value: stats.spent, unit: 'USDT' },
+                        { label: 'Total Earned', value: stats.earned, unit: 'USDC' },
+                        { label: 'Total Spent', value: stats.spent, unit: 'USDC' },
                     ].map((s, i) => (
                         <div key={i} className="glass-panel p-5 rounded-[1.5rem]">
                             <p className="text-[9px] text-zinc-400 dark:text-neutral-500 font-black uppercase tracking-widest mb-1.5 truncate">{s.label}</p>

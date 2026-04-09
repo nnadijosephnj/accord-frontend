@@ -1,5 +1,5 @@
 export const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || "0x0D56A507C4b740fBB12E24f4c5C88D7944423195";
-export const USDT_ADDRESS = import.meta.env.VITE_USDT_ADDRESS || "0xaDC7bcB5d8fe053Ef19b4E0C861c262Af6e0db60";
+
 export const USDC_ADDRESS = import.meta.env.VITE_USDC_ADDRESS || "0x0C382e685bbeeFE5d3d9C29e29E341fEE8E84C5d";
 export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://accord-backend-k0ip.onrender.com";
 

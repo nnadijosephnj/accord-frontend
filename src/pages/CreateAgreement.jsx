@@ -27,7 +27,7 @@ export default function CreateAgreement() {
         title: '',
         description: '',
         client_wallet: '',
-        amount_usdt: '',
+        amount: '',
         max_revisions: '3',
         deadline: ''
     });
@@ -48,9 +48,9 @@ export default function CreateAgreement() {
             setIsSubmitting(true);
             
             // 1. Logic for Smart Contract Call
-            // Note: Contract expects amount in 6 decimals for USDT
+            // Note: Contract expects amount in 6 decimals for USDC
             const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-            const amountInUnits = ethers.parseUnits(formData.amount_usdt, 6);
+            const amountInUnits = ethers.parseUnits(formData.amount, 6);
             
             console.log("Creating agreement on contract...");
             const tx = await contract.createAgreement(
@@ -208,14 +208,14 @@ export default function CreateAgreement() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Amount (USDT)</label>
+                                    <label className="block text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">Amount (USDC)</label>
                                     <div className="relative">
                                         <Hash className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                         <input 
-                                            name="amount_usdt"
+                                            name="amount"
                                             type="number"
                                             required
-                                            value={formData.amount_usdt}
+                                            value={formData.amount}
                                             onChange={handleChange}
                                             placeholder="50"
                                             className="w-full pl-10 pr-4 py-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-teal/20 transition-all font-bold text-navy"

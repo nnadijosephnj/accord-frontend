@@ -3,6 +3,7 @@ import { Wallet, CheckCircle2, AlertTriangle, Save } from 'lucide-react';
 import { useWallet } from '../../context/WalletContext';
 import { apiCall, uploadFileCall } from '../../utils/api';
 import { useRef, useEffect } from 'react';
+import EmailSettings from '../../components/EmailSettings';
 
 export default function Settings() {
   const { address, userProfile, setUserProfile, logout } = useWallet();
@@ -190,12 +191,14 @@ export default function Settings() {
       {/* Security Tab */}
       {tab === 'security' && (
         <div className="space-y-4">
+          <EmailSettings />
+          
           {/* Connected Wallet */}
           <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl border border-zinc-200 dark:border-white/5 shadow-sm p-6">
             <h2 className="text-sm font-bold text-zinc-900 dark:text-white mb-4">Connected Wallet</h2>
             <div className="space-y-3">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1.5">Keplr Wallet Address</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1.5">Connected Wallet Address</label>
                 <div className="p-3 bg-zinc-50 dark:bg-white/5 rounded-xl border border-zinc-200 dark:border-white/5">
                   <p className="text-sm font-mono text-zinc-900 dark:text-white break-all">{address || '—'}</p>
                   <p className="text-[10px] text-zinc-400 mt-1">This is locked and cannot be changed</p>

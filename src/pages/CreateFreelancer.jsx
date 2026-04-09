@@ -9,7 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { apiCall } from '../utils/api';
-import { CONTRACT_ADDRESS, CONTRACT_ABI, USDT_ADDRESS, USDC_ADDRESS } from '../utils/contractABI';
+import { CONTRACT_ADDRESS, CONTRACT_ABI, USDC_ADDRESS } from '../utils/contractABI';
 
 export default function CreateFreelancer() {
     const { address, signer } = useWallet();
@@ -24,7 +24,7 @@ export default function CreateFreelancer() {
         description: '',
         clientAddress: '',
         amount: '',
-        tokenAddress: USDT_ADDRESS,
+        tokenAddress: USDC_ADDRESS,
         maxRevisions: 3,
         deadline: ''
     });
@@ -192,7 +192,6 @@ export default function CreateFreelancer() {
                                     value={form.tokenAddress}
                                     onChange={(e) => setForm({...form, tokenAddress: e.target.value})}
                                 >
-                                    <option value={USDT_ADDRESS}>USDT</option>
                                     <option value={USDC_ADDRESS}>USDC</option>
                                 </select>
                             </div>
