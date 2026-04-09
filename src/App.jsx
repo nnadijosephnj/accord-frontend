@@ -35,6 +35,14 @@ function DashboardWrapper({ children }) {
 }
 
 function App() {
+  React.useEffect(() => {
+    const handleError = (error) => {
+      console.error("GLOBAL ERROR CAUGHT:", error);
+    };
+    window.addEventListener("error", handleError);
+    return () => window.removeEventListener("error", handleError);
+  }, []);
+
   return (
     <ThirdwebProvider client={client}>
       <AuthProvider>
