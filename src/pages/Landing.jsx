@@ -6,6 +6,7 @@ import { ShieldCheck, LockKeyhole, Coins, ArrowRight, UserCheck, Moon, Sun, Shie
 import { useWallet } from '../context/WalletContext';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
+import IntegratedAuthModal from '../components/IntegratedAuthModal';
 
 function Counter({ from, to, duration = 2, delay = 0, formattingFn = (v) => v }) {
   const nodeRef = useRef(null);
@@ -30,10 +31,11 @@ function Counter({ from, to, duration = 2, delay = 0, formattingFn = (v) => v })
 }
 
 export default function Landing() {
-  const { address, connectWallet, isConnecting } = useWallet();
+  const { address, connectWallet: contextConnect, isConnecting } = useWallet();
   const { isDark, toggle } = useTheme();
   const navigate = useNavigate();
   const [init, setInit] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   // Mouse positional tracking for glowing cursor follower
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -57,6 +59,10 @@ export default function Landing() {
       navigate('/dashboard');
     }
   }, [address, navigate]);
+
+  const handleLoginStart = () => {
+    setIsAuthModalOpen(true);
+  };
 
   const particlesOptions = {
     background: { color: { value: "transparent" } },
@@ -156,14 +162,14 @@ export default function Landing() {
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
             <button
-              onClick={() => connectWallet()}
-              className="group relative px-6 py-3 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black overflow-hidden shadow-lg hover:shadow-orange-500/20 transition-all"
-            >
-              <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-orange-600 to-[#ff9157] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <span className="relative z-10 flex items-center gap-2 group-hover:text-white transition-colors duration-300">
-                {isConnecting ? 'Opening...' : 'Connect Wallet'}
-              </span>
-            </button>
+               onClick={handleLoginStart}
+               className="group relative px-6 py-3 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black overflow-hidden shadow-lg hover:shadow-orange-500/20 transition-all"
+             >
+               <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-orange-600 to-[#ff9157] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+               <span className="relative z-10 flex items-center gap-2 group-hover:text-white transition-colors duration-300">
+                 {isConnecting ? 'Opening...' : 'Connect Wallet'}
+               </span>
+             </button>
           </div>
         </div>
       </nav>
@@ -217,7 +223,7 @@ export default function Landing() {
               
               <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-6 pointer-events-auto">
                 <button
-                  onClick={() => connectWallet()}
+                  onClick={handleLoginStart}
                   disabled={isConnecting}
                   className="group relative w-full sm:w-auto px-12 py-6 rounded-full bg-gradient-to-r from-orange-600 to-[#ff9157] text-white font-black text-xl overflow-hidden flex items-center justify-center gap-4 shadow-[0_0_50px_rgba(234,88,12,0.5)] dark:shadow-[0_0_60px_rgba(255,145,87,0.4)] hover:shadow-[0_0_80px_rgba(234,88,12,0.8)] hover:-translate-y-2 hover:scale-105 transition-all duration-300"
                 >
@@ -410,6 +416,18 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+      <AnimatePresence>
+        {isAuthModalOpen && (
+          <IntegratedAuthModal 
+            isOpen={isAuthModalOpen} 
+            onClose={() => setIsAuthModalOpen(false)} 
+            onComplete={() => {
+              setIsAuthModalOpen(false);
+              navigate('/dashboard');
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

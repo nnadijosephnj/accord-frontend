@@ -26,23 +26,27 @@ export function WalletProvider({ children }) {
     }, [account]);
 
     const logout = () => {
-        window.location.href = '/login'; 
+        // Since we are using Thirdweb, the "ActiveAccount" will clear 
+        // when the user disconnects via the Thirdweb hooks.
+        // We'll just reset local state if needed.
+        setSigner(null);
     };
 
     const connectWallet = () => {
-        window.location.href = '/login'; 
+        // No longer redirecting. The UI (Landing) will now handle 
+        // showing the custom login modal.
     };
 
     return (
         <WalletContext.Provider value={{ 
-            address: account?.address?.toLowerCase(), 
+            address: account?.address?.toLowerCase() || null, 
             provider, 
             signer, 
             userProfile: user, 
             isLoggedIn: isConnected,
             logout,
             connectWallet,
-            isConnecting: false
+            isConnecting: !isConnected && !!account // simple loading state
         }}>
             {children}
         </WalletContext.Provider>
