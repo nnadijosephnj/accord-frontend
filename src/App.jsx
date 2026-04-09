@@ -4,8 +4,7 @@ import { WalletProvider, useWallet } from './context/WalletContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ThirdwebProvider } from "thirdweb/react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import AuthPage from "./pages/AuthPage";
-
+// AuthPage removed as it is now integrated into Landing
 import Landing from './pages/Landing';
 import AgreementRoom from './pages/AgreementRoom';
 
@@ -43,7 +42,6 @@ function App() {
           <Routes>
             {/* Public */}
             <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<AuthPage />} />
 
             {/* Redirect /dashboard -> /dashboard/overview */}
             <Route path="/dashboard" element={<ProtectedRoute><Navigate to="/dashboard/overview" replace /></ProtectedRoute>} />
@@ -118,7 +116,7 @@ function ProtectedRoute({ children }) {
   const { isConnected, loading } = useAuth();
   if (loading) return <div className="h-screen w-full flex items-center justify-center bg-[#f5f6f7] dark:bg-[#0e0e0e] text-zinc-500 font-bold italic tracking-widest text-sm">LOADING...</div>;
   if (!isConnected) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
   return children;
 }
