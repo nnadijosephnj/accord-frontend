@@ -4,6 +4,7 @@ import { X, Mail, ArrowRight, Loader2, Link as LinkIcon, ShieldAlert } from "luc
 import { useConnect, useActiveAccount } from "thirdweb/react";
 import { createWallet, inAppWallet, preAuthenticate } from "thirdweb/wallets";
 import { client, injectiveTestnet } from "../lib/thirdwebClient";
+import { upsertUser } from "../lib/supabaseHelpers";
 import WalletPrompt from "./WalletPrompt";
 
 export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
@@ -29,11 +30,22 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
         throw new Error("Keplr extension not found. Opening download page...");
       }
 
-      await connect(async () => {
+      const walletInstance = await connect(async () => {
         const wallet = createWallet(walletId);
         await wallet.connect({ client, chain: injectiveTestnet });
         return wallet;
       });
+
+      const address = walletInstance.getAccount()?.address;
+      if (address) {
+        await upsertUser({
+          walletAddress: address,
+          email: null,
+          loginMethod: "wallet",
+          walletType: "external",
+        });
+      }
+
       onComplete(); 
     } catch (err) {
       setError(err.message || "Failed to connect wallet");
