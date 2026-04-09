@@ -4,8 +4,10 @@ import { WalletProvider, useWallet } from './context/WalletContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ThirdwebProvider } from "thirdweb/react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { client } from "./lib/thirdwebClient";
 // AuthPage removed as it is now integrated into Landing
 import Landing from './pages/Landing';
+
 import AgreementRoom from './pages/AgreementRoom';
 
 // Dashboard Layout
@@ -34,7 +36,7 @@ function DashboardWrapper({ children }) {
 
 function App() {
   return (
-    <ThirdwebProvider>
+    <ThirdwebProvider client={client}>
       <AuthProvider>
         <ThemeProvider>
           <WalletProvider>
