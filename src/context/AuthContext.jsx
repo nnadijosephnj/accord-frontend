@@ -19,15 +19,18 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     async function syncUser() {
       if (!activeAccount?.address) {
+        console.log("AuthContext: No active account address found.");
         setUser(null);
         setLoading(false);
         return;
       }
       try {
+        console.log("AuthContext: Syncing user for address:", activeAccount.address);
         const data = await getUserByWallet(activeAccount.address);
+        console.log("AuthContext: Supabase data received:", !!data);
         setUser(data);
       } catch (err) {
-        console.error("AuthContext syncUser error:", err);
+        console.error("AuthContext: syncUser CRITICAL ERROR:", err);
       } finally {
         setLoading(false);
       }
