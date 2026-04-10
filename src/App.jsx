@@ -124,14 +124,13 @@ function App() {
 
 function ProtectedRoute({ children }) {
   const { isConnected, loading } = useAuth();
-  const activeAccount = useActiveAccount();
   
-  // if loading OR if Thirdweb is still initializing the account, show loading
-  if (loading || (activeAccount === undefined)) {
-    return <div className="h-screen w-full flex items-center justify-center bg-[#f5f6f7] dark:bg-[#0e0e0e] text-zinc-500 font-bold italic tracking-widest text-sm">
+  // Only show a loading spinner briefly, don't stay stuck for minutes
+  if (loading) {
+    return <div className="h-screen w-full flex items-center justify-center bg-[#f5f6f7] dark:bg-[#0e0e0e]">
       <div className="flex flex-col items-center gap-4">
         <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-        <span>AUTHENTICATING...</span>
+        <span className="text-zinc-500 font-bold italic tracking-widest text-sm uppercase">Entering Accord...</span>
       </div>
     </div>;
   }

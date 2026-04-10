@@ -209,7 +209,16 @@ export default function DashboardLayout({ children }) {
             <p className="text-xs font-bold text-zinc-800 dark:text-white truncate">
               {userProfile?.display_name || 'User'}
             </p>
-            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 truncate font-mono">{shortenAddress(address)}</p>
+            {userProfile?.wallet_type === 'external' ? (
+              <p className="text-[10px] text-zinc-400 dark:text-zinc-500 truncate font-mono">{shortenAddress(address)}</p>
+            ) : (
+              <p 
+                onClick={() => setShowWalletSetup(true)}
+                className="text-[10px] text-orange-500 font-bold truncate cursor-pointer hover:underline"
+              >
+                No Wallet Linked
+              </p>
+            )}
           </div>
           <button
             onClick={logout}
