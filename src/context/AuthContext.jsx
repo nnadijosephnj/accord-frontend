@@ -29,27 +29,27 @@ export function AuthProvider({ children }) {
   // Whenever wallet connects/disconnects → sync with Supabase
   useEffect(() => {
     async function syncUser() {
-      // If Thirdweb is still determining the account state, stay in loading
       if (activeAccount === undefined) {
         setLoading(true);
         return;
       }
 
-      if (!activeAccount?.address) {
-        console.log("AuthContext: No active account address found.");
+      const address = activeAccount?.address;
+      if (!address) {
         setUser(null);
         setLoading(false);
         return;
       }
+
+      // If it's a social/generated wallet, we enter THE DASHBOARD INSTANTLY
+      // We sync the database in the background without making the user wait
+      setLoading(false); 
+
       try {
-        console.log("AuthContext: Syncing user for address:", activeAccount.address);
-        const data = await getUserByWallet(activeAccount.address);
-        console.log("AuthContext: Supabase data received:", !!data);
+        const data = await getUserByWallet(address);
         setUser(data);
       } catch (err) {
-        console.error("AuthContext: syncUser CRITICAL ERROR:", err);
-      } finally {
-        setLoading(false);
+        console.error("AuthContext: Background sync error:", err);
       }
     }
     syncUser();
