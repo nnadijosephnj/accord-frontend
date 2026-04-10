@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Mail, ArrowRight, Loader2, Link as LinkIcon, ShieldAlert } from "lucide-react";
-import { useConnect, useActiveAccount } from "thirdweb/react";
+import { useConnect, useActiveAccount, ConnectEmbed } from "thirdweb/react";
 import { createWallet, inAppWallet, preAuthenticate } from "thirdweb/wallets";
 import { client, injectiveTestnet } from "../lib/thirdwebClient";
 import { upsertUser } from "../lib/supabaseHelpers";
@@ -149,39 +149,23 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
 
               {error && <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-bold">{error}</div>}
 
-              <div className="grid gap-3">
-                <button onClick={() => handleConnectWallet("app.keplr")} disabled={loading} className="w-full flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-orange-500/50 hover:bg-orange-500/5 transition-all">
-                  <div className="flex items-center gap-4">
-                    <img src="https://avatars.githubusercontent.com/u/40890691?s=200&v=4" alt="Keplr" className="w-8 h-8 rounded-lg" />
-                    <span className="font-bold text-white">Keplr Wallet</span>
-                  </div>
-                  <ArrowRight size={18} className="text-zinc-600" />
-                </button>
-
-                <button onClick={() => handleConnectWallet("io.metamask")} disabled={loading} className="w-full flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-orange-500/50 hover:bg-orange-500/5 transition-all">
-                  <div className="flex items-center gap-4">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask" className="w-8 h-8" />
-                    <span className="font-bold text-white">MetaMask</span>
-                  </div>
-                  <ArrowRight size={18} className="text-zinc-600" />
-                </button>
-              </div>
-
-              <div className="relative flex justify-center text-xs uppercase font-black text-zinc-700">
-                <span className="bg-[#121212] px-4">or</span>
-              </div>
-
-              <div className="space-y-4">
-                <button onClick={loginWithGoogle} disabled={loading} className="w-full flex items-center justify-center gap-3 p-5 rounded-2xl bg-white text-black font-black hover:bg-zinc-200 transition-colors">
-                  <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google" className="w-5 h-5" />
-                  Continue with Google
-                </button>
-                <div className="flex gap-2">
-                  <input type="email" placeholder="Email address" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-5 text-white font-bold focus:outline-none focus:border-orange-500" />
-                  <button onClick={sendOtp} disabled={loading || !emailInput} className="p-4 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white transition-colors">
-                    {loading ? <Loader2 className="animate-spin" /> : <ArrowRight />}
-                  </button>
-                </div>
+              <div className="rounded-2xl overflow-hidden border border-white/5 bg-white/5 p-1">
+                <ConnectEmbed
+                  client={client}
+                  chain={injectiveTestnet}
+                  wallets={[
+                    createWallet("app.keplr"),
+                    createWallet("io.metamask"),
+                    inAppWallet({
+                      auth: {
+                        options: ["google", "email"],
+                      },
+                    }),
+                  ]}
+                  theme={"dark"}
+                  onConnect={() => onComplete()}
+                  className="!bg-transparent !border-0"
+                />
               </div>
             </div>
           )}
