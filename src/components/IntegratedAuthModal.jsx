@@ -16,31 +16,21 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete, initi
 
   if (!isOpen) return null;
 
-  // Manual Google Login (Identity Only)
+  // Step 1: Identity Handshake (Using Redirect to avoid Popup/COOP issues)
   const handleGoogleLogin = async () => {
     setLoading(true);
     setError("");
     try {
       const wallet = inAppWallet();
-      // We authenticate to get the identity, but we don't connect yet!
-      const account = await wallet.connect({
+      // Use redirect mode to bypass browser security blockers
+      await wallet.connect({
         client,
         strategy: "google",
         chain: injectiveTestnet,
+        // When they return, Step 2 will be triggered by AuthContext detection
       });
-      
-      const profiles = await wallet.getProfiles();
-      const email = profiles?.[0]?.details?.email;
-      
-      if (email) {
-        setSocialEmail(email);
-        setTempWallet(wallet);
-        setStep(2); // Show choice screen
-      } else {
-        onComplete();
-      }
     } catch (err) {
-      setError("Google authentication failed. Please try again.");
+      setError("Google connection failed. Try again.");
     } finally {
       setLoading(false);
     }
