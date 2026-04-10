@@ -15,11 +15,19 @@ export function WalletProvider({ children }) {
 
     useEffect(() => {
         if (account) {
-            ethers6Adapter.signer.toEthers({
-                client,
-                chain: defineChain(1439),
-                account
-            }).then(setSigner).catch(console.error);
+            const syncSigner = async () => {
+                try {
+                    const s = await ethers6Adapter.signer.toEthers({
+                        client,
+                        chain: defineChain(1439),
+                        account
+                    });
+                    setSigner(s);
+                } catch (err) {
+                    console.error("Error converting to Ethers signer:", err);
+                }
+            };
+            syncSigner();
         } else {
             setSigner(null);
         }

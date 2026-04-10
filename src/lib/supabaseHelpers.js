@@ -22,7 +22,6 @@ export async function upsertUser({ walletAddress, email, loginMethod, walletType
         email: email || null,
         login_method: loginMethod,       // 'wallet' | 'google' | 'email'
         wallet_type: walletType,         // 'external' | 'generated'
-        updated_at: new Date().toISOString(),
       },
       { onConflict: "wallet_address" }
     );
