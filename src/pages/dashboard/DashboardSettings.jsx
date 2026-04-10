@@ -203,28 +203,55 @@ export default function Settings() {
             <h2 className="text-sm font-bold text-zinc-900 dark:text-white mb-4">Connected Wallet</h2>
             <div className="space-y-3">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1.5">Connected Wallet Address</label>
-                <div className="p-3 bg-zinc-50 dark:bg-white/5 rounded-xl border border-zinc-200 dark:border-white/5">
-                  <p className="text-sm font-mono text-zinc-900 dark:text-white break-all">
-                    {userProfile?.wallet_type === 'external' ? (address || '—') : 'No Wallet Connected'}
-                  </p>
-                  <p className="text-[10px] text-zinc-400 mt-1">
-                    {userProfile?.wallet_type === 'external' ? 'This is your primary linked wallet' : 'Please link an external wallet to start transactions'}
-                  </p>
-                </div>
-              </div>
-              <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1.5">Network</label>
                 <div className="p-3 bg-zinc-50 dark:bg-white/5 rounded-xl border border-zinc-200 dark:border-white/5">
-                  <p className="text-sm font-medium text-zinc-900 dark:text-white">
-                    {userProfile?.wallet_type === 'external' ? 'Injective EVM Testnet' : '—'}
-                  </p>
-                  <p className="text-[10px] text-zinc-400 mt-1">
-                    {userProfile?.wallet_type === 'external' ? 'Locked to this network' : 'Network status available after linking wallet'}
-                  </p>
+                  <p className="text-sm font-medium text-zinc-900 dark:text-white">Injective EVM Testnet</p>
+                  <p className="text-[10px] text-zinc-400 mt-1">Locked to this network</p>
                 </div>
               </div>
             </div>
+
+            {userProfile?.wallet_type === 'generated' && (
+              <div className="mt-8 p-6 bg-orange-50 dark:bg-orange-500/5 rounded-[2.5rem] border border-orange-200 dark:border-orange-500/10">
+                <div className="flex items-start gap-4 mb-6">
+                  <div className="w-12 h-12 bg-orange-500/10 rounded-2xl flex items-center justify-center text-orange-500 shrink-0">
+                    <ShieldAlert size={24} />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-black text-zinc-900 dark:text-white uppercase italic">Wallet Security & Export</h4>
+                    <p className="text-xs text-zinc-500 leading-relaxed mt-1">
+                      This wallet was created by Accord. You have full ownership. You can export these keys and use them in Keplr or MetaMask any time.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <button 
+                    onClick={async () => {
+                      if (activeWallet) {
+                        try {
+                          // This triggers the official Thirdweb secure export flow
+                          const uri = await activeWallet.export();
+                          window.open(uri, "_blank");
+                        } catch (e) {
+                          alert("Export failed or cancelled.");
+                        }
+                      }
+                    }}
+                    className="flex items-center justify-center gap-2 p-4 rounded-2xl bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-widest hover:border-orange-500 transition-all"
+                  >
+                    <Lock size={14} /> Export / Reveal Wallet
+                  </button>
+                </div>
+
+                <div className="mt-6 flex items-start gap-3 p-4 bg-white/50 dark:bg-black/20 rounded-2xl border border-white dark:border-white/5">
+                  <AlertTriangle className="text-orange-500 shrink-0" size={16} />
+                  <p className="text-[10px] text-orange-700 dark:text-zinc-500 leading-relaxed font-medium">
+                    <span className="text-orange-600 dark:text-orange-400 font-bold uppercase">Critical Safety:</span> Never share your private key or seed phrase. Anyone with these can steal your funds. Accord staff will <span className="underline">never</span> ask for them.
+                  </p>
+                </div>
+              </div>
+            )}
             <button
               onClick={logout}
               className="mt-4 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-red-500 border border-red-200 dark:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
