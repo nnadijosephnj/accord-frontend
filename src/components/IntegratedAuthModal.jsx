@@ -152,7 +152,7 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
               <div className="grid gap-3">
                 <button onClick={() => handleConnectWallet("app.keplr")} disabled={loading} className="w-full flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-orange-500/50 hover:bg-orange-500/5 transition-all">
                   <div className="flex items-center gap-4">
-                    <img src="https://raw.githubusercontent.com/cosmostation/cosmostation_token_resource/master/wallet-icons/keplr.png" alt="Keplr" className="w-8 h-8" />
+                    <img src="https://avatars.githubusercontent.com/u/40890691?s=200&v=4" alt="Keplr" className="w-8 h-8 rounded-lg" />
                     <span className="font-bold text-white">Keplr Wallet</span>
                   </div>
                   <ArrowRight size={18} className="text-zinc-600" />
