@@ -9,19 +9,20 @@ const WalletContext = createContext();
 
 export function WalletProvider({ children }) {
     const { user, isConnected } = useAuth();
+    const activeAccount = useActiveAccount();
     const activeWallet = useActiveWallet();
     const { disconnect } = useDisconnect();
     const [provider, setProvider] = useState(null);
     const [signer, setSigner] = useState(null);
 
     useEffect(() => {
-        if (account) {
+        if (activeAccount) {
             const syncSigner = async () => {
                 try {
                     const s = await ethers6Adapter.signer.toEthers({
                         client,
                         chain: defineChain(1439),
-                        account
+                        account: activeAccount
                     });
                     setSigner(s);
                 } catch (err) {
@@ -32,7 +33,7 @@ export function WalletProvider({ children }) {
         } else {
             setSigner(null);
         }
-    }, [account]);
+    }, [activeAccount]);
 
     const logout = () => {
         if (activeWallet) {
@@ -48,14 +49,14 @@ export function WalletProvider({ children }) {
 
     return (
         <WalletContext.Provider value={{ 
-            address: account?.address?.toLowerCase() || null, 
+            address: activeAccount?.address?.toLowerCase() || null, 
             provider, 
             signer, 
             userProfile: user, 
             isLoggedIn: isConnected,
             logout,
             connectWallet,
-            isConnecting: !isConnected && !!account // simple loading state
+            isConnecting: !isConnected && !!activeAccount // simple loading state
         }}>
             {children}
         </WalletContext.Provider>
