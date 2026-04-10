@@ -72,6 +72,7 @@ export default function DashboardLayout({ children }) {
 
   // Ghost Mode Logic: If not external, treat as Guest
   const isGuest = userProfile?.wallet_type !== 'external';
+  const displayAddress = isGuest ? null : address;
   const displayName = isGuest ? 'Guest User' : (userProfile?.display_name || 'User');
 
   // Show wallet setup if user is using a generated wallet (Google/Email) and hasn't dismissed it

@@ -205,15 +205,23 @@ export default function Settings() {
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1.5">Connected Wallet Address</label>
                 <div className="p-3 bg-zinc-50 dark:bg-white/5 rounded-xl border border-zinc-200 dark:border-white/5">
-                  <p className="text-sm font-mono text-zinc-900 dark:text-white break-all">{address || '—'}</p>
-                  <p className="text-[10px] text-zinc-400 mt-1">This is locked and cannot be changed</p>
+                  <p className="text-sm font-mono text-zinc-900 dark:text-white break-all">
+                    {userProfile?.wallet_type === 'external' ? (address || '—') : 'No Wallet Connected'}
+                  </p>
+                  <p className="text-[10px] text-zinc-400 mt-1">
+                    {userProfile?.wallet_type === 'external' ? 'This is your primary linked wallet' : 'Please link an external wallet to start transactions'}
+                  </p>
                 </div>
               </div>
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1.5">Network</label>
                 <div className="p-3 bg-zinc-50 dark:bg-white/5 rounded-xl border border-zinc-200 dark:border-white/5">
-                  <p className="text-sm font-medium text-zinc-900 dark:text-white">Injective EVM Testnet</p>
-                  <p className="text-[10px] text-zinc-400 mt-1">Locked to this network</p>
+                  <p className="text-sm font-medium text-zinc-900 dark:text-white">
+                    {userProfile?.wallet_type === 'external' ? 'Injective EVM Testnet' : '—'}
+                  </p>
+                  <p className="text-[10px] text-zinc-400 mt-1">
+                    {userProfile?.wallet_type === 'external' ? 'Locked to this network' : 'Network status available after linking wallet'}
+                  </p>
                 </div>
               </div>
             </div>
