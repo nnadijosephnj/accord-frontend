@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { createContext, useContext, useState, useEffect } from "react";
-import { useActiveAccount } from "thirdweb/react";
+import { useActiveAccount, useActiveWallet } from "thirdweb/react";
 import { getUserByWallet, upsertUser } from "../lib/supabaseHelpers";
 import { inAppWallet } from "thirdweb/wallets";
 import { client } from "../lib/thirdwebClient";
@@ -14,6 +14,7 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const activeAccount = useActiveAccount(); // Thirdweb hook — works for both external wallets and generated wallets
+  const activeWallet = useActiveWallet();
   const [user, setUser] = useState(null);  // Full user record from Supabase
   const [loading, setLoading] = useState(true);
 
@@ -53,11 +54,12 @@ export function AuthProvider({ children }) {
         
         let foundEmail = data?.email;
         // If email is missing in DB, try to get it from Thirdweb profile
-        if (!foundEmail) {
+        if (!foundEmail && activeWallet) {
           try {
-            const wallet = inAppWallet();
-            const profiles = await wallet.getProfiles({ client });
+            // New v5 way - get profiles from the active wallet
+            const profiles = await activeWallet.getProfiles();
             foundEmail = profiles?.[0]?.details?.email;
+            console.log("AuthContext: Found email from profile:", foundEmail);
           } catch (e) { 
             console.log("AuthContext: Could not fetch social profile");
           }
@@ -68,7 +70,7 @@ export function AuthProvider({ children }) {
            await upsertUser({
              walletAddress: address,
              email: foundEmail,
-             loginMethod: data?.login_method || "generated",
+             loginMethod: data?.login_method || (foundEmail ? "google" : "generated"),
              walletType: data?.wallet_type || "generated"
            });
            // Refresh user data after upsert
@@ -82,7 +84,7 @@ export function AuthProvider({ children }) {
       }
     }
     syncUser();
-  }, [activeAccount]);
+  }, [activeAccount, activeWallet]);
 
   const value = {
     walletAddress: activeAccount?.address || null,

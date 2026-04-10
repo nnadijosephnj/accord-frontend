@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
-import { useActiveAccount, useDisconnect } from "thirdweb/react";
+import { useActiveAccount, useActiveWallet, useDisconnect } from "thirdweb/react";
 import { ethers6Adapter } from "thirdweb/adapters/ethers6";
 import { client } from "../lib/thirdwebClient";
 import { defineChain } from "thirdweb/chains";
@@ -9,7 +9,8 @@ const WalletContext = createContext();
 
 export function WalletProvider({ children }) {
     const { user, isConnected } = useAuth();
-    const account = useActiveAccount();
+    const activeWallet = useActiveWallet();
+    const { disconnect } = useDisconnect();
     const [provider, setProvider] = useState(null);
     const [signer, setSigner] = useState(null);
 
@@ -33,11 +34,9 @@ export function WalletProvider({ children }) {
         }
     }, [account]);
 
-    const { disconnect } = useDisconnect();
-
     const logout = () => {
-        if (account) {
-            disconnect(account);
+        if (activeWallet) {
+            disconnect(activeWallet);
         }
         setSigner(null);
     };

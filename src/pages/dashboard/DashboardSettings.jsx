@@ -22,6 +22,11 @@ export default function Settings() {
     loadStats();
   }, [address]);
 
+  useEffect(() => {
+    if (userProfile?.email) setEmail(userProfile.email);
+    if (userProfile?.display_name) setDisplayName(userProfile.display_name);
+  }, [userProfile]);
+
   const loadStats = async () => {
     try {
       const agreements = await apiCall('/api/agreements');
