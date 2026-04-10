@@ -70,6 +70,10 @@ export default function DashboardLayout({ children }) {
 
   const [showWalletSetup, setShowWalletSetup] = useState(false);
 
+  // Ghost Mode Logic: If not external, treat as Guest
+  const isGuest = userProfile?.wallet_type !== 'external';
+  const displayName = isGuest ? 'Guest User' : (userProfile?.display_name || 'User');
+
   // Show wallet setup if user is using a generated wallet (Google/Email) and hasn't dismissed it
   useEffect(() => {
     if (userProfile?.wallet_type === 'generated' && !localStorage.getItem('hide-wallet-setup')) {
@@ -207,16 +211,16 @@ export default function DashboardLayout({ children }) {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-bold text-zinc-800 dark:text-white truncate">
-              {userProfile?.display_name || 'User'}
+              {displayName}
             </p>
-            {userProfile?.wallet_type === 'external' ? (
+            {!isGuest ? (
               <p className="text-[10px] text-zinc-400 dark:text-zinc-500 truncate font-mono">{shortenAddress(address)}</p>
             ) : (
               <p 
                 onClick={() => setShowWalletSetup(true)}
                 className="text-[10px] text-orange-500 font-bold truncate cursor-pointer hover:underline"
               >
-                No Wallet Linked
+                Connect Wallet
               </p>
             )}
           </div>
@@ -271,7 +275,7 @@ export default function DashboardLayout({ children }) {
               Hi,{' '}
               <Link to="/dashboard/settings" className="group flex items-center gap-1.5 min-w-0">
                 <span className="font-bold text-zinc-900 dark:text-white uppercase transition-colors group-hover:text-orange-600 dark:group-hover:text-orange-400 truncate">
-                  {userProfile?.display_name || 'User'}
+                  {displayName}
                 </span>
                 <Settings className="w-3.5 h-3.5 text-zinc-400 group-hover:text-orange-500 transition-colors" />
               </Link>
