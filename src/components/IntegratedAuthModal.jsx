@@ -82,20 +82,32 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete, initi
               {step === 1 ? <UserCheck className="text-orange-500 w-8 h-8" /> : <ShieldAlert className="text-orange-500 w-8 h-8" />}
             </div>
 
-            {/* Step 1: Identity First */}
+            {/* Step 1: All Entry Points */}
             {step === 1 && (
-              <div className="space-y-8 text-center sm:text-left">
+              <div className="space-y-8">
                 <div>
-                  <h2 className="text-3xl font-black text-white tracking-tight mb-2 uppercase">Join Accord</h2>
-                  <p className="text-zinc-500 font-medium">Identify with Google to secure your identity.</p>
+                  <h2 className="text-3xl font-black text-white tracking-tight mb-2 uppercase italic text-center">Join Accord</h2>
+                  <p className="text-zinc-500 font-medium text-center text-sm tracking-tight">Access your secure freelance agreements.</p>
                 </div>
                 <div className="rounded-3xl overflow-hidden border border-white/5 bg-white/5 p-1">
                   <ConnectEmbed
                     client={client}
                     chain={injectiveTestnet}
-                    wallets={[inAppWallet({ auth: { options: ["google", "email"] } })]}
+                    wallets={[
+                      createWallet("app.keplr"),
+                      createWallet("io.metamask"),
+                      inAppWallet({ auth: { options: ["google", "email"] } })
+                    ]}
                     theme={"dark"}
-                    onConnect={onSocialLoginComplete}
+                    onConnect={(wallet) => {
+                       // If it's a social wallet, go to Step 2 to verify Identity vs Wallet choice
+                       if (wallet.id === 'in-app') {
+                          onSocialLoginComplete(wallet);
+                       } else {
+                          // If it's pure Path A (Keplr/MetaMask), we are DONE!
+                          finalizeOnboarding(wallet.getAccount()?.address, 'external');
+                       }
+                    }}
                     className="!bg-transparent !border-0"
                   />
                 </div>
