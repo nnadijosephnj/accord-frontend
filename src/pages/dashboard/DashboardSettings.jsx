@@ -3,24 +3,27 @@ import { Wallet, CheckCircle2, AlertTriangle, Save, Lock, ShieldAlert, Mail } fr
 import { useWallet } from '../../context/WalletContext';
 import { apiCall, uploadFileCall } from '../../utils/api';
 import { useActiveWallet } from "thirdweb/react";
+import { useAuth } from '../../context/AuthContext';
+import IntegratedAuthModal from '../../components/IntegratedAuthModal';
 
 export default function Settings() {
   const { address, userProfile, setUserProfile, logout } = useWallet();
+  const { isGuest } = useAuth();
   const activeWallet = useActiveWallet();
   
   const [displayName, setDisplayName] = useState(userProfile?.display_name || '');
   const [email, setEmail] = useState(userProfile?.email || '');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [stats, setStats] = useState({ total: 0, completed: 0, earned: 0, spent: 0 });
   const fileInputRef = useRef(null);
 
-  const avatarUrl = userProfile?.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${address}`;
+  const avatarUrl = userProfile?.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${address || 'guest'}`;
   const isGenerated = userProfile?.wallet_type === 'generated';
 
   useEffect(() => {
-    loadStats();
+    if (address) loadStats();
   }, [address]);
 
   useEffect(() => {
@@ -66,25 +69,54 @@ export default function Settings() {
     const file = e.target.files[0];
     if (!file) return;
     try {
-      setUploadingAvatar(true);
       const formData = new FormData();
       formData.append('avatar', file);
       const result = await uploadFileCall('/api/auth/avatar', formData);
       if (result?.user) setUserProfile(result.user);
     } catch (e) {
       alert('Avatar upload failed');
-    } finally {
-      setUploadingAvatar(false);
     }
   };
 
   return (
     <div className="max-w-2xl mx-auto pb-20 space-y-10">
+      <IntegratedAuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+        onComplete={() => {
+          setShowAuthModal(false);
+          window.location.reload();
+        }} 
+      />
+
       {/* Header */}
       <div>
         <h1 className="text-3xl font-black text-zinc-900 dark:text-white uppercase italic tracking-tighter">Account Settings</h1>
         <p className="text-sm text-zinc-500 font-medium">Manage your decentralized identity and security.</p>
       </div>
+
+      {/* Guest Mode Block */}
+      {isGuest && (
+        <section className="bg-gradient-to-br from-orange-600 to-orange-400 rounded-[2.5rem] p-8 sm:p-10 text-white shadow-2xl">
+           <div className="flex items-start gap-5 mb-8">
+              <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
+                 <ShieldAlert size={28} />
+              </div>
+              <div className="flex-1">
+                 <h3 className="text-xl font-black uppercase italic tracking-tighter leading-none mb-2">Connect Your Wallet</h3>
+                 <p className="text-sm text-orange-50 font-medium leading-relaxed">
+                   You are currently in Guest Mode. To create agreements, fund escrows, or use your vault, you must link a wallet.
+                 </p>
+              </div>
+           </div>
+           <button 
+             onClick={() => setShowAuthModal(true)}
+             className="w-full py-5 bg-white text-orange-600 font-black rounded-2xl uppercase tracking-widest text-xs hover:shadow-2xl transition-all hover:-translate-y-1"
+           >
+             Finish Setup Now
+           </button>
+        </section>
+      )}
 
       {/* Profile Section */}
       <section className="bg-white dark:bg-[#1a1a1a] rounded-[2.5rem] border border-zinc-200 dark:border-white/5 shadow-xl p-8 sm:p-10">
@@ -121,64 +153,46 @@ export default function Settings() {
         </form>
       </section>
 
-      {/* Wallet Recovery (Show if generated) */}
-      <section className="bg-orange-50 dark:bg-orange-500/5 rounded-[2.5rem] border border-orange-200 dark:border-orange-500/10 p-8 sm:p-10 relative overflow-hidden">
-         <div className="relative z-10">
-            <div className="flex items-start gap-5 mb-8">
-              <div className="w-14 h-14 bg-orange-600 text-white rounded-2xl flex items-center justify-center shadow-2xl shadow-orange-600/40">
-                <ShieldAlert size={28} />
+      {/* Wallet Recovery (Hide if guest) */}
+      {!isGuest && (
+        <section className="bg-[#111111] rounded-[2.5rem] border border-white/5 p-8 sm:p-10 relative overflow-hidden">
+           <div className="relative z-10">
+              <div className="flex items-start gap-5 mb-8">
+                <div className="w-14 h-14 bg-orange-600/10 text-orange-500 rounded-2xl flex items-center justify-center border border-orange-500/20">
+                  <Lock size={28} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">On-Chain Identity</h3>
+                  <p className="text-xs text-zinc-500 font-medium leading-relaxed mt-1 font-mono break-all">{address}</p>
+                </div>
               </div>
-              <div className="flex-1">
-                <h3 className="text-xl font-black text-zinc-900 dark:text-white uppercase italic tracking-tighter">Security & Recovery</h3>
-                <p className="text-xs text-zinc-500 font-medium leading-relaxed mt-1">
-                  {isGenerated 
-                    ? "This is an Accord-Managed Wallet. You own the identity and can export your keys to any external wallet (MetaMask/Keplr)." 
-                    : "This is a Self-Custody external wallet linked to your Accord identity."}
-                </p>
-              </div>
-            </div>
 
-            <div className="space-y-4">
-               {/* 0x Address Display */}
-               <div className="p-5 bg-white dark:bg-black/40 rounded-3xl border border-zinc-200 dark:border-white/5 shadow-sm">
-                  <label className="block text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-1">On-Chain Wallet Address</label>
-                  <p className="text-sm font-mono text-zinc-900 dark:text-white break-all">{address}</p>
-               </div>
-
-            {(userProfile?.wallet_type === 'generated' || activeWallet?.id === 'in-app') && (
-              <div className="p-8 bg-orange-50 dark:bg-orange-500/5 rounded-[2rem] border border-orange-200 dark:border-orange-500/10">
-                <div className="flex items-start gap-5 mb-8">
-                  <div className="w-14 h-14 bg-orange-600 text-white rounded-2xl flex items-center justify-center shadow-2xl shadow-orange-600/40">
-                    <ShieldAlert size={28} />
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-black text-zinc-900 dark:text-white uppercase italic tracking-tighter">Wallet Recovery</h4>
-                    <p className="text-[11px] text-zinc-500 font-medium leading-relaxed mt-1">
+              {isGenerated && (
+                <div className="p-8 bg-orange-500/5 rounded-[2rem] border border-orange-500/10">
+                  <div className="flex items-start gap-4 mb-6">
+                    <ShieldAlert className="text-orange-500 shrink-0" />
+                    <p className="text-[11px] text-zinc-400 font-medium leading-relaxed">
                       This is an Accord-Managed Wallet. You own the identity and can export your keys to any external wallet (MetaMask/Keplr).
                     </p>
                   </div>
+                  <button 
+                    onClick={async () => {
+                      if (activeWallet) {
+                        try {
+                          const uri = await activeWallet.export();
+                          window.open(uri, "_blank");
+                        } catch (e) { alert("Secure export cancelled."); }
+                      }
+                    }}
+                    className="w-full flex items-center justify-center gap-3 p-5 bg-white text-black rounded-2xl font-black uppercase tracking-widest text-[10px] hover:shadow-2xl transition-all"
+                  >
+                    <Lock size={16} /> Reveal Recovery Phrase
+                  </button>
                 </div>
-
-                <button 
-                  onClick={async () => {
-                    if (activeWallet) {
-                      try {
-                        const uri = await activeWallet.export();
-                        window.open(uri, "_blank");
-                      } catch (e) { alert("Secure export cancelled."); }
-                    }
-                  }}
-                  className="w-full flex items-center justify-center gap-3 p-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] shadow-xl transition-all"
-                >
-                  <Lock size={16} /> Reveal Recovery Phrase
-                </button>
-              </div>
-            )}
-            </div>
-         </div>
-         {/* Background Decoration */}
-         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-64 h-64 bg-orange-500/10 blur-[100px] rounded-full" />
-      </section>
+              )}
+           </div>
+        </section>
+      )}
 
       {/* Disconnect Section */}
       <section className="bg-white dark:bg-[#1a1a1a] rounded-[2.5rem] border border-zinc-200 dark:border-white/5 p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">

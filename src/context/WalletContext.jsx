@@ -35,10 +35,11 @@ export function WalletProvider({ children }) {
         }
     }, [activeAccount]);
 
-    const logout = () => {
+    const logout = async () => {
         if (activeWallet) {
             disconnect(activeWallet);
         }
+        await supabase.auth.signOut();
         setSigner(null);
         // Force a clean break to the landing page
         window.location.href = "/";

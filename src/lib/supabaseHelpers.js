@@ -10,30 +10,94 @@ export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_KEY
 );
 
-// ── Upsert user after any login ──────────────────────────────
-// Called every time a user successfully logs in
-// If they already exist → updates. If new → inserts.
-export async function upsertUser({ walletAddress, email, loginMethod, walletType }) {
-  const { error } = await supabase
+// ── Upsert user after Google/Email login (Guest Mode support) ──
+export async function upsertUserByEmail({ email, loginMethod }) {
+  // First check if user exists by email
+  const { data: existing } = await supabase
     .from("users")
-    .upsert(
+    .select("*")
+    .eq("email", email.toLowerCase())
+    .single();
+
+  if (existing) {
+    return existing;
+  }
+
+  // Create new guest user
+  const { data, error } = await supabase
+    .from("users")
+    .insert([
       {
-        wallet_address: walletAddress.toLowerCase(),
-        email: email || null,
-        login_method: loginMethod,       // 'wallet' | 'google' | 'email'
-        wallet_type: walletType,         // 'external' | 'generated'
+        email: email.toLowerCase(),
+        login_method: loginMethod,
+        wallet_address: null,
+        wallet_type: null,
       },
-      { onConflict: "wallet_address" }
-    );
+    ])
+    .select()
+    .single();
 
   if (error) {
-    console.error("Supabase upsertUser error:", error.message);
+    console.error("Supabase upsertUserByEmail error:", error.message);
     throw error;
   }
+  return data;
+}
+
+// ── Link a wallet to an existing email-based account ──────────
+export async function linkWalletToUser(userId, { walletAddress, walletType }) {
+  const { data, error } = await supabase
+    .from("users")
+    .update({
+      wallet_address: walletAddress.toLowerCase(),
+      wallet_type: walletType,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", userId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Supabase linkWalletToUser error:", error.message);
+    throw error;
+  }
+  return data;
+}
+
+// ── Upsert user after direct Wallet login (standard Wallet path) ──
+export async function upsertUserByWallet({ walletAddress, walletType, loginMethod = 'wallet' }) {
+  const { data: existing } = await supabase
+    .from("users")
+    .select("*")
+    .eq("wallet_address", walletAddress.toLowerCase())
+    .single();
+
+  if (existing) {
+    return existing;
+  }
+
+  const { data, error } = await supabase
+    .from("users")
+    .insert([
+      {
+        wallet_address: walletAddress.toLowerCase(),
+        wallet_type: walletType,
+        login_method: loginMethod,
+      },
+    ])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Supabase upsertUserByWallet error:", error.message);
+    throw error;
+  }
+  return data;
 }
 
 // ── Get user by wallet address ───────────────────────────────
 export async function getUserByWallet(walletAddress) {
+  if (!walletAddress) return null;
   const { data, error } = await supabase
     .from("users")
     .select("*")
@@ -46,26 +110,17 @@ export async function getUserByWallet(walletAddress) {
   return data || null;
 }
 
-// ── Update user email (from Settings page) ──────────────────
-export async function updateUserEmail(walletAddress, email) {
-  const { error } = await supabase
+// ── Get user by email ────────────────────────────────────────
+export async function getUserByEmail(email) {
+  if (!email) return null;
+  const { data, error } = await supabase
     .from("users")
-    .update({ email: email.toLowerCase() })
-    .eq("wallet_address", walletAddress.toLowerCase());
-
-  if (error) {
-    console.error("Supabase updateUserEmail error:", error.message);
-    throw error;
-  }
-}
-
-// ── Check if a wallet address already exists ─────────────────
-export async function walletExists(walletAddress) {
-  const { data } = await supabase
-    .from("users")
-    .select("wallet_address")
-    .eq("wallet_address", walletAddress.toLowerCase())
+    .select("*")
+    .eq("email", email.toLowerCase())
     .single();
 
-  return !!data;
+  if (error && error.code !== "PGRST116") {
+    console.error("Supabase getUserByEmail error:", error.message);
+  }
+  return data || null;
 }

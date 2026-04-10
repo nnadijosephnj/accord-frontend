@@ -10,6 +10,9 @@ import { useWallet } from '../context/WalletContext';
 import { useTheme } from '../context/ThemeContext';
 import WalletPrompt from './WalletPrompt';
 
+import { useAuth } from '../context/AuthContext';
+import GuestBanner from './GuestBanner';
+
 function shortenAddress(addr) {
   if (!addr) return '';
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -53,6 +56,7 @@ const NAV_ITEMS = [
 
 export default function DashboardLayout({ children }) {
   const { address, logout, userProfile } = useWallet();
+  const { isGuest } = useAuth();
   const { isDark, toggle: toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
@@ -262,6 +266,7 @@ export default function DashboardLayout({ children }) {
 
       {/* MAIN */}
       <div className="flex-1 flex flex-col min-h-screen min-w-0">
+        {isGuest && <GuestBanner />}
         {/* TOP BAR */}
         <header className="h-14 px-4 sm:px-6 flex items-center justify-between sticky top-0 bg-white/90 dark:bg-[#111111]/90 backdrop-blur-xl border-b border-zinc-200 dark:border-white/5 z-30 shrink-0">
           <div className="flex items-center gap-3">

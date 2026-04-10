@@ -1,105 +1,105 @@
 // src/context/AuthContext.jsx
 // ─────────────────────────────────────────────────────────────
 // Global auth state. Wrap your entire app with <AuthProvider>.
-// Any component can call useAuth() to get user info.
 // ─────────────────────────────────────────────────────────────
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { useActiveAccount, useActiveWallet } from "thirdweb/react";
-import { getUserByWallet, upsertUser } from "../lib/supabaseHelpers";
-import { inAppWallet } from "thirdweb/wallets";
-import { client } from "../lib/thirdwebClient";
+import { supabase, getUserByEmail, upsertUserByEmail, getUserByWallet, upsertUserByWallet } from "../lib/supabaseHelpers";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const activeAccount = useActiveAccount(); // Thirdweb hook — works for both external wallets and generated wallets
+  const activeAccount = useActiveAccount(); 
   const activeWallet = useActiveWallet();
-  const [user, setUser] = useState(null);  // Full user record from Supabase
+  const [user, setUser] = useState(null);       // Full user record from Supabase public.users
+  const [session, setSession] = useState(null); // Supabase Auth session
   const [loading, setLoading] = useState(true);
 
-  // Safety Timeout: Don't let users stay stuck on 'Entering Accord' for more than 5 seconds
+  // 1. Listen for Supabase Auth changes (Google OAuth / Email OTP)
   useEffect(() => {
-    const timer = setTimeout(() => {
-        if (loading) {
-            console.log("AuthContext: Safety timeout reached, forcing load completion.");
-            setLoading(false);
-        }
-    }, 15000); 
-    return () => clearTimeout(timer);
-  }, [loading]);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
 
-  // Whenever wallet connects/disconnects → sync with Supabase
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (!session) {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // 2. Sync public.users based on either Supabase Session (Email) or Active Wallet
   useEffect(() => {
     async function syncUser() {
+      // If we're still waiting for Thirdweb to initialize its state
       if (activeAccount === undefined) {
         setLoading(true);
         return;
       }
 
-      const address = activeAccount?.address;
-      if (!address) {
-        setUser(null);
-        setLoading(false);
-        return;
-      }
-
-      // If it's a social/generated wallet, we enter THE DASHBOARD INSTANTLY
-      // We sync the database in the background without making the user wait
-      setLoading(false); 
+      const email = session?.user?.email;
+      const walletAddress = activeAccount?.address;
 
       try {
-        // Find if this is a social/email login to get the email
-        const data = await getUserByWallet(address);
-        
-        let foundEmail = data?.email;
-        // If email is missing in DB, try to get it from Thirdweb profile
-        if (!foundEmail && activeWallet) {
-          try {
-            // New v5 way - get profiles from the active wallet
-            const profiles = await activeWallet.getProfiles();
-            foundEmail = profiles?.[0]?.details?.email;
-            console.log("AuthContext: Found email from profile:", foundEmail);
-          } catch (e) { 
-            console.log("AuthContext: Could not fetch social profile");
-          }
+        let dbUser = null;
+
+        if (email) {
+          // Path: Logged in via Google/Email (Supabase Auth)
+          dbUser = await upsertUserByEmail({ 
+            email, 
+            loginMethod: session.app_metadata.provider || 'email' 
+          });
+          
+          // If they also have an active wallet, and it's not linked yet, we might need to link it
+          // But according to the user's flow, linking happens in the WalletPrompt/Settings.
+          // For now, if both exist, prioritize the DB record linked to the email.
+        } else if (walletAddress) {
+          // Path: Logged in via direct wallet connection (No email yet)
+          dbUser = await upsertUserByWallet({ 
+            walletAddress, 
+            walletType: activeWallet?.id === 'in-app' ? 'generated' : 'external',
+            loginMethod: 'wallet'
+          });
         }
 
-        // Auto-Provision Profile if missing OR if we found a new email
-        if (!data || (foundEmail && !data.email)) {
-           const isGenerated = activeWallet?.id === "in-app";
-           await upsertUser({
-             walletAddress: address,
-             email: foundEmail,
-             loginMethod: data?.login_method || (foundEmail ? (isGenerated ? "google" : "wallet") : "generated"),
-             walletType: isGenerated ? "generated" : "external"
-           });
-           // Refresh user data after upsert
-           const updatedData = await getUserByWallet(address);
-           setUser(updatedData);
-        } else {
-           // If data exists, but wallet type is somehow wrong, we update it in the UI state
-           setUser(data);
-        }
+        setUser(dbUser);
       } catch (err) {
-        console.error("AuthContext: Background sync error:", err);
+        console.error("AuthContext: Sync error:", err);
+      } finally {
+        setLoading(false);
       }
     }
     syncUser();
-  }, [activeAccount, activeWallet]);
+  }, [session, activeAccount, activeWallet]);
+
+  const logout = async () => {
+    setLoading(true);
+    await supabase.auth.signOut();
+    // Thirdweb disconnect is usually handled by the component calling it or WalletContext
+    setUser(null);
+    setSession(null);
+    setLoading(false);
+    window.location.href = "/";
+  };
 
   const value = {
+    user,             // full Supabase user row (contains id, email, wallet_address, etc.)
+    session,          // Supabase Auth session
     walletAddress: activeAccount?.address || null,
     isConnected: !!activeAccount?.address,
-    user,          // full Supabase user row
-    loading: loading || (activeAccount === undefined),
-    setUser,       // allow components to refresh user after updates
+    isGuest: !!session && !activeAccount?.address, // Logged in with email but no wallet
+    loading: loading,
+    setUser,
+    logout
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// Hook — use this anywhere in your app
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth must be used inside AuthProvider");

@@ -123,7 +123,7 @@ function App() {
 }
 
 function ProtectedRoute({ children }) {
-  const { isConnected, loading } = useAuth();
+  const { isConnected, isGuest, loading } = useAuth();
   const [showSkip, setShowSkip] = useState(false);
 
   useEffect(() => {
@@ -133,9 +133,8 @@ function ProtectedRoute({ children }) {
     }
   }, [loading]);
   
-  // Only show a loading spinner briefly
   if (loading) {
-    const isLoggingOut = !isConnected && window.location.pathname.startsWith('/dashboard');
+    const isLoggingOut = !isConnected && !isGuest && window.location.pathname.startsWith('/dashboard');
 
     return <div className="h-screen w-full flex items-center justify-center bg-[#f5f6f7] dark:bg-[#0e0e0e]">
       <div className="flex flex-col items-center gap-6">
@@ -157,7 +156,7 @@ function ProtectedRoute({ children }) {
     </div>;
   }
   
-  if (!isConnected) {
+  if (!isConnected && !isGuest) {
     return <Navigate to="/" replace />;
   }
   return children;
