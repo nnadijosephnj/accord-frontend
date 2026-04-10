@@ -15,6 +15,17 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);  // Full user record from Supabase
   const [loading, setLoading] = useState(true);
 
+  // Safety Timeout: Don't let users stay stuck on 'Entering Accord' for more than 5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+        if (loading) {
+            console.log("AuthContext: Safety timeout reached, forcing load completion.");
+            setLoading(false);
+        }
+    }, 5000); 
+    return () => clearTimeout(timer);
+  }, [loading]);
+
   // Whenever wallet connects/disconnects → sync with Supabase
   useEffect(() => {
     async function syncUser() {
