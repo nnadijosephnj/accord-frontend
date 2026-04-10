@@ -66,7 +66,8 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
       });
       setSocialEmail(googleAccount?.email || "");
       setLoginMethod("google");
-      setStep("wallet-prompt");
+      // Skip the immediate prompt, go straight to dashboard
+      onComplete();
     } catch (err) {
       setError(err.message || "Google login failed");
     } finally {
@@ -109,7 +110,8 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
         email: socialEmail,
         verificationCode: otpInput,
       });
-      setStep("wallet-prompt");
+      // Skip the immediate prompt, go straight to dashboard
+      onComplete();
     } catch (err) {
       setError(err.message || "Invalid code");
     } finally {
@@ -150,7 +152,7 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
               <div className="grid gap-3">
                 <button onClick={() => handleConnectWallet("app.keplr")} disabled={loading} className="w-full flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-orange-500/50 hover:bg-orange-500/5 transition-all">
                   <div className="flex items-center gap-4">
-                    <img src="/icons/keplr.svg" alt="Keplr" className="w-8 h-8" />
+                    <img src="https://raw.githubusercontent.com/chainapsis/keplr-wallet/master/packages/extension/src/public/assets/img/icon-256.png" alt="Keplr" className="w-8 h-8" />
                     <span className="font-bold text-white">Keplr Wallet</span>
                   </div>
                   <ArrowRight size={18} className="text-zinc-600" />
@@ -158,7 +160,7 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
 
                 <button onClick={() => handleConnectWallet("io.metamask")} disabled={loading} className="w-full flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-orange-500/50 hover:bg-orange-500/5 transition-all">
                   <div className="flex items-center gap-4">
-                    <img src="/icons/metamask.svg" alt="MetaMask" className="w-8 h-8" />
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask" className="w-8 h-8" />
                     <span className="font-bold text-white">MetaMask</span>
                   </div>
                   <ArrowRight size={18} className="text-zinc-600" />
@@ -171,7 +173,7 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
 
               <div className="space-y-4">
                 <button onClick={loginWithGoogle} disabled={loading} className="w-full flex items-center justify-center gap-3 p-5 rounded-2xl bg-white text-black font-black hover:bg-zinc-200 transition-colors">
-                  <img src="/icons/google.svg" alt="Google" className="w-5 h-5" />
+                  <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google" className="w-5 h-5" />
                   Continue with Google
                 </button>
                 <div className="flex gap-2">

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 import { useTheme } from '../context/ThemeContext';
+import WalletPrompt from './WalletPrompt';
 
 function shortenAddress(addr) {
   if (!addr) return '';
@@ -66,6 +67,20 @@ export default function DashboardLayout({ children }) {
     kids?.some((c) => location.pathname.startsWith(c.path));
 
   const closeSidebar = () => setSidebarOpen(false);
+
+  const [showWalletSetup, setShowWalletSetup] = useState(false);
+
+  // Show wallet setup if user is using a generated wallet (Google/Email) and hasn't dismissed it
+  useEffect(() => {
+    if (userProfile?.wallet_type === 'generated' && !localStorage.getItem('hide-wallet-setup')) {
+      setShowWalletSetup(true);
+    }
+  }, [userProfile]);
+
+  const handleDismissSetup = () => {
+    setShowWalletSetup(false);
+    localStorage.setItem('hide-wallet-setup', 'true');
+  };
 
   const renderNav = () =>
     NAV_ITEMS.map((item) => {
@@ -277,6 +292,42 @@ export default function DashboardLayout({ children }) {
           {children}
         </main>
       </div>
+
+      {/* Premium Wallet Setup Modal */}
+      <AnimatePresence>
+        {showWalletSetup && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <Motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleDismissSetup}
+              className="absolute inset-0 bg-black/60 backdrop-blur-md"
+            />
+            <Motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-xl bg-[#121212] border border-white/10 rounded-[3rem] shadow-2xl overflow-hidden"
+            >
+               <div className="p-10 sm:p-12">
+                 <WalletPrompt 
+                   email={userProfile?.email} 
+                   loginMethod={userProfile?.login_method}
+                   onComplete={() => setShowWalletSetup(false)} 
+                 />
+               </div>
+               <button 
+                 onClick={handleDismissSetup}
+                 className="absolute top-8 right-8 text-zinc-500 hover:text-white transition-colors"
+                >
+                 <X size={24} />
+               </button>
+            </Motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
