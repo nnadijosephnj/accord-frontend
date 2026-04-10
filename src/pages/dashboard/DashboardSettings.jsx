@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { Wallet, CheckCircle2, AlertTriangle, Save } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Wallet, CheckCircle2, AlertTriangle, Save, Lock, ShieldAlert } from 'lucide-react';
 import { useWallet } from '../../context/WalletContext';
 import { apiCall, uploadFileCall } from '../../utils/api';
-import { useRef, useEffect } from 'react';
+import { useActiveWallet } from "thirdweb/react";
 import EmailSettings from '../../components/EmailSettings';
 
 export default function Settings() {
   const { address, userProfile, setUserProfile, logout } = useWallet();
+  const activeWallet = useActiveWallet();
   const [tab, setTab] = useState('profile');
   const [displayName, setDisplayName] = useState(userProfile?.display_name || '');
   const [email, setEmail] = useState(userProfile?.email || '');
@@ -79,7 +80,7 @@ export default function Settings() {
       const result = await uploadFileCall('/api/auth/avatar', formData);
       if (result?.user) setUserProfile(result.user);
     } catch (e) {
-      alert('Avatar upload failed: ' + err.message);
+      alert('Avatar upload failed');
     } finally {
       setUploadingAvatar(false);
     }
@@ -90,19 +91,19 @@ export default function Settings() {
   return (
     <div className="max-w-2xl space-y-5">
       <div>
-        <h1 className="text-xl font-bold text-zinc-900 dark:text-white">Settings</h1>
+        <h1 className="text-xl font-bold text-zinc-900 dark:text-white uppercase italic tracking-tighter">Settings</h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">Manage your account preferences</p>
       </div>
 
       {/* Tab Nav */}
-      <div className="flex gap-1 bg-zinc-100 dark:bg-white/5 rounded-xl p-1 w-fit">
+      <div className="flex gap-1 bg-zinc-100 dark:bg-white/5 rounded-2xl p-1 w-fit border border-zinc-200 dark:border-white/5">
         {tabs.map((t) => (
           <button
             key={t}
             onClick={() => setTab(t.toLowerCase())}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
               tab === t.toLowerCase()
-                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
+                ? 'bg-white dark:bg-zinc-800 text-orange-600 dark:text-orange-400 shadow-xl'
                 : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
             }`}
           >
@@ -113,80 +114,71 @@ export default function Settings() {
 
       {/* Profile Tab */}
       {tab === 'profile' && (
-        <div>
-          <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl border border-zinc-200 dark:border-white/5 shadow-sm p-6">
-            <h2 className="text-sm font-bold text-zinc-900 dark:text-white mb-1">Profile Information</h2>
-            <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-5">Update your display name and preferences</p>
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <div className="bg-white dark:bg-[#1a1a1a] rounded-3xl border border-zinc-200 dark:border-white/5 shadow-sm p-8">
+            <h2 className="text-sm font-bold text-zinc-900 dark:text-white mb-1 uppercase tracking-tight">Profile Information</h2>
+            <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-8">Update your display name and preferences</p>
 
             {/* Avatar */}
-            <div className="flex items-center gap-4 mb-6">
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleAvatarFileChange}
-                accept="image/*"
-                className="hidden"
-              />
+            <div className="flex items-center gap-6 mb-8">
+              <input type="file" ref={fileInputRef} onChange={handleAvatarFileChange} accept="image/*" className="hidden" />
               <div 
                 onClick={handleAvatarClick}
-                className="relative w-16 h-16 rounded-2xl overflow-hidden border-2 border-zinc-200 dark:border-white/10 shadow-sm transition-transform hover:scale-105 cursor-pointer group"
+                className="relative w-24 h-24 rounded-[2rem] overflow-hidden border-2 border-zinc-200 dark:border-white/10 shadow-lg transition-transform hover:scale-105 cursor-pointer group"
               >
                 <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" style={{ display: uploadingAvatar ? 'block' : 'none' }} />
-                  {!uploadingAvatar && <div className="text-[8px] font-black text-white uppercase">Upload</div>}
+                  {!uploadingAvatar && <div className="text-[10px] font-black text-white uppercase tracking-tighter">Edit</div>}
                 </div>
               </div>
-              <div>
-                <p className="text-sm font-semibold text-zinc-900 dark:text-white">{displayName || 'User'}</p>
-                <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-0.5">
-                  Member Since: <span className="text-zinc-600 dark:text-zinc-300 transition-colors uppercase">{userProfile?.created_at ? new Date(userProfile.created_at).toLocaleDateString() : 'Active Now'}</span>
+              <div className="space-y-1">
+                <p className="text-xl font-black text-zinc-900 dark:text-white uppercase italic tracking-tighter">{displayName || 'User'}</p>
+                <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.2em] mt-0.5">
+                  Joined: <span className="text-orange-600 dark:text-orange-400">{userProfile?.created_at ? new Date(userProfile.created_at).toLocaleDateString() : 'Active'}</span>
                 </p>
               </div>
             </div>
 
-            <form onSubmit={handleSave} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5">Display Name <span className="text-zinc-300">(optional)</span></label>
+            <form onSubmit={handleSave} className="space-y-6">
+              <div className="space-y-2">
+                <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400">Display Name</label>
                 <input
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="e.g. CryptoFreelancer"
-                  className="w-full px-3 py-2.5 text-sm bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl outline-none focus:border-orange-400 text-zinc-900 dark:text-white placeholder-zinc-400 transition-colors"
+                  placeholder="e.g. Satoshi"
+                  className="w-full px-4 py-3 text-sm bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl outline-none focus:border-orange-500/50 text-zinc-900 dark:text-white transition-all"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5">Email <span className="text-zinc-300">(for notifications only)</span></label>
+              <div className="space-y-2">
+                <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400">Email Address</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="w-full px-3 py-2.5 text-sm bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl outline-none focus:border-orange-400 text-zinc-900 dark:text-white placeholder-zinc-400 transition-colors"
+                  placeholder="you@accord.com"
+                  className="w-full px-4 py-3 text-sm bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl outline-none focus:border-orange-500/50 text-zinc-900 dark:text-white transition-all"
                 />
               </div>
               <button
                 type="submit"
                 disabled={saving}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-orange-600 to-orange-500 shadow-[0_4px_12px_rgba(234,88,12,0.25)] hover:shadow-[0_6px_16px_rgba(234,88,12,0.4)] hover:-translate-y-0.5 transition-all disabled:opacity-50"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl text-xs font-black text-white bg-orange-600 shadow-xl shadow-orange-600/20 hover:bg-orange-500 hover:-translate-y-0.5 transition-all uppercase tracking-widest"
               >
-                {saved ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-                {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
+                {saving ? 'Saving...' : 'Update Profile'}
               </button>
             </form>
           </div>
 
-          {/* User Stats Mini Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
             {[
-              { label: 'Total Jobs', value: stats.total },
-              { label: 'Completed', value: stats.completed },
-              { label: 'Earned ($)', value: stats.earned.toFixed(2) },
-              { label: 'Spent ($)', value: stats.spent.toFixed(2) },
+              { label: 'Jobs', value: stats.total },
+              { label: 'Done', value: stats.completed },
+              { label: 'Earned', value: stats.earned.toFixed(2) },
+              { label: 'Spent', value: stats.spent.toFixed(2) },
             ].map((s) => (
-              <div key={s.label} className="bg-white dark:bg-[#1a1a1a] p-4 rounded-2xl border border-zinc-200 dark:border-white/5 shadow-sm text-center">
-                <p className="text-lg font-black text-zinc-900 dark:text-white">{s.value}</p>
-                <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-1 truncate">{s.label}</p>
+              <div key={s.label} className="bg-white dark:bg-[#1a1a1a] p-5 rounded-3xl border border-zinc-200 dark:border-white/5 text-center shadow-sm">
+                <p className="text-xl font-black text-zinc-900 dark:text-white tracking-tighter">{s.value}</p>
+                <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-1">{s.label}</p>
               </div>
             ))}
           </div>
@@ -195,85 +187,77 @@ export default function Settings() {
 
       {/* Security Tab */}
       {tab === 'security' && (
-        <div className="space-y-4">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
           <EmailSettings />
           
-          {/* Connected Wallet */}
-          <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl border border-zinc-200 dark:border-white/5 shadow-sm p-6">
-            <h2 className="text-sm font-bold text-zinc-900 dark:text-white mb-4">Connected Wallet</h2>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1.5">Network</label>
-                <div className="p-3 bg-zinc-50 dark:bg-white/5 rounded-xl border border-zinc-200 dark:border-white/5">
-                  <p className="text-sm font-medium text-zinc-900 dark:text-white">Injective EVM Testnet</p>
-                  <p className="text-[10px] text-zinc-400 mt-1">Locked to this network</p>
-                </div>
+          <div className="bg-white dark:bg-[#1a1a1a] rounded-[2.5rem] border border-zinc-200 dark:border-white/5 shadow-sm p-8">
+            <h2 className="text-sm font-bold text-zinc-900 dark:text-white mb-6 uppercase tracking-tight">Connected Wallet</h2>
+            
+            <div className="space-y-4">
+              <div className="p-4 bg-zinc-50 dark:bg-white/5 rounded-2xl border border-zinc-100 dark:border-white/5">
+                <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">Network</label>
+                <p className="text-sm font-bold text-orange-600 dark:text-orange-400 italic">Injective EVM Testnet</p>
               </div>
-            </div>
 
-            {userProfile?.wallet_type === 'generated' && (
-              <div className="mt-8 p-6 bg-orange-50 dark:bg-orange-500/5 rounded-[2.5rem] border border-orange-200 dark:border-orange-500/10">
-                <div className="flex items-start gap-4 mb-6">
-                  <div className="w-12 h-12 bg-orange-500/10 rounded-2xl flex items-center justify-center text-orange-500 shrink-0">
-                    <ShieldAlert size={24} />
+              {userProfile?.wallet_type === 'generated' && (
+                <div className="p-8 bg-orange-50 dark:bg-orange-500/5 rounded-[2rem] border border-orange-200 dark:border-orange-500/10">
+                  <div className="flex items-start gap-5 mb-8">
+                    <div className="w-14 h-14 bg-orange-500/10 rounded-2xl flex items-center justify-center text-orange-500 shrink-0 shadow-lg shadow-orange-500/10">
+                      <ShieldAlert size={28} />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-black text-zinc-900 dark:text-white uppercase italic tracking-tighter">Wallet Recovery</h4>
+                      <p className="text-[11px] text-zinc-500 leading-relaxed mt-1 font-medium">
+                        You own this wallet. Export your keys to use your funds in Keplr or MetaMask externally.
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-lg font-black text-zinc-900 dark:text-white uppercase italic">Wallet Security & Export</h4>
-                    <p className="text-xs text-zinc-500 leading-relaxed mt-1">
-                      This wallet was created by Accord. You have full ownership. You can export these keys and use them in Keplr or MetaMask any time.
-                    </p>
-                  </div>
-                </div>
 
-                <div className="grid sm:grid-cols-2 gap-3">
                   <button 
                     onClick={async () => {
                       if (activeWallet) {
                         try {
-                          // This triggers the official Thirdweb secure export flow
                           const uri = await activeWallet.export();
                           window.open(uri, "_blank");
                         } catch (e) {
-                          alert("Export failed or cancelled.");
+                          alert("Export cancelled.");
                         }
                       }
                     }}
-                    className="flex items-center justify-center gap-2 p-4 rounded-2xl bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-widest hover:border-orange-500 transition-all"
+                    className="w-full flex items-center justify-center gap-3 p-5 rounded-[1.5rem] bg-zinc-900 dark:bg-white text-white dark:text-black font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] active:scale-95 transition-all shadow-xl"
                   >
-                    <Lock size={14} /> Export / Reveal Wallet
+                    <Lock size={16} /> Reveal Recovery Phrase
                   </button>
-                </div>
 
-                <div className="mt-6 flex items-start gap-3 p-4 bg-white/50 dark:bg-black/20 rounded-2xl border border-white dark:border-white/5">
-                  <AlertTriangle className="text-orange-500 shrink-0" size={16} />
-                  <p className="text-[10px] text-orange-700 dark:text-zinc-500 leading-relaxed font-medium">
-                    <span className="text-orange-600 dark:text-orange-400 font-bold uppercase">Critical Safety:</span> Never share your private key or seed phrase. Anyone with these can steal your funds. Accord staff will <span className="underline">never</span> ask for them.
-                  </p>
+                  <div className="mt-8 flex items-start gap-4 p-5 bg-white dark:bg-black/20 rounded-2xl border border-zinc-100 dark:border-white/5">
+                    <AlertTriangle className="text-orange-500 shrink-0" size={18} />
+                    <p className="text-[10px] text-zinc-500 dark:text-zinc-400 leading-relaxed font-bold uppercase tracking-tight">
+                      Never share your keys. Anyone with your recovery phrase can steal your USDC.
+                    </p>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+
             <button
               onClick={logout}
-              className="mt-4 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-red-500 border border-red-200 dark:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
+              className="mt-8 w-full flex items-center justify-center gap-2 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-red-500 border border-red-200 dark:border-red-500/20 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
             >
               <AlertTriangle className="w-4 h-4" />
-              Disconnect Wallet
+              Disconnect
             </button>
           </div>
 
-          {/* Connection Status */}
-          <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl border border-zinc-200 dark:border-white/5 shadow-sm p-6">
-            <h2 className="text-sm font-bold text-zinc-900 dark:text-white mb-4">Connection Status</h2>
-            <div className="space-y-3">
+          <div className="bg-white dark:bg-[#1a1a1a] rounded-[2.5rem] border border-zinc-200 dark:border-white/5 shadow-sm p-8">
+            <h2 className="text-sm font-bold text-zinc-900 dark:text-white mb-6 uppercase tracking-tight">Status</h2>
+            <div className="grid gap-3">
               {[
-                { label: 'Wallet Connected', status: !!address },
-                { label: 'Network Correct', status: true },
+                { label: 'Wallet Active', status: !!address },
+                { label: 'Chain Correct', status: true },
               ].map((item) => (
-                <div key={item.label} className={`flex items-center gap-3 p-3 rounded-xl ${item.status ? 'bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20' : 'bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20'}`}>
+                <div key={item.label} className={`flex items-center justify-between p-4 rounded-2xl ${item.status ? 'bg-emerald-500/5 border border-emerald-500/10' : 'bg-red-500/5'}`}>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{item.label}</span>
                   <CheckCircle2 className={`w-4 h-4 ${item.status ? 'text-emerald-500' : 'text-red-500'}`} />
-                  <span className={`text-sm font-semibold ${item.status ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
-                    {item.label}
-                  </span>
                 </div>
               ))}
             </div>
