@@ -40,6 +40,8 @@ export function WalletProvider({ children }) {
             disconnect(activeWallet);
         }
         setSigner(null);
+        // Force a clean break to the landing page
+        window.location.href = "/";
     };
 
     const connectWallet = () => {
