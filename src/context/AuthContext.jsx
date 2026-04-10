@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
             console.log("AuthContext: Safety timeout reached, forcing load completion.");
             setLoading(false);
         }
-    }, 8000); 
+    }, 15000); 
     return () => clearTimeout(timer);
   }, [loading]);
 
