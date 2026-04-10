@@ -73,7 +73,7 @@ export default function WalletPrompt({ email, loginMethod, onComplete }) {
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <img src="https://raw.githubusercontent.com/chainapsis/keplr-wallet/master/packages/extension/src/public/assets/img/icon-256.png" alt="Keplr" className="w-7 h-7" />
+                <img src="https://raw.githubusercontent.com/cosmostation/cosmostation_token_resource/master/wallet-icons/keplr.png" alt="Keplr" className="w-7 h-7" />
               </div>
               <div className="text-left">
                 <p className="font-black text-white">Link Keplr Wallet</p>
