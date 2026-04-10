@@ -18,6 +18,12 @@ export function AuthProvider({ children }) {
   // Whenever wallet connects/disconnects → sync with Supabase
   useEffect(() => {
     async function syncUser() {
+      // If Thirdweb is still determining the account state, stay in loading
+      if (activeAccount === undefined) {
+        setLoading(true);
+        return;
+      }
+
       if (!activeAccount?.address) {
         console.log("AuthContext: No active account address found.");
         setUser(null);
@@ -36,7 +42,7 @@ export function AuthProvider({ children }) {
       }
     }
     syncUser();
-  }, [activeAccount?.address]);
+  }, [activeAccount]);
 
   const value = {
     walletAddress: activeAccount?.address || null,
