@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
-import { useActiveAccount } from "thirdweb/react";
+import { useActiveAccount, useDisconnect } from "thirdweb/react";
 import { ethers6Adapter } from "thirdweb/adapters/ethers6";
 import { client } from "../lib/thirdwebClient";
 import { defineChain } from "thirdweb/chains";
@@ -33,10 +33,12 @@ export function WalletProvider({ children }) {
         }
     }, [account]);
 
+    const { disconnect } = useDisconnect();
+
     const logout = () => {
-        // Since we are using Thirdweb, the "ActiveAccount" will clear 
-        // when the user disconnects via the Thirdweb hooks.
-        // We'll just reset local state if needed.
+        if (account) {
+            disconnect(account);
+        }
         setSigner(null);
     };
 

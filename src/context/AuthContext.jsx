@@ -6,7 +6,9 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { useActiveAccount } from "thirdweb/react";
-import { getUserByWallet } from "../lib/supabaseHelpers";
+import { getUserByWallet, upsertUser } from "../lib/supabaseHelpers";
+import { inAppWallet } from "thirdweb/wallets";
+import { client } from "../lib/thirdwebClient";
 
 const AuthContext = createContext(null);
 
@@ -46,8 +48,35 @@ export function AuthProvider({ children }) {
       setLoading(false); 
 
       try {
+        // Find if this is a social/email login to get the email
         const data = await getUserByWallet(address);
-        setUser(data);
+        
+        let foundEmail = data?.email;
+        // If email is missing in DB, try to get it from Thirdweb profile
+        if (!foundEmail) {
+          try {
+            const wallet = inAppWallet();
+            const profiles = await wallet.getProfiles({ client });
+            foundEmail = profiles?.[0]?.details?.email;
+          } catch (e) { 
+            console.log("AuthContext: Could not fetch social profile");
+          }
+        }
+
+        // Auto-Provision Profile if missing OR if we found a new email
+        if (!data || (foundEmail && !data.email)) {
+           await upsertUser({
+             walletAddress: address,
+             email: foundEmail,
+             loginMethod: data?.login_method || "generated",
+             walletType: data?.wallet_type || "generated"
+           });
+           // Refresh user data after upsert
+           const updatedData = await getUserByWallet(address);
+           setUser(updatedData);
+        } else {
+           setUser(data);
+        }
       } catch (err) {
         console.error("AuthContext: Background sync error:", err);
       }
