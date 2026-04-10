@@ -4,7 +4,7 @@ import { Wallet, Zap, ShieldCheck, ArrowRight, Loader2, Link as LinkIcon } from 
 import { useConnect } from "thirdweb/react";
 import { createWallet } from "thirdweb/wallets";
 import { client, injectiveTestnet } from "../lib/thirdwebClient";
-import { upsertUser } from "../lib/supabaseHelpers";
+import { getUserByEmail, linkWalletToUser } from "../lib/supabaseHelpers";
 
 export default function WalletPrompt({ email, loginMethod, onComplete }) {
   const { connect } = useConnect();
