@@ -67,16 +67,18 @@ export function AuthProvider({ children }) {
 
         // Auto-Provision Profile if missing OR if we found a new email
         if (!data || (foundEmail && !data.email)) {
+           const isGenerated = activeWallet?.id === "in-app";
            await upsertUser({
              walletAddress: address,
              email: foundEmail,
-             loginMethod: data?.login_method || (foundEmail ? "google" : "generated"),
-             walletType: data?.wallet_type || "generated"
+             loginMethod: data?.login_method || (foundEmail ? (isGenerated ? "google" : "wallet") : "generated"),
+             walletType: isGenerated ? "generated" : "external"
            });
            // Refresh user data after upsert
            const updatedData = await getUserByWallet(address);
            setUser(updatedData);
         } else {
+           // If data exists, but wallet type is somehow wrong, we update it in the UI state
            setUser(data);
         }
       } catch (err) {
