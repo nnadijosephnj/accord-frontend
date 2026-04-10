@@ -59,7 +59,7 @@ export function AuthProvider({ children }) {
     walletAddress: activeAccount?.address || null,
     isConnected: !!activeAccount?.address,
     user,          // full Supabase user row
-    loading,
+    loading: loading || (activeAccount === undefined),
     setUser,       // allow components to refresh user after updates
   };
 
