@@ -70,10 +70,9 @@ export default function DashboardLayout({ children }) {
 
   const [showWalletSetup, setShowWalletSetup] = useState(false);
 
-  // Ghost Mode Logic: If not external, treat as Guest
-  const isGuest = userProfile?.wallet_type !== 'external';
-  const displayAddress = isGuest ? null : address;
-  const displayName = isGuest ? 'Guest User' : (userProfile?.display_name || 'User');
+  // Sync profile display
+  const displayName = userProfile?.display_name || 'User';
+  const displayAddress = address;
 
   // Show wallet setup if user is using a generated wallet (Google/Email) and hasn't dismissed it
   useEffect(() => {
@@ -214,7 +213,7 @@ export default function DashboardLayout({ children }) {
             <p className="text-xs font-bold text-zinc-800 dark:text-white truncate">
               {displayName}
             </p>
-            {!isGuest ? (
+            {address ? (
               <p className="text-[10px] text-zinc-400 dark:text-zinc-500 truncate font-mono">{shortenAddress(address)}</p>
             ) : (
               <p 
