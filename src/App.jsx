@@ -135,12 +135,16 @@ function ProtectedRoute({ children }) {
   
   // Only show a loading spinner briefly
   if (loading) {
+    const isLoggingOut = !isConnected && window.location.pathname.startsWith('/dashboard');
+
     return <div className="h-screen w-full flex items-center justify-center bg-[#f5f6f7] dark:bg-[#0e0e0e]">
       <div className="flex flex-col items-center gap-6">
         <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
         <div className="text-center">
-            <span className="text-zinc-500 font-bold italic tracking-widest text-sm uppercase block">Entering Accord...</span>
-            {showSkip && (
+            <span className="text-zinc-500 font-bold italic tracking-widest text-sm uppercase block">
+              {isLoggingOut ? 'Signing Out...' : 'Entering Accord...'}
+            </span>
+            {showSkip && !isLoggingOut && (
                 <button 
                   onClick={() => window.location.reload()} 
                   className="mt-4 text-[10px] text-orange-500 font-black uppercase tracking-widest hover:underline"
