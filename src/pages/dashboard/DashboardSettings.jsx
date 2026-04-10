@@ -145,27 +145,35 @@ export default function Settings() {
                   <p className="text-sm font-mono text-zinc-900 dark:text-white break-all">{address}</p>
                </div>
 
-               {isGenerated && (
-                 <div className="grid sm:grid-cols-2 gap-3">
-                    <button 
-                      onClick={async () => {
-                        if (activeWallet) {
-                          try {
-                            const uri = await activeWallet.export();
-                            window.open(uri, "_blank");
-                          } catch (e) { alert("Secure export cancelled."); }
-                        }
-                      }}
-                      className="flex items-center justify-center gap-3 p-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] shadow-xl transition-all"
-                    >
-                      <Lock size={16} /> Reveal Recovery Phrase
-                    </button>
-                    <div className="flex items-center gap-3 p-5 bg-white/50 dark:bg-white/5 rounded-2xl border border-white/40 dark:border-white/5">
-                        <AlertTriangle className="text-orange-600 shrink-0" size={18} />
-                        <p className="text-[9px] text-zinc-500 font-bold uppercase leading-tight tracking-tight">Never share your recovery keys.</p>
-                    </div>
-                 </div>
-               )}
+            {(userProfile?.wallet_type === 'generated' || activeWallet?.id === 'in-app') && (
+              <div className="p-8 bg-orange-50 dark:bg-orange-500/5 rounded-[2rem] border border-orange-200 dark:border-orange-500/10">
+                <div className="flex items-start gap-5 mb-8">
+                  <div className="w-14 h-14 bg-orange-600 text-white rounded-2xl flex items-center justify-center shadow-2xl shadow-orange-600/40">
+                    <ShieldAlert size={28} />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-black text-zinc-900 dark:text-white uppercase italic tracking-tighter">Wallet Recovery</h4>
+                    <p className="text-[11px] text-zinc-500 font-medium leading-relaxed mt-1">
+                      This is an Accord-Managed Wallet. You own the identity and can export your keys to any external wallet (MetaMask/Keplr).
+                    </p>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={async () => {
+                    if (activeWallet) {
+                      try {
+                        const uri = await activeWallet.export();
+                        window.open(uri, "_blank");
+                      } catch (e) { alert("Secure export cancelled."); }
+                    }
+                  }}
+                  className="w-full flex items-center justify-center gap-3 p-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] shadow-xl transition-all"
+                >
+                  <Lock size={16} /> Reveal Recovery Phrase
+                </button>
+              </div>
+            )}
             </div>
          </div>
          {/* Background Decoration */}
