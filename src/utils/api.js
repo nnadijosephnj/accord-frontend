@@ -1,19 +1,25 @@
 import { BACKEND_URL } from './contractABI';
+import { getWalletAuthHeaders } from '../lib/walletApiAuth';
 
 export async function apiCall(endpoint, options = {}) {
-    const token = localStorage.getItem('jwt_token');
-    // For now, if no token is found, we still proceed but without the Auth header
-    // In the future, we will use the wallet signature as auth
-    const isFormData = options.isFormData || options.body instanceof FormData;
+    const {
+        headers: optionHeaders = {},
+        isFormData: optionIsFormData,
+        requiresWalletAuth = endpoint.startsWith('/api/'),
+        ...fetchOptions
+    } = options;
+
+    const isFormData = optionIsFormData || fetchOptions.body instanceof FormData;
+    const walletAuthHeaders = requiresWalletAuth ? await getWalletAuthHeaders() : {};
     const headers = {
         ...(!isFormData && { 'Content-Type': 'application/json' }),
-        ...(token && { 'Authorization': `Bearer ${token}` }),
-        ...options.headers
+        ...walletAuthHeaders,
+        ...optionHeaders
     };
 
     try {
         const response = await fetch(`${BACKEND_URL}${endpoint}`, {
-            ...options,
+            ...fetchOptions,
             headers
         });
 

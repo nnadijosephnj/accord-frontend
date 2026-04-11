@@ -5,9 +5,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { ThirdwebProvider } from "thirdweb/react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { client } from "./lib/thirdwebClient";
-// AuthPage removed as it is now integrated into Landing
 import Landing from './pages/Landing';
-
 import AgreementRoom from './pages/AgreementRoom';
 
 // Dashboard Layout
@@ -123,7 +121,7 @@ function App() {
 }
 
 function ProtectedRoute({ children }) {
-  const { isConnected, isGuest, loading } = useAuth();
+  const { isConnected, loading } = useAuth();
   const [showSkip, setShowSkip] = useState(false);
 
   useEffect(() => {
@@ -133,7 +131,6 @@ function ProtectedRoute({ children }) {
     }
   }, [loading]);
 
-  // Always show spinner while loading — never redirect during this phase
   if (loading) {
     return (
       <div className="h-screen w-full flex items-center justify-center bg-[#f5f6f7] dark:bg-[#0e0e0e]">
@@ -157,7 +154,7 @@ function ProtectedRoute({ children }) {
     );
   }
 
-  if (!isConnected && !isGuest) {
+  if (!isConnected) {
     return <Navigate to="/" replace />;
   }
   return children;

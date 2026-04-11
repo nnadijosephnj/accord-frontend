@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import {
@@ -8,10 +8,6 @@ import {
 } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 import { useTheme } from '../context/ThemeContext';
-import IntegratedAuthModal from './IntegratedAuthModal';
-
-import { useAuth } from '../context/AuthContext';
-import GuestBanner from './GuestBanner';
 
 function shortenAddress(addr) {
   if (!addr) return '';
@@ -55,8 +51,7 @@ const NAV_ITEMS = [
 ];
 
 export default function DashboardLayout({ children }) {
-  const { user, isGuest, openAuthModal } = useAuth();
-  const { address, logout, userProfile } = useWallet();
+  const { address, logout } = useWallet();
   const { isDark, toggle: toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
@@ -72,15 +67,7 @@ export default function DashboardLayout({ children }) {
 
   const closeSidebar = () => setSidebarOpen(false);
 
-  // Sync profile display
-  const displayName = user?.display_name || user?.email || (address ? shortenAddress(address) : 'Guest');
-
-  // Show wallet setup if guest and hasn't dismissed it
-  useEffect(() => {
-    if (isGuest && !localStorage.getItem('hide-wallet-setup')) {
-      openAuthModal('WALLET_PROMPT');
-    }
-  }, [isGuest, openAuthModal]);
+  const displayName = address ? shortenAddress(address) : 'Wallet User';
 
   const renderNav = () =>
     NAV_ITEMS.map((item) => {
@@ -197,27 +184,16 @@ export default function DashboardLayout({ children }) {
       <div className="px-4 py-4 border-t border-zinc-100 dark:border-white/5 shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl overflow-hidden border border-zinc-200 dark:border-white/10 shrink-0">
-            {userProfile?.avatar_url ? (
-              <img src={userProfile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center text-white font-bold text-xs">
-                {address ? address.slice(2, 4).toUpperCase() : 'AC'}
-              </div>
-            )}
+            <div className="w-full h-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center text-white font-bold text-xs">
+              {address ? address.slice(2, 4).toUpperCase() : 'AC'}
+            </div>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-bold text-zinc-800 dark:text-white truncate">
               {displayName}
             </p>
-            {address ? (
+            {address && (
               <p className="text-[10px] text-zinc-400 dark:text-zinc-500 truncate font-mono">{shortenAddress(address)}</p>
-            ) : (
-              <p 
-                onClick={() => openAuthModal('WALLET_PROMPT')}
-                className="text-[10px] text-orange-500 font-bold truncate cursor-pointer hover:underline"
-              >
-                Connect Wallet
-              </p>
             )}
           </div>
           <button
@@ -258,7 +234,6 @@ export default function DashboardLayout({ children }) {
 
       {/* MAIN */}
       <div className="flex-1 flex flex-col min-h-screen min-w-0">
-        {isGuest && <GuestBanner />}
         {/* TOP BAR */}
         <header className="h-14 px-4 sm:px-6 flex items-center justify-between sticky top-0 bg-white/90 dark:bg-[#111111]/90 backdrop-blur-xl border-b border-zinc-200 dark:border-white/5 z-30 shrink-0">
           <div className="flex items-center gap-3">
@@ -302,8 +277,6 @@ export default function DashboardLayout({ children }) {
           {children}
         </main>
       </div>
-
-
     </div>
   );
 }

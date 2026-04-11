@@ -11,10 +11,7 @@ export const injectiveTestnet = defineChain({
   id: 1439,
   name: "Injective EVM Testnet",
   nativeCurrency: { name: "Injective", symbol: "INJ", decimals: 18 },
-  rpc: import.meta.env.VITE_RPC_URL || "https://testnet.rpc.inevm.com/http",
-  blockExplorers: [
-    { name: "Injective Explorer", url: "https://inevm.calderaexplorer.xyz" },
-  ],
+  rpc: "https://testnet.rpc.inevm.com/http",
 });
 
 // USDC — the only currency Accord uses

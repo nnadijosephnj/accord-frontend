@@ -31,12 +31,11 @@ function Counter({ from, to, duration = 2, delay = 0, formattingFn = (v) => v })
 }
 
 export default function Landing() {
-  const { address, openAuthModal, isConnecting } = useWallet();
-  const { isGuest } = useAuth();
+  const { openAuthModal, isConnecting } = useWallet();
+  const { isConnected } = useAuth();
   const { isDark, toggle } = useTheme();
   const navigate = useNavigate();
   const [init, setInit] = useState(false);
-
 
   // Mouse positional tracking for glowing cursor follower
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -56,10 +55,10 @@ export default function Landing() {
   }, []);
 
   useEffect(() => {
-    if (address || isGuest) {
+    if (isConnected) {
       navigate('/dashboard');
     }
-  }, [address, isGuest, navigate]);
+  }, [isConnected, navigate]);
 
   const handleLoginStart = () => {
     openAuthModal('CHOICE');
@@ -104,7 +103,7 @@ export default function Landing() {
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
       transition: { staggerChildren: 0.1 }
     }
@@ -112,10 +111,10 @@ export default function Landing() {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 60 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } 
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 1, ease: [0.16, 1, 0.3, 1] }
     }
   };
 
@@ -123,9 +122,9 @@ export default function Landing() {
 
   return (
     <div className="relative min-h-screen bg-[#f5f6f7] dark:bg-[#0e0e0e] font-sans overflow-x-hidden text-zinc-900 dark:text-white selection:bg-orange-500/30">
-      
-      {/* Background GRID PATTERN for Premium Web3 feel */}
-      <div 
+
+      {/* Background GRID PATTERN */}
+      <div
         className="fixed inset-0 pointer-events-none z-0 opacity-10 dark:opacity-20"
         style={{
           backgroundImage: 'linear-gradient(#f97316 1px, transparent 1px), linear-gradient(90deg, #f97316 1px, transparent 1px)',
@@ -134,13 +133,13 @@ export default function Landing() {
       />
 
       {/* Custom Cursor Glow */}
-      <Motion.div 
+      <Motion.div
         className="fixed top-0 left-0 w-[500px] h-[500px] bg-orange-500/30 dark:bg-[#ff9157]/15 rounded-full blur-[120px] pointer-events-none z-0 hidden lg:block"
         animate={{ x: mousePos.x - 250, y: mousePos.y - 250 }}
         transition={{ type: "tween", ease: "linear", duration: 0 }}
       />
 
-      {/* Particles Background Layer */}
+      {/* Particles Background */}
       {init && (
         <div className="absolute inset-0 z-0 pointer-events-none dark:opacity-100 opacity-60 mix-blend-multiply dark:mix-blend-screen">
           <Particles id="tsparticles" options={particlesOptions} className="absolute inset-0" />
@@ -176,17 +175,58 @@ export default function Landing() {
       </nav>
 
       <main className="relative z-10">
-        
-        {/* HERO SECTION WITH SPLINE 3D VIEWER */}
+
+        {/* HERO SECTION — Modern geometric background instead of Spline */}
         <section className="relative min-h-screen flex flex-col items-center justify-center pt-20 px-6 overflow-hidden">
-          
-          {/* HUGE 3D SPLINE EMBED BACKGROUND */}
-          <div className="absolute inset-0 flex items-center justify-center z-0 opacity-80 mix-blend-luminosity dark:mix-blend-normal pointer-events-auto">
-             <spline-viewer url="https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode"></spline-viewer>
+
+          {/* Modern geometric shapes background */}
+          <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+            {/* Floating gradient orbs */}
+            <Motion.div
+              animate={{ y: [0, -40, 0], x: [0, 20, 0], rotate: [0, 10, 0] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-1/4 left-[10%] w-[400px] h-[400px] bg-gradient-to-br from-orange-500/20 to-orange-600/5 rounded-full blur-[80px]"
+            />
+            <Motion.div
+              animate={{ y: [0, 30, 0], x: [0, -30, 0], rotate: [0, -15, 0] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+              className="absolute top-1/3 right-[5%] w-[500px] h-[500px] bg-gradient-to-br from-blue-500/10 to-purple-500/5 rounded-full blur-[100px]"
+            />
+            <Motion.div
+              animate={{ y: [0, -20, 0], scale: [1, 1.1, 1] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+              className="absolute bottom-1/4 left-1/3 w-[300px] h-[300px] bg-gradient-to-br from-[#00e6ed]/10 to-emerald-500/5 rounded-full blur-[60px]"
+            />
+
+            {/* Geometric wireframe shapes */}
+            <Motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+              className="absolute top-[20%] right-[15%] w-48 h-48 border border-orange-500/10 dark:border-orange-500/20 rounded-[2rem]"
+            />
+            <Motion.div
+              animate={{ rotate: -360 }}
+              transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+              className="absolute bottom-[25%] left-[8%] w-32 h-32 border border-blue-500/10 dark:border-blue-500/20 rounded-full"
+            />
+            <Motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+              className="absolute top-[60%] right-[10%] w-20 h-20 border-2 border-[#00e6ed]/10 dark:border-[#00e6ed]/20"
+              style={{ transform: "rotate(45deg)" }}
+            />
+
+            {/* Shield icon as hero accent */}
+            <Motion.div
+              animate={{ y: [0, -15, 0], opacity: [0.15, 0.25, 0.15] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-10 dark:opacity-15"
+            >
+              <ShieldCheck className="w-[300px] h-[300px] text-orange-500/30 dark:text-orange-500/20" strokeWidth={0.5} />
+            </Motion.div>
           </div>
 
           <div className="max-w-5xl mx-auto w-full flex flex-col items-center text-center relative z-10 pointer-events-none mt-20">
-            {/* Headline Details */}
             <Motion.div
               variants={containerVariants}
               initial="hidden"
@@ -199,11 +239,11 @@ export default function Landing() {
                   The Standard for Web3 Escrow
                 </span>
               </Motion.div>
-              
+
               <h1 className="text-6xl md:text-8xl lg:text-[7rem] font-black tracking-tighter leading-[0.95] mb-10 drop-shadow-2xl">
                 {headlineWords.map((word, i) => (
-                  <Motion.span 
-                    key={i} 
+                  <Motion.span
+                    key={i}
                     variants={itemVariants}
                     className="inline-block mr-3 md:mr-5"
                   >
@@ -217,11 +257,11 @@ export default function Landing() {
                   </Motion.span>
                 ))}
               </h1>
-              
+
               <Motion.p variants={itemVariants} className="text-2xl md:text-3xl text-zinc-700 dark:text-neutral-300 font-bold mb-14 max-w-3xl mx-auto leading-relaxed drop-shadow-lg p-2">
                 Create a deal. Share a link. Get paid safely. <br className="hidden md:block" /> Onchain. Unstoppable. Trustless.
               </Motion.p>
-              
+
               <Motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-6 pointer-events-auto">
                 <button
                   onClick={handleLoginStart}
@@ -240,7 +280,7 @@ export default function Landing() {
         {/* HOW IT WORKS SECTION */}
         <section className="py-40 relative z-10 bg-white/40 dark:bg-[#0a0a0a]/80 backdrop-blur-3xl border-y border-orange-500/10 dark:border-white/5">
           <div className="max-w-7xl mx-auto px-6">
-            <Motion.div 
+            <Motion.div
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
@@ -255,23 +295,23 @@ export default function Landing() {
               <div className="hidden lg:block absolute top-[64px] left-[15%] right-[15%] h-1 border-t-4 border-dashed border-orange-500/30 z-0" />
 
               {[
-                { 
-                  num: '01', 
-                  title: 'Create Agreement', 
-                  desc: 'Freelancer frames the terms and payment amount inside an immutable block.', 
-                  icon: <UserCheck className="w-14 h-14" /> 
+                {
+                  num: '01',
+                  title: 'Create Agreement',
+                  desc: 'Freelancer frames the terms and payment amount inside an immutable block.',
+                  icon: <UserCheck className="w-14 h-14" />
                 },
-                { 
-                  num: '02', 
-                  title: 'Lock Payment', 
-                  desc: 'Client deposits USDT into the smart contract escrow. Funds are cryptographically secured.', 
-                  icon: <LockKeyhole className="w-14 h-14" /> 
+                {
+                  num: '02',
+                  title: 'Lock Payment',
+                  desc: 'Client deposits USDC into the smart contract escrow. Funds are cryptographically secured.',
+                  icon: <LockKeyhole className="w-14 h-14" />
                 },
-                { 
-                  num: '03', 
-                  title: 'Get Paid Safely', 
-                  desc: 'Deliver work, client approves, and instant payout routes directly to your wallet.', 
-                  icon: <Coins className="w-14 h-14" /> 
+                {
+                  num: '03',
+                  title: 'Get Paid Safely',
+                  desc: 'Deliver work, client approves, and instant payout routes directly to your wallet.',
+                  icon: <Coins className="w-14 h-14" />
                 }
               ].map((step, i) => (
                 <Motion.div
@@ -286,8 +326,8 @@ export default function Landing() {
                     <div className="absolute -top-5 -right-5 w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-700 text-white font-black text-lg flex items-center justify-center shadow-[0_0_20px_rgba(234,88,12,0.6)]">
                       {step.num}
                     </div>
-                    <Motion.div 
-                      animate={{ y: [0, -8, 0] }} 
+                    <Motion.div
+                      animate={{ y: [0, -8, 0] }}
                       transition={{ duration: 3, repeat: Infinity, delay: i * 0.5, ease: "easeInOut" }}
                     >
                       {step.icon}
@@ -326,7 +366,7 @@ export default function Landing() {
         <section className="py-40 relative z-10 bg-zinc-100 dark:bg-[#0e0e0e]/80 border-y border-zinc-200/50 dark:border-white/5 backdrop-blur-xl">
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid lg:grid-cols-2 gap-20 items-center">
-              <Motion.div 
+              <Motion.div
                 initial={{ opacity: 0, x: -80 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
@@ -343,7 +383,7 @@ export default function Landing() {
                     { title: "Instant Payment", desc: "Payout releases the exact millisecond the client hits approve. Pure zero-delay processing.", icon: <Zap className="w-8 h-8" /> },
                     { title: "File Protection", desc: "Watermarked preview shown first. The final full asset unlocks only after payment hits.", icon: <Lock className="w-8 h-8" /> }
                   ].map((item, i) => (
-                    <Motion.li 
+                    <Motion.li
                       key={i}
                       whileHover={{ x: 15, scale: 1.02 }}
                       transition={{ type: "spring", stiffness: 300, damping: 20 }}
@@ -362,7 +402,7 @@ export default function Landing() {
               </Motion.div>
 
               {/* Injective Banner Feature */}
-              <Motion.div 
+              <Motion.div
                 initial={{ opacity: 0, scale: 0.9, rotateY: -15 }}
                 whileInView={{ opacity: 1, scale: 1, rotateY: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
@@ -404,7 +444,7 @@ export default function Landing() {
           </div>
           <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-6">Secure agreements for digital work, onchain.</h2>
           <p className="text-lg text-zinc-500 font-bold mb-14 max-w-md leading-relaxed">No trust required. Let smart contracts mathematically handle your escrow.</p>
-          
+
           <div className="flex gap-10 mb-16">
             <a href="#" className="font-black text-xs uppercase tracking-widest text-zinc-400 hover:text-orange-500 transition-colors">Twitter (X)</a>
             <a href="#" className="font-black text-xs uppercase tracking-widest text-zinc-400 hover:text-orange-500 transition-colors">GitHub</a>

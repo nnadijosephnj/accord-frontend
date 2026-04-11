@@ -1,137 +1,207 @@
-import React, { useState, useEffect } from 'react';
-import { Wallet, CheckCircle2, ShieldAlert, Mail } from 'lucide-react';
-import { useWallet } from '../../context/WalletContext';
-import { useAuth } from '../../context/AuthContext';
-import { supabase } from '../../lib/supabaseHelpers';
+import React, { useState } from "react";
+import { CheckCircle2, Copy, FileText, Key, ShieldCheck, Wallet } from "lucide-react";
+import { ConnectButton, useActiveWallet } from "thirdweb/react";
+import { useAuth } from "../../context/AuthContext";
+import { useWallet } from "../../context/WalletContext";
+import { client } from "../../lib/thirdwebClient";
 
-export default function Settings() {
-  const { user, isGuest, openAuthModal, logout } = useAuth();
-  const { address } = useWallet();
-  
-  const [displayName, setDisplayName] = useState('');
-  const [bio, setBio] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+export default function DashboardSettings() {
+  const { user } = useAuth();
+  const { address, logout } = useWallet();
+  const activeWallet = useActiveWallet();
+  const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-        setDisplayName(user.display_name || '');
-        setBio(user.bio || '');
-    }
-  }, [user]);
+  const isGenerated = user?.wallet_type === "generated";
+  const canOpenThirdwebExport = isGenerated && activeWallet?.id === "inApp";
+  const createdLabel = user?.created_at
+    ? new Date(user.created_at).toLocaleString()
+    : "Just now";
+  const shortAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "No wallet connected";
+  const exportHint = canOpenThirdwebExport
+    ? "Open Thirdweb wallet tools to reveal the private key for your generated wallet."
+    : "Reconnect with your Accord-generated in-app wallet to access Thirdweb export tools.";
 
-  const handleSave = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      const { error } = await supabase
-        .from('users')
-        .update({ display_name: displayName, bio: bio })
-        .eq('id', user.id);
-      
-      if (error) throw error;
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    } catch {
-      alert('Error updating profile');
-    } finally {
-      setSaving(false);
-    }
+  const copyAddress = () => {
+    if (!address) return;
+
+    navigator.clipboard.writeText(address);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  const avatarUrl = user?.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.id || 'guest'}`;
-
   return (
-    <div className="max-w-4xl mx-auto pb-20 space-y-10 px-4">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div className="mx-auto max-w-4xl space-y-10 px-4 pb-20">
+      <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
         <div>
-          <h1 className="text-4xl font-black text-zinc-900 dark:text-white uppercase italic tracking-tighter">My Account</h1>
-          <p className="text-sm text-zinc-500 font-bold uppercase tracking-widest mt-1">Universal Identity on Injective</p>
+          <h1 className="text-4xl font-black uppercase italic tracking-tighter text-zinc-900 dark:text-white">
+            My Account
+          </h1>
+          <p className="mt-1 text-sm font-bold uppercase tracking-widest text-zinc-500">
+            Wallet Identity on Injective
+          </p>
         </div>
-        <button onClick={logout} className="px-6 py-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-full text-[10px] font-black uppercase transition-all">Sign Out</button>
+        <button
+          onClick={logout}
+          className="rounded-full bg-red-500/10 px-6 py-2 text-[10px] font-black uppercase text-red-500 transition-all hover:bg-red-500 hover:text-white"
+        >
+          Sign Out
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        
-        {/* Profile Card */}
-        <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white dark:bg-[#111111] border border-zinc-200 dark:border-white/5 rounded-[2.5rem] p-8 text-center shadow-xl">
-                <div className="relative inline-block mb-6">
-                    <img src={avatarUrl} alt="Avatar" className="w-32 h-32 rounded-[2.5rem] bg-orange-500/10 border-4 border-white dark:border-zinc-800 shadow-2xl" />
-                </div>
-                <h3 className="text-xl font-black text-zinc-900 dark:text-white uppercase italic truncate px-4">{user?.display_name || 'Anonymous User'}</h3>
-                <p className="text-[10px] text-zinc-400 font-black uppercase tracking-widest mt-2">{user?.email || 'Authenticated User'}</p>
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
+        <div className="space-y-6 lg:col-span-4">
+          <div className="rounded-[2.5rem] border border-zinc-200 bg-white p-8 text-center shadow-xl dark:border-white/5 dark:bg-[#111111]">
+            <div className="relative mb-6 inline-flex h-32 w-32 items-center justify-center rounded-[2.5rem] border-4 border-white bg-gradient-to-br from-orange-500 to-orange-700 text-3xl font-black uppercase text-white shadow-2xl dark:border-zinc-800">
+              {address ? address.slice(2, 4) : "AC"}
+            </div>
+            <h3 className="truncate px-4 text-xl font-black uppercase italic text-zinc-900 dark:text-white">
+              {shortAddress}
+            </h3>
+            <p className="mt-2 text-[10px] font-black uppercase tracking-widest text-zinc-400">
+              {isGenerated ? "Accord-Generated Wallet" : "External Wallet"}
+            </p>
+          </div>
+
+          <div className="space-y-4 rounded-[2.5rem] border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/5 dark:bg-[#111111]">
+            <div className="space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                Active Wallet
+              </p>
+              <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+                <Wallet size={14} className="text-blue-500" />
+                <span className="truncate text-xs font-bold tracking-tight">
+                  {address || "No wallet connected"}
+                </span>
+                {address && (
+                  <button onClick={copyAddress} className="text-zinc-400 transition-colors hover:text-orange-500">
+                    {copied ? <CheckCircle2 size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                  </button>
+                )}
+              </div>
             </div>
 
-            {/* Identity Markers */}
-            <div className="bg-white dark:bg-[#111111] border border-zinc-200 dark:border-white/5 rounded-[2.5rem] p-6 space-y-4 shadow-sm">
-                <div className="space-y-1">
-                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Verified Email</p>
-                    <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
-                        <Mail size={14} className="text-orange-500" />
-                        <span className="text-xs font-bold truncate">{user?.email || 'No email linked'}</span>
-                    </div>
-                </div>
-                <div className="space-y-1">
-                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Active Wallet</p>
-                    <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
-                        <Wallet size={14} className="text-blue-500" />
-                        <span className="text-xs font-bold truncate tracking-tight">{address || 'No wallet connected'}</span>
-                    </div>
-                </div>
+            <div className="space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                Wallet Type
+              </p>
+              <p className="text-xs font-bold text-zinc-600 dark:text-zinc-300">
+                {isGenerated ? "Accord-Generated (Thirdweb In-App)" : "External (Self-Managed)"}
+              </p>
             </div>
+
+            <div className="space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                Member Since
+              </p>
+              <p className="text-xs font-bold text-zinc-600 dark:text-zinc-300">{createdLabel}</p>
+            </div>
+          </div>
         </div>
 
-        {/* Action Panel */}
-        <div className="lg:col-span-8 space-y-8">
-            {/* Wallet Setup CTA (If Guest) */}
-            {isGuest && (
-                <div className="bg-gradient-to-br from-orange-600 to-orange-400 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-4 mb-4">
-                            <ShieldAlert size={32} />
-                            <h2 className="text-2xl font-black uppercase italic tracking-tighter">Setup Required</h2>
-                        </div>
-                        <p className="text-sm font-bold text-orange-50 mb-6 leading-relaxed max-w-lg italic">
-                            You are signed in as a Guest. To create agreements or receive funds, connect a wallet or generate one securely.
-                        </p>
-                        <button 
-                            onClick={() => openAuthModal('WALLET_PROMPT')}
-                            className="bg-white text-orange-600 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm hover:scale-105 active:scale-95 transition-all shadow-xl"
-                        >
-                            Connect Wallet Now
+        <div className="space-y-8 lg:col-span-8">
+          {isGenerated && (
+            <div className="space-y-6 rounded-[2.5rem] border border-zinc-200 bg-white p-8 shadow-sm dark:border-white/5 dark:bg-[#111111]">
+              <div>
+                <h3 className="text-lg font-black uppercase italic tracking-tight text-zinc-900 dark:text-white">
+                  Export Your Wallet
+                </h3>
+                <p className="mt-1 text-sm font-medium leading-relaxed text-zinc-500">
+                  This wallet was created by Accord. Use Thirdweb&apos;s wallet tools to export the generated wallet and move it into another EVM wallet whenever you want.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {canOpenThirdwebExport ? (
+                  <ConnectButton
+                    client={client}
+                    theme="dark"
+                    connectButton={{
+                      style: { display: "none" },
+                    }}
+                    detailsButton={{
+                      render: () => (
+                        <button className="flex w-full items-center justify-center gap-3 rounded-2xl border border-orange-500/20 bg-orange-500/10 px-6 py-4 text-sm font-black uppercase tracking-wide text-orange-600 transition-all hover:border-orange-500/50 hover:bg-orange-500/20 dark:text-orange-400">
+                          <Key size={18} />
+                          Export Private Key
                         </button>
-                    </div>
-                </div>
-            )}
+                      ),
+                    }}
+                    detailsModal={{
+                      hideSwitchWallet: true,
+                      hideSendFunds: true,
+                      hideReceiveFunds: true,
+                      hideBuyFunds: true,
+                      showTestnetFaucet: false,
+                    }}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="flex w-full cursor-not-allowed items-center justify-center gap-3 rounded-2xl border border-orange-500/20 bg-orange-500/10 px-6 py-4 text-sm font-black uppercase tracking-wide text-orange-600/50 dark:text-orange-400/50"
+                  >
+                    <Key size={18} />
+                    Export Private Key
+                  </button>
+                )}
 
-            {/* Profile Form */}
-            <form onSubmit={handleSave} className="bg-white dark:bg-[#111111] border border-zinc-200 dark:border-white/5 rounded-[2.5rem] p-8 sm:p-10 shadow-sm space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] ml-2">Display Name</label>
-                        <input type="text" placeholder="John Doe" value={displayName} onChange={(e)=>setDisplayName(e.target.value)} className="w-full h-14 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl px-6 text-sm font-bold text-zinc-900 dark:text-white focus:outline-none focus:border-orange-500/50" />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] ml-2">Bio</label>
-                        <input type="text" placeholder="Freelancer" value={bio} onChange={(e)=>setBio(e.target.value)} className="w-full h-14 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl px-6 text-sm font-bold text-zinc-900 dark:text-white focus:outline-none focus:border-orange-500/50" />
-                    </div>
-                </div>
+                <button
+                  type="button"
+                  disabled
+                  className="flex w-full cursor-not-allowed items-center justify-center gap-3 rounded-2xl border border-blue-500/20 bg-blue-500/10 px-6 py-4 text-sm font-black uppercase tracking-wide text-blue-600/50 dark:text-blue-400/50"
+                >
+                  <FileText size={18} />
+                  Export Seed Phrase
+                </button>
+              </div>
 
-                <div className="flex items-center gap-4 pt-4">
-                    <button type="submit" disabled={saving} className="h-14 px-10 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-orange-600 dark:hover:bg-orange-500 hover:text-white transition-all transform active:scale-95 disabled:opacity-50">
-                        {saving ? 'Saving...' : 'Update Profile'}
-                    </button>
-                    {saved && (
-                        <div className="flex items-center gap-2 text-emerald-500">
-                            <CheckCircle2 size={18} />
-                            <span className="text-xs font-black uppercase tracking-widest italic">Updated!</span>
-                        </div>
-                    )}
+              <div className="space-y-2 rounded-2xl border border-orange-500/20 bg-orange-500/5 p-4">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck size={16} className="mt-0.5 text-orange-500" />
+                  <p className="text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+                    {exportHint}
+                  </p>
                 </div>
-            </form>
+                <p className="text-[10px] font-black uppercase tracking-widest text-red-500">
+                  Never share your private key or recovery material with anyone, including Accord.
+                </p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                  Seed phrase export is not exposed by the current Thirdweb web SDK, so that action is disabled instead of failing at runtime.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-6 rounded-[2.5rem] border border-zinc-200 bg-white p-8 shadow-sm dark:border-white/5 dark:bg-[#111111] sm:p-10">
+            <div>
+              <h3 className="text-lg font-black uppercase italic tracking-tight text-zinc-900 dark:text-white">
+                Wallet-Only Identity
+              </h3>
+              <p className="mt-1 text-sm font-medium leading-relaxed text-zinc-500">
+                Accord now uses your wallet address as the only identity. There is no email profile, password, or Supabase auth session tied to this account.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 dark:border-white/5 dark:bg-white/5">
+                <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                  Identity
+                </p>
+                <p className="break-all text-sm font-bold text-zinc-900 dark:text-white">
+                  {address || "No wallet connected"}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 dark:border-white/5 dark:bg-white/5">
+                <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                  Storage Record
+                </p>
+                <p className="text-sm font-bold text-zinc-900 dark:text-white">
+                  users.wallet_address + users.wallet_type
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

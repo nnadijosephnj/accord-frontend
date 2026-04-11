@@ -19,7 +19,7 @@ export default function ConnectedWallet() {
     <div className="max-w-lg space-y-5">
       <div>
         <h1 className="text-xl font-bold text-zinc-900 dark:text-white">Connected Wallet</h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">Your Keplr wallet connected to Accord</p>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">Your wallet connected to Accord</p>
       </div>
 
       {/* Wallet Card */}
@@ -33,7 +33,7 @@ export default function ConnectedWallet() {
             <Wallet className="w-6 h-6 text-white" />
           </div>
           <div>
-            <p className="text-sm font-bold text-zinc-900 dark:text-white">Keplr Wallet</p>
+            <p className="text-sm font-bold text-zinc-900 dark:text-white">Active Wallet</p>
             <p className="text-xs text-zinc-400 dark:text-zinc-500">Injective EVM Testnet</p>
           </div>
         </div>
