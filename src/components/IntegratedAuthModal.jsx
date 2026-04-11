@@ -1,6 +1,51 @@
 import React, { useState } from "react";
 import { motion as Motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Globe, ArrowRight, UserCheck, Shield, Zap, Smartphone, Info, Fingerprint, ShieldCheck, ExternalLink } from "lucide-react";
+import { X, Mail, Globe, ArrowRight, UserCheck, Info, Fingerprint, ShieldCheck, ExternalLink } from "lucide-react";
+
+// Real Keplr logo SVG
+const KeplrLogo = () => (
+  <svg width="20" height="20" viewBox="0 0 112 112" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="112" height="112" rx="28" fill="#1C1C2E"/>
+    <path d="M56 20C36.12 20 20 36.12 20 56C20 75.88 36.12 92 56 92C75.88 92 92 75.88 92 56C92 36.12 75.88 20 56 20Z" fill="url(#kg)"/>
+    <path d="M46 38L62 56L46 74" stroke="white" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M56 38V74" stroke="white" strokeWidth="6" strokeLinecap="round" opacity="0.5"/>
+    <defs>
+      <linearGradient id="kg" x1="20" y1="20" x2="92" y2="92" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#726FFF"/>
+        <stop offset="1" stopColor="#4B47D6"/>
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
+// Real MetaMask logo SVG
+const MetaMaskLogo = () => (
+  <svg width="20" height="20" viewBox="0 0 318.6 318.6" xmlns="http://www.w3.org/2000/svg">
+    <polygon fill="#E2761B" stroke="#E2761B" strokeLinecap="round" strokeLinejoin="round" points="274.1,35.5 174.6,109.4 193,65.8"/>
+    <polygon fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round" points="44.4,35.5 143.1,110.1 125.6,65.8"/>
+    <polygon fill="#D7C1B3" stroke="#D7C1B3" strokeLinecap="round" strokeLinejoin="round" points="238.3,206.8 211.8,247.4 268.5,263 284.8,207.7"/>
+    <polygon fill="#D7C1B3" stroke="#D7C1B3" strokeLinecap="round" strokeLinejoin="round" points="33.9,207.7 50.1,263 106.8,247.4 80.3,206.8"/>
+    <polygon fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round" points="103.6,138.2 87.8,162.1 144.1,164.6 142.1,104.1"/>
+    <polygon fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round" points="214.9,138.2 176.3,103.4 174.6,164.6 230.8,162.1"/>
+    <polygon fill="#D7C1B3" stroke="#D7C1B3" strokeLinecap="round" strokeLinejoin="round" points="106.8,247.4 140.6,230.9 111.4,208.1"/>
+    <polygon fill="#D7C1B3" stroke="#D7C1B3" strokeLinecap="round" strokeLinejoin="round" points="177.9,230.9 211.8,247.4 207.1,208.1"/>
+    <polygon fill="#F6851B" stroke="#F6851B" strokeLinecap="round" strokeLinejoin="round" points="211.8,247.4 177.9,230.9 180.6,253 180.3,262.3"/>
+    <polygon fill="#F6851B" stroke="#F6851B" strokeLinecap="round" strokeLinejoin="round" points="106.8,247.4 138.3,262.3 138.1,253 140.6,230.9"/>
+    <polygon fill="#C0AD9E" stroke="#C0AD9E" strokeLinecap="round" strokeLinejoin="round" points="138.8,193.5 110.6,185.2 130.5,176.1"/>
+    <polygon fill="#C0AD9E" stroke="#C0AD9E" strokeLinecap="round" strokeLinejoin="round" points="179.7,193.5 188,176.1 207.9,185.2"/>
+    <polygon fill="#161616" stroke="#161616" strokeLinecap="round" strokeLinejoin="round" points="138.3,262.3 180.3,262.3 179.5,253 139,253"/>
+    <polygon fill="#763E1A" stroke="#763E1A" strokeLinecap="round" strokeLinejoin="round" points="138.8,193.5 130.5,176.1 111.4,208.1 138.8,193.5"/>
+    <polygon fill="#763E1A" stroke="#763E1A" strokeLinecap="round" strokeLinejoin="round" points="179.7,193.5 207.1,208.1 188,176.1 179.7,193.5"/>
+    <polygon fill="#F6851B" stroke="#F6851B" strokeLinecap="round" strokeLinejoin="round" points="111.4,208.1 138.8,193.5 130.5,176.1"/>
+    <polygon fill="#F6851B" stroke="#F6851B" strokeLinecap="round" strokeLinejoin="round" points="207.1,208.1 188,176.1 179.7,193.5"/>
+    <polygon fill="#E4751F" stroke="#E4751F" strokeLinecap="round" strokeLinejoin="round" points="144.1,164.6 110.6,185.2 138.8,193.5 144.1,164.6"/>
+    <polygon fill="#E4751F" stroke="#E4751F" strokeLinecap="round" strokeLinejoin="round" points="174.6,164.6 179.7,193.5 207.9,185.2 174.6,164.6"/>
+    <polygon fill="#F6851B" stroke="#F6851B" strokeLinecap="round" strokeLinejoin="round" points="174.6,164.6 207.9,185.2 230.8,162.1"/>
+    <polygon fill="#F6851B" stroke="#F6851B" strokeLinecap="round" strokeLinejoin="round" points="87.8,162.1 110.6,185.2 144.1,164.6"/>
+    <polygon fill="#E4751F" stroke="#E4751F" strokeLinecap="round" strokeLinejoin="round" points="144.1,164.6 110.6,185.2 130.5,176.1 138.8,193.5"/>
+    <polygon fill="#E4751F" stroke="#E4751F" strokeLinecap="round" strokeLinejoin="round" points="174.6,164.6 179.7,193.5 207.9,185.2"/>
+  </svg>
+);
 import { useConnect } from "thirdweb/react";
 import { createWallet, inAppWallet } from "thirdweb/wallets";
 import { client, injectiveTestnet } from "../lib/thirdwebClient";
@@ -59,9 +104,26 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete, force
 
   const handleConnectWallet = async (walletId) => {
     setIsLoading(true);
+    setError(null);
+
+    // Check extension availability before attempting connection
+    if (walletId === "app.keplr" && !window.keplr) {
+      setError("Keplr extension not found. Please install it from keplr.app and refresh.");
+      setIsLoading(false);
+      return;
+    }
+    if (walletId === "io.metamask" && !window.ethereum?.isMetaMask) {
+      setError("MetaMask extension not found. Please install it from metamask.io and refresh.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const wallet = createWallet(walletId);
-      const account = await connect(wallet, { client, chain: injectiveTestnet });
+      const account = await connect(async () => {
+        const wallet = createWallet(walletId);
+        await wallet.connect({ client, chain: injectiveTestnet });
+        return wallet;
+      });
       
       if (account && user) {
         await linkWalletToUser(user.id, { 
@@ -71,8 +133,9 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete, force
       }
       if (onComplete) onComplete();
       else closeAuthModal();
-    } catch {
-      setError("Failed to connect. Check if wallet is installed.");
+    } catch (err) {
+      console.error("Wallet connect error:", err);
+      setError(err?.message || "Failed to connect. Please try again.");
     }
     setIsLoading(false);
   };
@@ -142,11 +205,11 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete, force
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <button onClick={() => handleConnectWallet("app.keplr")} className="flex items-center justify-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold transition-all">
-                      <Smartphone size={18} className="text-blue-400" /> Keplr
+                    <button onClick={() => handleConnectWallet("app.keplr")} disabled={isLoading} className="flex items-center justify-center gap-2 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-[#726FFF]/10 hover:border-[#726FFF]/40 text-white font-bold transition-all disabled:opacity-50">
+                      <KeplrLogo /> Keplr
                     </button>
-                    <button onClick={() => handleConnectWallet("io.metamask")} className="flex items-center justify-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold transition-all">
-                      <Zap size={18} className="text-orange-400" /> MetaMask
+                    <button onClick={() => handleConnectWallet("io.metamask")} disabled={isLoading} className="flex items-center justify-center gap-2 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-orange-500/10 hover:border-orange-500/40 text-white font-bold transition-all disabled:opacity-50">
+                      <MetaMaskLogo /> MetaMask
                     </button>
                   </div>
                 </div>
@@ -179,8 +242,8 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete, force
                       <p className="text-zinc-500 text-[10px]">Securely generated by Thirdweb. Perfect for beginners.</p>
                    </button>
                    <div className="p-4 border border-white/5 rounded-2xl grid grid-cols-2 gap-2">
-                       <button onClick={() => handleConnectWallet("app.keplr")} className="p-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-bold flex items-center gap-2">Keplr</button>
-                       <button onClick={() => handleConnectWallet("io.metamask")} className="p-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-bold flex items-center gap-2">MetaMask</button>
+                       <button onClick={() => handleConnectWallet("app.keplr")} disabled={isLoading} className="p-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-bold flex items-center gap-2 disabled:opacity-50"><KeplrLogo /> Keplr</button>
+                       <button onClick={() => handleConnectWallet("io.metamask")} disabled={isLoading} className="p-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-bold flex items-center gap-2 disabled:opacity-50"><MetaMaskLogo /> MetaMask</button>
                    </div>
                 </div>
 
