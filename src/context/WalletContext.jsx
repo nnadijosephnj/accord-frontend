@@ -44,7 +44,6 @@ export function WalletProvider({ children }) {
             }
             await supabase.auth.signOut();
             setSigner(null);
-            // Re-nav done in window.location.href or handled by AuthContext but we'll do both
             window.location.href = "/";
         } catch (err) {
             console.error("Logout failed:", err);
@@ -76,7 +75,8 @@ export function WalletProvider({ children }) {
                     onClose={closeAuthModal}
                     onComplete={() => {
                         closeAuthModal();
-                        window.location.reload();
+                        // Use replace so the browser doesn't reload and lose Thirdweb wallet state
+                        window.location.replace('/dashboard/overview');
                     }}
                     forceStep={authModal.step}
                 />
