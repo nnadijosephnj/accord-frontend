@@ -55,11 +55,10 @@ const NAV_ITEMS = [
 ];
 
 export default function DashboardLayout({ children }) {
-  const { address, logout, userProfile } = useWallet();
-  const { isGuest } = useAuth();
+  const { user, isGuest, openAuthModal } = useAuth();
+  const { address, logout } = useWallet();
   const { isDark, toggle: toggleTheme } = useTheme();
   const location = useLocation();
-  const { openAuthModal } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expanded, setExpanded] = useState({ Agreements: true, Vault: false });
 
@@ -73,8 +72,7 @@ export default function DashboardLayout({ children }) {
   const closeSidebar = () => setSidebarOpen(false);
 
   // Sync profile display
-  const displayName = userProfile?.display_name || 'User';
-  const displayAddress = address;
+  const displayName = user?.display_name || user?.email || (address ? shortenAddress(address) : 'Guest');
 
   // Show wallet setup if guest and hasn't dismissed it
   useEffect(() => {

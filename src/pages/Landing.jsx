@@ -169,7 +169,7 @@ export default function Landing() {
              >
                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-orange-600 to-[#ff9157] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                <span className="relative z-10 flex items-center gap-2 group-hover:text-white transition-colors duration-300">
-                 {isConnecting ? 'Opening...' : 'Connect Wallet'}
+                 {isConnecting ? 'Opening...' : 'Sign In'}
                </span>
              </button>
           </div>
@@ -230,7 +230,7 @@ export default function Landing() {
                   className="group relative w-full sm:w-auto px-12 py-6 rounded-full bg-gradient-to-r from-orange-600 to-[#ff9157] text-white font-black text-xl overflow-hidden flex items-center justify-center gap-4 shadow-[0_0_50px_rgba(234,88,12,0.5)] dark:shadow-[0_0_60px_rgba(255,145,87,0.4)] hover:shadow-[0_0_80px_rgba(234,88,12,0.8)] hover:-translate-y-2 hover:scale-105 transition-all duration-300"
                 >
                   <span className="absolute inset-0 w-full h-full bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-                  <span className="relative z-10 tracking-wide">{isConnecting ? 'Connecting...' : 'Connect Wallet'}</span>
+                  <span className="relative z-10 tracking-wide">{isConnecting ? 'Signing In...' : 'Sign In'}</span>
                   <ArrowRight className="w-6 h-6 relative z-10 group-hover:translate-x-2 transition-transform" strokeWidth={3} />
                 </button>
               </motion.div>

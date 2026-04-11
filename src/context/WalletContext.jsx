@@ -38,13 +38,18 @@ export function WalletProvider({ children }) {
     }, [activeAccount]);
 
     const logout = async () => {
-        if (activeWallet) {
-            disconnect(activeWallet);
+        try {
+            if (activeWallet) {
+                await disconnect(activeWallet);
+            }
+            await supabase.auth.signOut();
+            setSigner(null);
+            // Re-nav done in window.location.href or handled by AuthContext but we'll do both
+            window.location.href = "/";
+        } catch (err) {
+            console.error("Logout failed:", err);
+            window.location.href = "/";
         }
-        await supabase.auth.signOut();
-        setSigner(null);
-        // Force a clean break to the landing page
-        window.location.href = "/";
     };
 
     const connectWallet = (preferredStep = 'CHOICE') => {
