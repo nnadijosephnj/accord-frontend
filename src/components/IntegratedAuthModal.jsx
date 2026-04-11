@@ -6,6 +6,7 @@ import { createWallet, inAppWallet } from "thirdweb/wallets";
 import { client, injectiveTestnet } from "../lib/thirdwebClient";
 import { supabase, linkWalletToUser } from "../lib/supabaseHelpers";
 import { useAuth } from "../context/AuthContext";
+import { useWallet } from "../context/WalletContext";
 
 const flowVariants = {
   enter: (direction) => ({ x: direction > 0 ? 300 : -300, opacity: 0 }),
