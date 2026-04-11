@@ -15,6 +15,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);       // Full user record from Supabase public.users
   const [session, setSession] = useState(null); // Supabase Auth session
   const [loading, setLoading] = useState(true);
+  const [authModal, setAuthModal] = useState({ open: false, step: 'CHOICE' });
 
   // 1. Listen for Supabase Auth changes (Google OAuth / Email OTP)
   useEffect(() => {
@@ -93,6 +94,10 @@ export function AuthProvider({ children }) {
     isConnected: !!activeAccount?.address,
     isGuest: !!session && !activeAccount?.address, // Logged in with email but no wallet
     loading: loading,
+    authModal,
+    setAuthModal,
+    openAuthModal: (step = 'CHOICE') => setAuthModal({ open: true, step }),
+    closeAuthModal: () => setAuthModal({ open: false, step: 'CHOICE' }),
     setUser,
     logout
   };

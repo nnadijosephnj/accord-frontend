@@ -4,11 +4,13 @@ import { useActiveAccount, useActiveWallet, useDisconnect } from "thirdweb/react
 import { ethers6Adapter } from "thirdweb/adapters/ethers6";
 import { client } from "../lib/thirdwebClient";
 import { defineChain } from "thirdweb/chains";
+import { supabase } from "../lib/supabaseHelpers";
+import IntegratedAuthModal from "../components/IntegratedAuthModal";
 
 const WalletContext = createContext();
 
 export function WalletProvider({ children }) {
-    const { user, isConnected } = useAuth();
+    const { user, isConnected, authModal, closeAuthModal, openAuthModal } = useAuth();
     const activeAccount = useActiveAccount();
     const activeWallet = useActiveWallet();
     const { disconnect } = useDisconnect();
@@ -45,9 +47,8 @@ export function WalletProvider({ children }) {
         window.location.href = "/";
     };
 
-    const connectWallet = () => {
-        // No longer redirecting. The UI (Landing) will now handle 
-        // showing the custom login modal.
+    const connectWallet = (preferredStep = 'CHOICE') => {
+        openAuthModal(preferredStep);
     };
 
     return (
@@ -59,9 +60,21 @@ export function WalletProvider({ children }) {
             isLoggedIn: isConnected,
             logout,
             connectWallet,
+            openAuthModal,
             isConnecting: !isConnected && !!activeAccount // simple loading state
         }}>
             {children}
+            {authModal.open && (
+                <IntegratedAuthModal 
+                    isOpen={authModal.open}
+                    onClose={closeAuthModal}
+                    onComplete={() => {
+                        closeAuthModal();
+                        window.location.reload();
+                    }}
+                    forceStep={authModal.step}
+                />
+            )}
         </WalletContext.Provider>
     );
 }

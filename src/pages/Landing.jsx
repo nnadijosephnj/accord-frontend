@@ -31,11 +31,11 @@ function Counter({ from, to, duration = 2, delay = 0, formattingFn = (v) => v })
 }
 
 export default function Landing() {
-  const { address, connectWallet: contextConnect, isConnecting } = useWallet();
+  const { address, openAuthModal, isConnecting } = useWallet();
   const { isDark, toggle } = useTheme();
   const navigate = useNavigate();
   const [init, setInit] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
 
   // Mouse positional tracking for glowing cursor follower
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -61,7 +61,7 @@ export default function Landing() {
   }, [address, navigate]);
 
   const handleLoginStart = () => {
-    setIsAuthModalOpen(true);
+    openAuthModal('CHOICE');
   };
 
   const particlesOptions = {
@@ -416,18 +416,7 @@ export default function Landing() {
           </div>
         </div>
       </footer>
-      <AnimatePresence>
-        {isAuthModalOpen && (
-          <IntegratedAuthModal 
-            isOpen={isAuthModalOpen} 
-            onClose={() => setIsAuthModalOpen(false)} 
-            onComplete={() => {
-              setIsAuthModalOpen(false);
-              navigate('/dashboard');
-            }}
-          />
-        )}
-      </AnimatePresence>
+
     </div>
   );
 }

@@ -8,14 +8,14 @@ import IntegratedAuthModal from '../../components/IntegratedAuthModal';
 
 export default function Settings() {
   const { address, userProfile, setUserProfile, logout } = useWallet();
-  const { isGuest } = useAuth();
+  const { isGuest, openAuthModal } = useAuth();
   const activeWallet = useActiveWallet();
   
   const [displayName, setDisplayName] = useState(userProfile?.display_name || '');
   const [email, setEmail] = useState(userProfile?.email || '');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
+
   const [stats, setStats] = useState({ total: 0, completed: 0, earned: 0, spent: 0 });
   const fileInputRef = useRef(null);
 
@@ -80,14 +80,7 @@ export default function Settings() {
 
   return (
     <div className="max-w-2xl mx-auto pb-20 space-y-10">
-      <IntegratedAuthModal 
-        isOpen={showAuthModal} 
-        onClose={() => setShowAuthModal(false)} 
-        onComplete={() => {
-          setShowAuthModal(false);
-          window.location.reload();
-        }} 
-      />
+
 
       {/* Header */}
       <div>
@@ -110,7 +103,7 @@ export default function Settings() {
               </div>
            </div>
            <button 
-             onClick={() => setShowAuthModal(true)}
+             onClick={() => openAuthModal('WALLET_PROMPT')}
              className="w-full py-5 bg-white text-orange-600 font-black rounded-2xl uppercase tracking-widest text-xs hover:shadow-2xl transition-all hover:-translate-y-1"
            >
              Finish Setup Now

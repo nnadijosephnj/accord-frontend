@@ -13,11 +13,13 @@ const flowVariants = {
   exit: (direction) => ({ x: direction < 0 ? 300 : -300, opacity: 0 })
 };
 
-export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
+export default function IntegratedAuthModal({ isOpen, onClose, onComplete, forceStep = null }) {
+  const { address } = useWallet();
   const { session, user, isGuest } = useAuth();
   const { connect } = useConnect();
   
-  const [step, setStep] = useState("CHOICE"); // CHOICE, EMAIL_OTP, WALLET_PROMPT, OWNERSHIP_INFO
+  // FLOW STEPS: 'CHOICE' | 'EMAIL_OTP' | 'WALLET_PROMPT' | 'OWNERSHIP_INFO'
+  const [step, setStep] = useState(forceStep || "CHOICE");
   const [direction, setDirection] = useState(1);
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -46,10 +48,17 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
   // ── Step 1: Main Choice ──────────────────────────────────────
   const handleGoogleLogin = async () => {
     setIsLoading(true);
+    // Use the explicit origin, ensuring no trailing slashes or weirdness
+    const redirectUrl = window.location.origin;
+    
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin
+        redirectTo: redirectUrl,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        }
       }
     });
     if (error) setError(error.message);
@@ -83,7 +92,16 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
     setIsLoading(true);
     try {
       const wallet = createWallet(walletId);
-      await connect(wallet, { client, chain: injectiveTestnet });
+      const account = await connect(wallet, { client, chain: injectiveTestnet });
+      
+      // If we are in Guest Mode, link this new wallet to the existing account
+      if (account && user) {
+        await linkWalletToUser(user.id, { 
+          walletAddress: account.address, 
+          walletType: 'external' 
+        });
+      }
+      
       onComplete();
     } catch (e) {
       setError("Failed to connect wallet. Is it installed?");
