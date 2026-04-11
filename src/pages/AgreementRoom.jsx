@@ -1,60 +1,61 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import {
     ShieldCheck, ArrowLeft, Clock, DollarSign, CheckCircle2,
-    Lock, FileText, Send, MessageSquare, ExternalLink,
-    AlertCircle, ChevronRight, Paperclip, Download, Info
+    Lock, FileText, Send, MessageSquare,
+    AlertCircle, Paperclip, Info
 } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
-import { useTheme } from '../context/ThemeContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as ethers from 'ethers';
 import { apiCall, uploadFileCall } from '../utils/api';
-import { CONTRACT_ADDRESS, CONTRACT_ABI, USDC_ADDRESS, TOKEN_ABI } from '../utils/contractABI';
+import { CONTRACT_ADDRESS, CONTRACT_ABI, TOKEN_ABI } from '../utils/contractABI';
 
 export default function AgreementRoom() {
     const { id } = useParams();
     const { address, signer } = useWallet();
-    const { isDark } = useTheme();
     const navigate = useNavigate();
 
     const [agreement, setAgreement] = useState(null);
     const [messages, setMessages] = useState([]);
-    const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [message, setMessage] = useState('');
     const agreementAmount = agreement?.amount ?? 0;
 
-    useEffect(() => {
-        if (id) {
-            loadAgreement();
-            loadMessages();
-        }
-    }, [id]);
-
-    const loadAgreement = async () => {
+    const loadAgreement = useCallback(async () => {
         try {
             setLoading(true);
             const data = await apiCall(`/api/agreements/${id}`);
             setAgreement(data);
-            if (data.files) setFiles(data.files);
         } catch (error) {
             console.error(error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
 
-    const loadMessages = async () => {
+    const loadMessages = useCallback(async () => {
         try {
             const data = await apiCall(`/api/messages/${id}`);
             setMessages(data || []);
         } catch (error) {
             console.error(error);
         }
-    };
+    }, [id]);
+
+    useEffect(() => {
+        if (!id) {
+            return;
+        }
+
+        const loadRoom = async () => {
+            await Promise.all([loadAgreement(), loadMessages()]);
+        };
+
+        loadRoom();
+    }, [id, loadAgreement, loadMessages]);
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
@@ -251,7 +252,7 @@ export default function AgreementRoom() {
                             <span className="text-[10px] font-black text-orange-600 dark:text-orange-400 uppercase">{statusInfo.step * 20}% Complete</span>
                         </div>
                         <div className="h-3 bg-zinc-200 dark:bg-white/5 rounded-full overflow-hidden p-0.5 border border-white/40 dark:border-white/5">
-                            <motion.div initial={{ width: 0 }} animate={{ width: `${statusInfo.step * 20}%` }} className="h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-full shadow-[0_0_15px_rgba(234,88,12,0.4)]" />
+                            <Motion.div initial={{ width: 0 }} animate={{ width: `${statusInfo.step * 20}%` }} className="h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-full shadow-[0_0_15px_rgba(234,88,12,0.4)]" />
                         </div>
                     </div>
                 </div>
@@ -260,7 +261,7 @@ export default function AgreementRoom() {
                     <div className="glass-panel p-8 rounded-[2.5rem] border-orange-500/10 shadow-2xl shadow-orange-500/[0.03]">
                         <AnimatePresence mode="wait">
                             {isFreelancer ? (
-                                <motion.div key="freelancer" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+                                <Motion.div key="freelancer" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
                                     {agreement.status === 'PENDING' && (
                                         <div className="text-center py-6 space-y-6">
                                             <div className="w-20 h-20 bg-zinc-100 dark:bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-6">
@@ -311,9 +312,9 @@ export default function AgreementRoom() {
                                             <p className="text-zinc-400 font-medium text-sm">Agreement settled on Injective.</p>
                                         </div>
                                     )}
-                                </motion.div>
+                                </Motion.div>
                             ) : isClient ? (
-                                <motion.div key="client" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+                                <Motion.div key="client" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
                                     {agreement.status === 'PENDING' && (
                                         <div className="space-y-8 text-center">
                                             <div className="w-20 h-20 bg-orange-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-orange-500/20">
@@ -354,7 +355,7 @@ export default function AgreementRoom() {
                                             <button className="orange-glow-btn text-white py-4 px-10 rounded-full font-black text-xs uppercase tracking-widest text-center">Download Final File</button>
                                         </div>
                                     )}
-                                </motion.div>
+                                </Motion.div>
                             ) : (
                                 <div className="space-y-6 py-10 text-center">
                                     <AlertCircle className="w-16 h-16 text-orange-400 mx-auto mb-4" />

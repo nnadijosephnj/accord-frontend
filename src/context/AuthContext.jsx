@@ -81,10 +81,14 @@ export function AuthProvider({ children }) {
     window.location.href = "/";
   };
 
+  const isConnected = !!session || !!activeAccount?.address;
+
   const value = {
     user,
+    setUser,
     session,
-    isAuthenticated: !!session || !!activeAccount?.address,
+    isAuthenticated: isConnected,
+    isConnected,
     isGuest: !!session && !activeAccount?.address, // Logged in with email but no wallet yet
     loading,
     authModal,

@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     ArrowLeft, Copy, Check, LogOut, Edit3, Camera, Moon, Sun
 } from 'lucide-react';
@@ -10,7 +9,7 @@ import { apiCall, uploadFileCall } from '../utils/api';
 import { useRef } from 'react';
 
 export default function Profile() {
-    const { address, userProfile, fetchProfile, setUserProfile, logout, isLoggedIn, connectWallet } = useWallet();
+    const { address, userProfile, setUserProfile, logout } = useWallet();
     const { isDark, toggle } = useTheme();
     const [isEditing, setIsEditing] = useState(false);
     const [displayName, setDisplayName] = useState(userProfile?.display_name || '');
@@ -23,12 +22,7 @@ export default function Profile() {
 
     const [stats, setStats] = useState({ total: 0, completed: 0, earned: 0, spent: 0 });
 
-    useEffect(() => {
-        if (userProfile?.display_name) setDisplayName(userProfile.display_name);
-        loadStats();
-    }, [userProfile]);
-
-    const loadStats = async () => {
+    const loadStats = useCallback(async () => {
         try {
             const agreements = await apiCall('/api/agreements');
             if (agreements) {
@@ -45,17 +39,19 @@ export default function Profile() {
         } catch (e) {
             console.warn("Stats load failed:", e.message);
         }
-    };
+    }, [address]);
+
+    useEffect(() => {
+        if (userProfile?.display_name) setDisplayName(userProfile.display_name);
+        loadStats();
+    }, [userProfile, loadStats]);
 
     const handleSave = async () => {
         try {
             setSaving(true);
-            if (!localStorage.getItem('jwt_token')) {
-                await connectWallet();
-                if (!localStorage.getItem('jwt_token')) {
-                    alert("Signature is required to save changes.");
-                    return;
-                }
+            if (!address) {
+                alert("Connect a wallet before saving changes.");
+                return;
             }
             const updatedUser = await apiCall('/api/auth/profile', {
                 method: 'PATCH',

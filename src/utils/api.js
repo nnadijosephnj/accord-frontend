@@ -23,7 +23,7 @@ export async function apiCall(endpoint, options = {}) {
             try {
                 const errorJson = JSON.parse(text);
                 errorMsg = errorJson.error || errorMsg;
-            } catch (p) {
+            } catch {
                 errorMsg = text || errorMsg;
             }
             throw new Error(errorMsg);

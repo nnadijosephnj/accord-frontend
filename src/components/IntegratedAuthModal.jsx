@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState } from "react";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 import { X, Mail, Globe, ArrowRight, UserCheck, Shield, Zap, Smartphone, Info, Fingerprint, ShieldCheck, ExternalLink } from "lucide-react";
 import { useConnect } from "thirdweb/react";
 import { createWallet, inAppWallet } from "thirdweb/wallets";
 import { client, injectiveTestnet } from "../lib/thirdwebClient";
 import { supabase, linkWalletToUser } from "../lib/supabaseHelpers";
 import { useAuth } from "../context/AuthContext";
-import { useWallet } from "../context/WalletContext";
 
 const flowVariants = {
   enter: (direction) => ({ x: direction > 0 ? 300 : -300, opacity: 0 }),
@@ -19,16 +18,12 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete, force
   const { connect } = useConnect();
   
   // FLOW STEPS: 'CHOICE' | 'EMAIL_OTP' | 'WALLET_PROMPT' | 'OWNERSHIP_INFO'
-  const [step, setStep] = useState(forceStep || "CHOICE");
+  const [step, setStep] = useState(() => forceStep || "CHOICE");
   const [direction, setDirection] = useState(1);
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (forceStep) setStep(forceStep);
-  }, [forceStep]);
 
   const next = (s) => { setDirection(1); setStep(s); };
   const back = (s) => { setDirection(-1); setStep(s); };
@@ -76,7 +71,7 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete, force
       }
       if (onComplete) onComplete();
       else closeAuthModal();
-    } catch (e) {
+    } catch {
       setError("Failed to connect. Check if wallet is installed.");
     }
     setIsLoading(false);
@@ -103,7 +98,7 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete, force
       if (onComplete) onComplete();
       else closeAuthModal();
       window.location.reload();
-    } catch (e) {
+    } catch {
       setError("Wallet generation failed. Try again.");
     }
     setIsLoading(false);
@@ -113,15 +108,15 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete, force
 
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-black/80 backdrop-blur-xl" />
+      <Motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-black/80 backdrop-blur-xl" />
       
-      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative w-full max-w-xl bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col min-h-[500px]">
+      <Motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative w-full max-w-xl bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col min-h-[500px]">
         <button onClick={onClose} className="absolute top-8 right-8 text-zinc-500 hover:text-white transition-colors z-20"><X size={20} /></button>
 
         <div className="p-10 flex-grow flex flex-col justify-center">
           <AnimatePresence mode="wait" custom={direction}>
             {step === "CHOICE" && (
-              <motion.div key="choice" custom={direction} variants={flowVariants} initial="enter" animate="center" exit="exit" className="space-y-6">
+              <Motion.div key="choice" custom={direction} variants={flowVariants} initial="enter" animate="center" exit="exit" className="space-y-6">
                 <div className="text-center mb-6">
                    <div className="w-16 h-16 bg-orange-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                      <Globe className="text-orange-500 w-8 h-8" />
@@ -155,11 +150,11 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete, force
                     </button>
                   </div>
                 </div>
-              </motion.div>
+              </Motion.div>
             )}
 
             {step === "EMAIL_OTP" && (
-              <motion.div key="otp" custom={direction} variants={flowVariants} initial="enter" animate="center" exit="exit" className="space-y-8">
+              <Motion.div key="otp" custom={direction} variants={flowVariants} initial="enter" animate="center" exit="exit" className="space-y-8">
                 <div className="text-center">
                    <div className="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-4"><Mail className="text-orange-500 w-8 h-8" /></div>
                    <h2 className="text-xl font-black text-white italic uppercase">Verify</h2>
@@ -167,11 +162,11 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete, force
                 </div>
                 <input type="text" placeholder="000000" value={otp} onChange={(e)=>setOtp(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl py-6 text-center text-3xl font-black text-white focus:outline-none" />
                 <button onClick={handleVerifyOtp} className="w-full py-5 bg-orange-600 hover:bg-orange-500 text-white font-black rounded-xl uppercase transition-all italic">Verify Code</button>
-              </motion.div>
+              </Motion.div>
             )}
 
             {step === "WALLET_PROMPT" && (
-              <motion.div key="prompt" custom={direction} variants={flowVariants} initial="enter" animate="center" exit="exit" className="space-y-8">
+              <Motion.div key="prompt" custom={direction} variants={flowVariants} initial="enter" animate="center" exit="exit" className="space-y-8">
                 <div className="text-center">
                    <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4"><UserCheck className="text-emerald-500 w-8 h-8" /></div>
                    <h2 className="text-xl font-black text-white italic uppercase">Identity Verified</h2>
@@ -190,11 +185,11 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete, force
                 </div>
 
                 <button onClick={() => closeAuthModal()} className="w-full text-zinc-600 hover:text-white text-[10px] font-black uppercase tracking-widest transition-colors">Skip for now</button>
-              </motion.div>
+              </Motion.div>
             )}
 
             {step === "OWNERSHIP_INFO" && (
-              <motion.div key="info" custom={direction} variants={flowVariants} initial="enter" animate="center" exit="exit" className="space-y-6">
+              <Motion.div key="info" custom={direction} variants={flowVariants} initial="enter" animate="center" exit="exit" className="space-y-6">
                 <div className="text-center">
                    <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4"><Info className="text-blue-500 w-8 h-8" /></div>
                    <h2 className="text-xl font-black text-white italic uppercase">Ownership Info</h2>
@@ -206,7 +201,7 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete, force
                 </div>
                 <button onClick={handleCreateWallet} className="w-full py-5 bg-orange-600 hover:bg-orange-500 text-white font-black rounded-xl uppercase transition-all italic">{isLoading ? 'Loading...' : 'Create My Wallet'}</button>
                 <button onClick={() => back("WALLET_PROMPT")} className="w-full text-zinc-600 text-[10px] font-bold uppercase">Go Back</button>
-              </motion.div>
+              </Motion.div>
             )}
           </AnimatePresence>
           {error && <p className="mt-4 text-[10px] text-red-500 uppercase font-black text-center">{error}</p>}
@@ -217,7 +212,7 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete, force
             Accord Trust Execution Framework v2.0
           </p>
         </div>
-      </motion.div>
+      </Motion.div>
     </div>
   );
 }

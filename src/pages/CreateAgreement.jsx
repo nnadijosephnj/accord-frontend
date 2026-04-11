@@ -4,9 +4,10 @@ import { useWallet } from '../context/WalletContext';
 import { apiCall } from '../utils/api';
 import { ethers } from 'ethers';
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from '../utils/contractABI';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { 
     ArrowLeft, 
+    Briefcase,
     CheckCircle2, 
     Copy, 
     MessageCircle, 
@@ -34,7 +35,7 @@ export default function CreateAgreement() {
 
     useEffect(() => {
         if (!address) navigate('/');
-    }, [address]);
+    }, [address, navigate]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -104,7 +105,7 @@ export default function CreateAgreement() {
     if (successData) {
         return (
             <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6">
-                <motion.div 
+                <Motion.div 
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     className="max-w-xl w-full bg-white rounded-[40px] shadow-2xl p-10 text-center border border-gray-100"
@@ -141,7 +142,7 @@ export default function CreateAgreement() {
                             Go to Dashboard
                         </button>
                     </div>
-                </motion.div>
+                </Motion.div>
             </div>
         );
     }

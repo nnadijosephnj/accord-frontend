@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
-    ShieldCheck, ArrowLeft, RefreshCw, Link as LinkIcon,
-    Briefcase, User, DollarSign, Calendar, Send, Moon, Sun
+    ArrowLeft, RefreshCw, Link as LinkIcon,
+    Briefcase, User, Send, Moon, Sun
 } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { apiCall } from '../utils/api';
-import { CONTRACT_ADDRESS, CONTRACT_ABI, USDC_ADDRESS } from '../utils/contractABI';
+import { USDC_ADDRESS } from '../utils/contractABI';
 
 export default function CreateClient() {
-    const { address, signer } = useWallet();
+    const { address } = useWallet();
     const { isDark, toggle } = useTheme();
     const [loading, setLoading] = useState(false);
     const [pasteLink, setPasteLink] = useState('');
@@ -33,7 +32,7 @@ export default function CreateClient() {
             const url = new URL(pasteLink);
             const id = url.pathname.split('/').pop();
             navigate(`/deal/${id}`);
-        } catch (e) {
+        } catch {
             navigate(`/deal/${pasteLink}`);
         }
     };
@@ -41,6 +40,9 @@ export default function CreateClient() {
     const handleCreateSubmit = async (e) => {
         e.preventDefault();
         try {
+            if (!address) {
+                throw new Error('Connect a wallet before creating an agreement');
+            }
             setLoading(true);
 
             // In V2, we generate a random bytes32 ID locally. 

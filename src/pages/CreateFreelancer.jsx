@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import {
-    ShieldCheck, ArrowLeft, Plus, CheckCircle2, Copy,
-    Check, Calendar, Wallet, DollarSign, MessageCircle, Moon, Sun
+    ArrowLeft, CheckCircle2, Copy,
+    Check, Wallet, MessageCircle, Moon, Sun
 } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { apiCall } from '../utils/api';
-import { CONTRACT_ADDRESS, CONTRACT_ABI, USDC_ADDRESS } from '../utils/contractABI';
+import { USDC_ADDRESS } from '../utils/contractABI';
 
 export default function CreateFreelancer() {
-    const { address, signer } = useWallet();
+    const { address } = useWallet();
     const { isDark, toggle } = useTheme();
     const [loading, setLoading] = useState(false);
     const [successData, setSuccessData] = useState(null);
@@ -32,6 +32,9 @@ export default function CreateFreelancer() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            if (!address) {
+                throw new Error('Connect a wallet before creating an agreement');
+            }
             setLoading(true);
 
             // In V2, we generate a random bytes32 ID locally. 
@@ -80,9 +83,9 @@ export default function CreateFreelancer() {
         return (
             <div className="min-h-screen bg-[#f5f6f7] dark:bg-[#0e0e0e] flex flex-col items-center justify-center p-6 text-center">
                 <div className="fixed top-0 right-0 w-[400px] h-[400px] bg-orange-200/20 dark:bg-orange-500/[0.04] rounded-full blur-[120px] -z-10" />
-                <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="w-24 h-24 bg-orange-100 dark:bg-orange-500/10 rounded-full flex items-center justify-center mb-8">
+                <Motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="w-24 h-24 bg-orange-100 dark:bg-orange-500/10 rounded-full flex items-center justify-center mb-8">
                     <CheckCircle2 className="w-12 h-12 text-orange-600 dark:text-orange-400" />
-                </motion.div>
+                </Motion.div>
                 <h1 className="text-3xl font-black text-zinc-900 dark:text-white mb-4 tracking-tight">Agreement Created! 🎉</h1>
                 <p className="text-zinc-500 dark:text-neutral-400 font-medium mb-10 max-w-sm">Your work agreement is secured on Injective. Share the link with your client to get paid.</p>
 

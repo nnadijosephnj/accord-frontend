@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, Moon, Sun, LayoutDashboard, FileText, Wallet, Bell, Settings, LogOut, Clock, CheckCircle2, Shield, Search, ChevronDown, ArrowRight, Menu } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion as Motion } from 'framer-motion';
+import { Plus, X, Moon, Sun, LayoutDashboard, FileText, Wallet, Bell, Settings, LogOut, CheckCircle2, Shield, ChevronDown, ArrowRight, Menu } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
@@ -15,7 +15,7 @@ function RoleModal({ isOpen, onClose }) {
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6">
       <div className="absolute inset-0 bg-zinc-900/40 dark:bg-black/60 backdrop-blur-md" onClick={onClose} />
-      <motion.div
+      <Motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         className="relative w-full sm:max-w-lg bg-white/70 dark:bg-[#1a1919]/90 backdrop-blur-2xl border border-white/40 dark:border-white/10 rounded-t-[2rem] sm:rounded-[2rem] overflow-hidden shadow-2xl"
@@ -62,13 +62,13 @@ function RoleModal({ isOpen, onClose }) {
             </div>
           </div>
         </div>
-      </motion.div>
+      </Motion.div>
     </div>
   );
 }
 
 export default function Dashboard() {
-  const { userProfile, address } = useWallet();
+  const { userProfile, address, logout, signer } = useWallet();
   const { isDark, toggle } = useTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -80,18 +80,9 @@ export default function Dashboard() {
 
   const [vaultBalances, setVaultBalances] = useState({ usdc: '0.00' });
   const [agreements, setAgreements] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { signer } = useWallet();
-
-  useEffect(() => {
-    if (address) {
-      loadStats();
-      loadAgreements();
-    }
-  }, [address]);
-
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
       if (!signer) return;
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
@@ -106,19 +97,29 @@ export default function Dashboard() {
     } catch (e) {
       console.warn("Vault load error:", e);
     }
-  };
+  }, [address, signer]);
 
-  const loadAgreements = async () => {
+  const loadAgreements = useCallback(async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       const data = await apiCall('/api/agreements');
       setAgreements(data || []);
     } catch (e) {
       console.warn(e.message);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!address) {
+      setIsLoading(false);
+      return;
+    }
+
+    loadStats();
+    loadAgreements();
+  }, [address, loadAgreements, loadStats]);
 
   const navItems = [
     { label: "Overview", icon: <LayoutDashboard className="w-5 h-5" />, path: "/dashboard" },
@@ -190,7 +191,7 @@ export default function Dashboard() {
               <p className="text-sm font-black truncate">{userName}</p>
               <p className="text-xs text-zinc-500 font-medium truncate">{address ? `${address.slice(0,6)}...${address.slice(-4)}` : 'Not connected'}</p>
             </div>
-            <button className="ml-auto p-2 text-zinc-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition-all">
+            <button onClick={logout} className="ml-auto p-2 text-zinc-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition-all">
               <LogOut className="w-4 h-4" />
             </button>
           </div>
@@ -350,6 +351,15 @@ export default function Dashboard() {
                         </td>
                       </tr>
                     ))
+                  ) : isLoading ? (
+                    <tr>
+                      <td colSpan="7" className="px-8 py-24 text-center">
+                        <div className="flex flex-col items-center justify-center gap-4 text-zinc-400 dark:text-neutral-500">
+                          <div className="w-10 h-10 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
+                          <p className="text-xs font-black uppercase tracking-widest">Loading transactions...</p>
+                        </div>
+                      </td>
+                    </tr>
                   ) : (
                     <tr>
                       <td colSpan="7" className="px-8 py-24 text-center">

@@ -27,6 +27,10 @@ export default function EmailSettings() {
       setError("Please enter a valid email address");
       return;
     }
+    if (!activeAccount?.address) {
+      setError("Connect a wallet before saving an email address");
+      return;
+    }
     setError("");
     setSaving(true);
     try {
@@ -34,7 +38,7 @@ export default function EmailSettings() {
       setUser((prev) => ({ ...prev, email: emailInput }));
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } catch (err) {
+    } catch {
       setError("Failed to save email. Please try again.");
     } finally {
       setSaving(false);

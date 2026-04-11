@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { motion, useInView, animate, AnimatePresence } from 'framer-motion';
+import { motion as Motion, useInView, animate } from 'framer-motion';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
 import { loadSlim } from '@tsparticles/slim';
 import { ShieldCheck, LockKeyhole, Coins, ArrowRight, UserCheck, Moon, Sun, Shield, Zap, Lock } from 'lucide-react';
@@ -7,7 +7,6 @@ import { useWallet } from '../context/WalletContext';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
-import IntegratedAuthModal from '../components/IntegratedAuthModal';
 
 function Counter({ from, to, duration = 2, delay = 0, formattingFn = (v) => v }) {
   const nodeRef = useRef(null);
@@ -135,7 +134,7 @@ export default function Landing() {
       />
 
       {/* Custom Cursor Glow */}
-      <motion.div 
+      <Motion.div 
         className="fixed top-0 left-0 w-[500px] h-[500px] bg-orange-500/30 dark:bg-[#ff9157]/15 rounded-full blur-[120px] pointer-events-none z-0 hidden lg:block"
         animate={{ x: mousePos.x - 250, y: mousePos.y - 250 }}
         transition={{ type: "tween", ease: "linear", duration: 0 }}
@@ -188,22 +187,22 @@ export default function Landing() {
 
           <div className="max-w-5xl mx-auto w-full flex flex-col items-center text-center relative z-10 pointer-events-none mt-20">
             {/* Headline Details */}
-            <motion.div
+            <Motion.div
               variants={containerVariants}
               initial="hidden"
               animate="visible"
               className="max-w-5xl mix-blend-normal backdrop-blur-[2px] rounded-[3rem] p-4"
             >
-              <motion.div variants={itemVariants} className="mb-8 flex justify-center">
+              <Motion.div variants={itemVariants} className="mb-8 flex justify-center">
                 <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-black/40 dark:bg-orange-500/10 border border-white/20 dark:border-orange-500/20 text-white dark:text-[#ff9157] text-xs font-black tracking-[0.3em] uppercase backdrop-blur-md shadow-2xl">
                   <span className="w-2 h-2 rounded-full bg-[#ff9157] animate-pulse shadow-[0_0_10px_#ff9157]" />
                   The Standard for Web3 Escrow
                 </span>
-              </motion.div>
+              </Motion.div>
               
               <h1 className="text-6xl md:text-8xl lg:text-[7rem] font-black tracking-tighter leading-[0.95] mb-10 drop-shadow-2xl">
                 {headlineWords.map((word, i) => (
-                  <motion.span 
+                  <Motion.span 
                     key={i} 
                     variants={itemVariants}
                     className="inline-block mr-3 md:mr-5"
@@ -215,15 +214,15 @@ export default function Landing() {
                     ) : (
                       word
                     )}
-                  </motion.span>
+                  </Motion.span>
                 ))}
               </h1>
               
-              <motion.p variants={itemVariants} className="text-2xl md:text-3xl text-zinc-700 dark:text-neutral-300 font-bold mb-14 max-w-3xl mx-auto leading-relaxed drop-shadow-lg p-2">
+              <Motion.p variants={itemVariants} className="text-2xl md:text-3xl text-zinc-700 dark:text-neutral-300 font-bold mb-14 max-w-3xl mx-auto leading-relaxed drop-shadow-lg p-2">
                 Create a deal. Share a link. Get paid safely. <br className="hidden md:block" /> Onchain. Unstoppable. Trustless.
-              </motion.p>
+              </Motion.p>
               
-              <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-6 pointer-events-auto">
+              <Motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-6 pointer-events-auto">
                 <button
                   onClick={handleLoginStart}
                   disabled={isConnecting}
@@ -233,15 +232,15 @@ export default function Landing() {
                   <span className="relative z-10 tracking-wide">{isConnecting ? 'Signing In...' : 'Sign In'}</span>
                   <ArrowRight className="w-6 h-6 relative z-10 group-hover:translate-x-2 transition-transform" strokeWidth={3} />
                 </button>
-              </motion.div>
-            </motion.div>
+              </Motion.div>
+            </Motion.div>
           </div>
         </section>
 
         {/* HOW IT WORKS SECTION */}
         <section className="py-40 relative z-10 bg-white/40 dark:bg-[#0a0a0a]/80 backdrop-blur-3xl border-y border-orange-500/10 dark:border-white/5">
           <div className="max-w-7xl mx-auto px-6">
-            <motion.div 
+            <Motion.div 
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
@@ -249,7 +248,7 @@ export default function Landing() {
             >
               <h2 className="text-5xl md:text-7xl font-black mb-6 tracking-tight drop-shadow-lg">How Accord Works</h2>
               <div className="w-32 h-2 mx-auto rounded-full bg-gradient-to-r from-orange-600 to-[#ff9157] shadow-[0_0_20px_rgba(234,88,12,0.8)]" />
-            </motion.div>
+            </Motion.div>
 
             <div className="grid lg:grid-cols-3 gap-16 relative">
               {/* Dotted connecting line (desktop) */}
@@ -275,7 +274,7 @@ export default function Landing() {
                   icon: <Coins className="w-14 h-14" /> 
                 }
               ].map((step, i) => (
-                <motion.div
+                <Motion.div
                   key={i}
                   initial={{ opacity: 0, y: 80 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -287,16 +286,16 @@ export default function Landing() {
                     <div className="absolute -top-5 -right-5 w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-700 text-white font-black text-lg flex items-center justify-center shadow-[0_0_20px_rgba(234,88,12,0.6)]">
                       {step.num}
                     </div>
-                    <motion.div 
+                    <Motion.div 
                       animate={{ y: [0, -8, 0] }} 
                       transition={{ duration: 3, repeat: Infinity, delay: i * 0.5, ease: "easeInOut" }}
                     >
                       {step.icon}
-                    </motion.div>
+                    </Motion.div>
                   </div>
                   <h3 className="text-3xl font-black mb-4">{step.title}</h3>
                   <p className="text-xl text-zinc-600 dark:text-neutral-400 font-medium max-w-sm leading-relaxed">{step.desc}</p>
-                </motion.div>
+                </Motion.div>
               ))}
             </div>
           </div>
@@ -327,7 +326,7 @@ export default function Landing() {
         <section className="py-40 relative z-10 bg-zinc-100 dark:bg-[#0e0e0e]/80 border-y border-zinc-200/50 dark:border-white/5 backdrop-blur-xl">
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid lg:grid-cols-2 gap-20 items-center">
-              <motion.div 
+              <Motion.div 
                 initial={{ opacity: 0, x: -80 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
@@ -344,7 +343,7 @@ export default function Landing() {
                     { title: "Instant Payment", desc: "Payout releases the exact millisecond the client hits approve. Pure zero-delay processing.", icon: <Zap className="w-8 h-8" /> },
                     { title: "File Protection", desc: "Watermarked preview shown first. The final full asset unlocks only after payment hits.", icon: <Lock className="w-8 h-8" /> }
                   ].map((item, i) => (
-                    <motion.li 
+                    <Motion.li 
                       key={i}
                       whileHover={{ x: 15, scale: 1.02 }}
                       transition={{ type: "spring", stiffness: 300, damping: 20 }}
@@ -357,13 +356,13 @@ export default function Landing() {
                         <h4 className="text-2xl font-black mb-2 group-hover:text-orange-600 dark:group-hover:text-[#ff9157] transition-colors">{item.title}</h4>
                         <p className="text-lg text-zinc-600 dark:text-neutral-400 font-medium leading-relaxed">{item.desc}</p>
                       </div>
-                    </motion.li>
+                    </Motion.li>
                   ))}
                 </ul>
-              </motion.div>
+              </Motion.div>
 
               {/* Injective Banner Feature */}
-              <motion.div 
+              <Motion.div 
                 initial={{ opacity: 0, scale: 0.9, rotateY: -15 }}
                 whileInView={{ opacity: 1, scale: 1, rotateY: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
@@ -390,7 +389,7 @@ export default function Landing() {
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </Motion.div>
             </div>
           </div>
         </section>

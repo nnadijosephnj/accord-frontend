@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { WalletProvider, useWallet } from './context/WalletContext';
+import { WalletProvider } from './context/WalletContext';
 import { ThemeProvider } from './context/ThemeContext';
-import { ThirdwebProvider, useActiveAccount } from "thirdweb/react";
+import { ThirdwebProvider } from "thirdweb/react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { client } from "./lib/thirdwebClient";
 // AuthPage removed as it is now integrated into Landing

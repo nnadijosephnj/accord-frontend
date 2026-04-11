@@ -32,7 +32,7 @@ export default function Settings() {
       if (error) throw error;
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    } catch (err) {
+    } catch {
       alert('Error updating profile');
     } finally {
       setSaving(false);

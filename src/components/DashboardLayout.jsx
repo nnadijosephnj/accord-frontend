@@ -56,9 +56,10 @@ const NAV_ITEMS = [
 
 export default function DashboardLayout({ children }) {
   const { user, isGuest, openAuthModal } = useAuth();
-  const { address, logout } = useWallet();
+  const { address, logout, userProfile } = useWallet();
   const { isDark, toggle: toggleTheme } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expanded, setExpanded] = useState({ Agreements: true, Vault: false });
 
@@ -80,10 +81,6 @@ export default function DashboardLayout({ children }) {
       openAuthModal('WALLET_PROMPT');
     }
   }, [isGuest, openAuthModal]);
-
-  const handleDismissSetup = () => {
-    localStorage.setItem('hide-wallet-setup', 'true');
-  };
 
   const renderNav = () =>
     NAV_ITEMS.map((item) => {
@@ -310,4 +307,3 @@ export default function DashboardLayout({ children }) {
     </div>
   );
 }
-

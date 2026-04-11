@@ -10,12 +10,12 @@ import IntegratedAuthModal from "../components/IntegratedAuthModal";
 const WalletContext = createContext();
 
 export function WalletProvider({ children }) {
-    const { user, isConnected, authModal, closeAuthModal, openAuthModal } = useAuth();
+    const { user, setUser, isConnected, authModal, closeAuthModal, openAuthModal } = useAuth();
     const activeAccount = useActiveAccount();
     const activeWallet = useActiveWallet();
     const { disconnect } = useDisconnect();
-    const [provider, setProvider] = useState(null);
     const [signer, setSigner] = useState(null);
+    const provider = activeWallet ?? null;
 
     useEffect(() => {
         if (activeAccount) {
@@ -62,6 +62,7 @@ export function WalletProvider({ children }) {
             provider, 
             signer, 
             userProfile: user, 
+            setUserProfile: setUser,
             isLoggedIn: isConnected,
             logout,
             connectWallet,

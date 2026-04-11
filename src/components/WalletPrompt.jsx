@@ -1,12 +1,10 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { Wallet, Zap, ShieldCheck, ArrowRight, Loader2, Link as LinkIcon } from "lucide-react";
+import { Wallet, Zap, Link as LinkIcon } from "lucide-react";
 import { useConnect } from "thirdweb/react";
 import { createWallet } from "thirdweb/wallets";
 import { client, injectiveTestnet } from "../lib/thirdwebClient";
-import { getUserByEmail, linkWalletToUser } from "../lib/supabaseHelpers";
 
-export default function WalletPrompt({ email, loginMethod, onComplete }) {
+export default function WalletPrompt({ onComplete }) {
   const { connect } = useConnect();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -41,7 +39,7 @@ export default function WalletPrompt({ email, loginMethod, onComplete }) {
     try {
       // Logic would go here to confirm the in-app wallet is the primary
       onComplete();
-    } catch (err) {
+    } catch {
         setError("Failed to initialize wallet");
     } finally {
         setLoading(false);
