@@ -35,12 +35,14 @@ export function AuthProvider({ children }) {
 
   // 2. Sync public.users based on either Supabase Session (Email) or Active Wallet
   useEffect(() => {
+    // Safety fallback: If Thirdweb takes way too long, stop the spinner anyway
+    const safetyTimeout = setTimeout(() => {
+        if (loading) setLoading(false);
+    }, 6000);
+
     async function syncUser() {
-      // If we're still waiting for Thirdweb to initialize its state
-      if (activeAccount === undefined) {
-        setLoading(true);
-        return;
-      }
+      // Thirdweb's activeAccount starts as undefined, then becomes null or account
+      if (activeAccount === undefined) return;
 
       const email = session?.user?.email;
       const walletAddress = activeAccount?.address;
@@ -49,17 +51,11 @@ export function AuthProvider({ children }) {
         let dbUser = null;
 
         if (email) {
-          // Path: Logged in via Google/Email (Supabase Auth)
           dbUser = await upsertUserByEmail({ 
             email, 
             loginMethod: session.app_metadata.provider || 'email' 
           });
-          
-          // If they also have an active wallet, and it's not linked yet, we might need to link it
-          // But according to the user's flow, linking happens in the WalletPrompt/Settings.
-          // For now, if both exist, prioritize the DB record linked to the email.
         } else if (walletAddress) {
-          // Path: Logged in via direct wallet connection (No email yet)
           dbUser = await upsertUserByWallet({ 
             walletAddress, 
             walletType: activeWallet?.id === 'in-app' ? 'generated' : 'external',
