@@ -4,6 +4,7 @@ import Particles, { initParticlesEngine } from '@tsparticles/react';
 import { loadSlim } from '@tsparticles/slim';
 import { ShieldCheck, LockKeyhole, Coins, ArrowRight, UserCheck, Moon, Sun, Shield, Zap, Lock } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
+import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import IntegratedAuthModal from '../components/IntegratedAuthModal';
@@ -32,6 +33,7 @@ function Counter({ from, to, duration = 2, delay = 0, formattingFn = (v) => v })
 
 export default function Landing() {
   const { address, openAuthModal, isConnecting } = useWallet();
+  const { isGuest } = useAuth();
   const { isDark, toggle } = useTheme();
   const navigate = useNavigate();
   const [init, setInit] = useState(false);
@@ -55,10 +57,10 @@ export default function Landing() {
   }, []);
 
   useEffect(() => {
-    if (address) {
+    if (address || isGuest) {
       navigate('/dashboard');
     }
-  }, [address, navigate]);
+  }, [address, isGuest, navigate]);
 
   const handleLoginStart = () => {
     openAuthModal('CHOICE');
