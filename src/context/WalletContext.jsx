@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { useActiveAccount, useActiveWallet, useDisconnect } from "thirdweb/react";
 import { ethers6Adapter } from "thirdweb/adapters/ethers6";
@@ -10,6 +11,7 @@ import IntegratedAuthModal from "../components/IntegratedAuthModal";
 const WalletContext = createContext();
 
 export function WalletProvider({ children }) {
+    const navigate = useNavigate();
     const { user, setUser, isConnected, authModal, closeAuthModal, openAuthModal } = useAuth();
     const activeAccount = useActiveAccount();
     const activeWallet = useActiveWallet();
@@ -75,8 +77,8 @@ export function WalletProvider({ children }) {
                     onClose={closeAuthModal}
                     onComplete={() => {
                         closeAuthModal();
-                        // Use replace so the browser doesn't reload and lose Thirdweb wallet state
-                        window.location.replace('/dashboard/overview');
+                        // True client-side navigation — no reload, Thirdweb state preserved
+                        navigate('/dashboard/overview');
                     }}
                     forceStep={authModal.step}
                 />

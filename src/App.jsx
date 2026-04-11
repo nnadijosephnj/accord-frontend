@@ -47,8 +47,8 @@ function App() {
     <ThirdwebProvider client={client}>
       <AuthProvider>
         <ThemeProvider>
-          <WalletProvider>
-            <Router>
+          <Router>
+            <WalletProvider>
           <Routes>
             {/* Public */}
             <Route path="/" element={<Landing />} />
@@ -114,8 +114,8 @@ function App() {
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-            </Router>
-          </WalletProvider>
+            </WalletProvider>
+          </Router>
         </ThemeProvider>
       </AuthProvider>
     </ThirdwebProvider>
@@ -128,34 +128,35 @@ function ProtectedRoute({ children }) {
 
   useEffect(() => {
     if (loading) {
-      const t = setTimeout(() => setShowSkip(true), 4000);
+      const t = setTimeout(() => setShowSkip(true), 5000);
       return () => clearTimeout(t);
     }
   }, [loading]);
-  
-  if (loading) {
-    const isLoggingOut = !isConnected && !isGuest && window.location.pathname.startsWith('/dashboard');
 
-    return <div className="h-screen w-full flex items-center justify-center bg-[#f5f6f7] dark:bg-[#0e0e0e]">
-      <div className="flex flex-col items-center gap-6">
-        <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-        <div className="text-center">
+  // Always show spinner while loading — never redirect during this phase
+  if (loading) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-[#f5f6f7] dark:bg-[#0e0e0e]">
+        <div className="flex flex-col items-center gap-6">
+          <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+          <div className="text-center">
             <span className="text-zinc-500 font-bold italic tracking-widest text-sm uppercase block">
-              {isLoggingOut ? 'Signing Out...' : 'Entering Accord...'}
+              Entering Accord...
             </span>
-            {showSkip && !isLoggingOut && (
-                <button 
-                  onClick={() => window.location.reload()} 
-                  className="mt-4 text-[10px] text-orange-500 font-black uppercase tracking-widest hover:underline"
-                >
-                    Taking too long? Click to Refresh
-                </button>
+            {showSkip && (
+              <button
+                onClick={() => window.location.href = '/'}
+                className="mt-4 text-[10px] text-orange-500 font-black uppercase tracking-widest hover:underline"
+              >
+                Taking too long? Go Home
+              </button>
             )}
+          </div>
         </div>
       </div>
-    </div>;
+    );
   }
-  
+
   if (!isConnected && !isGuest) {
     return <Navigate to="/" replace />;
   }
