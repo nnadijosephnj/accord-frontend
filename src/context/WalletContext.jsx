@@ -1,18 +1,19 @@
 import React, { createContext, useContext, useEffect, useLayoutEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ethers6Adapter } from "thirdweb/adapters/ethers6";
-import { defineChain } from "thirdweb/chains";
 import { useActiveAccount, useActiveWallet, useDisconnect } from "thirdweb/react";
 import IntegratedAuthModal from "../components/IntegratedAuthModal";
 import { useAuth } from "./AuthContext";
 import { client } from "../lib/thirdwebClient";
 import { clearWalletApiAuth, configureWalletApiAuth } from "../lib/walletApiAuth";
+import { useNetwork } from "./NetworkContext";
 
 const WalletContext = createContext();
 
 export function WalletProvider({ children }) {
   const navigate = useNavigate();
   const { user, isConnected, authModal, closeAuthModal, openAuthModal } = useAuth();
+  const { currentChain, network } = useNetwork();
   const activeAccount = useActiveAccount();
   const activeWallet = useActiveWallet();
   const { disconnect } = useDisconnect();
@@ -31,7 +32,7 @@ export function WalletProvider({ children }) {
       try {
         const nextSigner = await ethers6Adapter.signer.toEthers({
           client,
-          chain: defineChain(1439),
+          chain: currentChain,
           account: activeAccount,
         });
 
@@ -47,7 +48,7 @@ export function WalletProvider({ children }) {
     return () => {
       isMounted = false;
     };
-  }, [activeAccount]);
+  }, [activeAccount, currentChain]);
 
   useLayoutEffect(() => {
     if (!activeAccount?.address || typeof activeAccount.signMessage !== "function") {
@@ -87,6 +88,8 @@ export function WalletProvider({ children }) {
         signer,
         userProfile: user,
         isLoggedIn: isConnected,
+        network,
+        currentChain,
         logout,
         connectWallet,
         openAuthModal,

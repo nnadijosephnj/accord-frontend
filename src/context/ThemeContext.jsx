@@ -1,31 +1,66 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { useAuth } from "./AuthContext";
 
-const ThemeContext = createContext();
+const ThemeContext = createContext(null);
+export const THEME_STORAGE_KEY = "accord-theme";
+
+function normalizeTheme(value) {
+  return value === "light" ? "light" : "dark";
+}
+
+function readStoredTheme() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return normalizeTheme(window.localStorage.getItem(THEME_STORAGE_KEY) || "dark");
+}
 
 export function ThemeProvider({ children }) {
-  const [isDark, setIsDark] = useState(() => {
-    return localStorage.getItem('accord-theme') === 'dark';
-  });
+  const { user } = useAuth();
+  const [theme, setThemeState] = useState(() => readStoredTheme() || "dark");
 
   useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('accord-theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('accord-theme', 'light');
+    if (typeof window === "undefined") {
+      return;
     }
-  }, [isDark]);
 
-  const toggle = () => setIsDark(v => !v);
+    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    if (!storedTheme && user?.theme) {
+      setThemeState(normalizeTheme(user.theme));
+    }
+  }, [user?.theme]);
 
-  return (
-    <ThemeContext.Provider value={{ isDark, toggle }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  useEffect(() => {
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+      window.localStorage.setItem(THEME_STORAGE_KEY, "dark");
+      return;
+    }
+
+    document.documentElement.classList.remove("dark");
+    window.localStorage.setItem(THEME_STORAGE_KEY, "light");
+  }, [theme]);
+
+  const setTheme = (nextTheme) => setThemeState(normalizeTheme(nextTheme));
+  const toggle = () => setThemeState((current) => (current === "dark" ? "light" : "dark"));
+
+  const value = {
+    theme,
+    isDark: theme === "dark",
+    setTheme,
+    toggle,
+  };
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {
-  return useContext(ThemeContext);
+  const context = useContext(ThemeContext);
+
+  if (!context) {
+    throw new Error("useTheme must be used inside ThemeProvider");
+  }
+
+  return context;
 }

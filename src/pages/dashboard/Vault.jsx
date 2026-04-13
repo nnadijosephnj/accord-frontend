@@ -6,9 +6,10 @@ import * as ethers from 'ethers';
 import { CONTRACT_ADDRESS, CONTRACT_ABI, USDC_ADDRESS } from '../../utils/contractABI';
 
 export default function VaultPage() {
-  const { address, signer } = useWallet();
+  const { address, signer, network } = useWallet();
   const [vaultBalance, setVaultBalance] = useState('0.00');
   const [loading, setLoading] = useState(true);
+  const networkLabel = network === 'mainnet' ? 'Injective EVM Mainnet' : 'Injective EVM Testnet';
 
   useEffect(() => {
     if (signer && address) loadBalance();
@@ -134,7 +135,7 @@ export default function VaultPage() {
               <p className="text-sm font-mono font-semibold text-zinc-900 dark:text-white mb-1">
                 {address ? `${address.slice(0, 10)}...${address.slice(-8)}` : '—'}
               </p>
-              <p className="text-xs text-zinc-400 dark:text-zinc-500">Network: Injective EVM Testnet</p>
+              <p className="text-xs text-zinc-400 dark:text-zinc-500">Network: {networkLabel}</p>
             </div>
           </div>
         </div>

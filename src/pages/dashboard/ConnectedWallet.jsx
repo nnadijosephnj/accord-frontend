@@ -4,8 +4,9 @@ import { Wallet, Copy, Check, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { useWallet } from '../../context/WalletContext';
 
 export default function ConnectedWallet() {
-  const { address, logout } = useWallet();
+  const { address, logout, network } = useWallet();
   const [copied, setCopied] = useState(false);
+  const networkLabel = network === 'mainnet' ? 'Injective EVM Mainnet' : 'Injective EVM Testnet';
 
   const handleCopy = () => {
     if (address) {
@@ -34,7 +35,7 @@ export default function ConnectedWallet() {
           </div>
           <div>
             <p className="text-sm font-bold text-zinc-900 dark:text-white">Active Wallet</p>
-            <p className="text-xs text-zinc-400 dark:text-zinc-500">Injective EVM Testnet</p>
+            <p className="text-xs text-zinc-400 dark:text-zinc-500">{networkLabel}</p>
           </div>
         </div>
 
@@ -64,7 +65,7 @@ export default function ConnectedWallet() {
             </label>
             <div className="flex items-center gap-2 p-3 bg-zinc-50 dark:bg-white/5 rounded-xl border border-zinc-200 dark:border-white/5">
               <div className="w-2 h-2 bg-emerald-400 rounded-full" />
-              <p className="text-sm text-zinc-900 dark:text-white font-medium">Injective EVM Testnet</p>
+              <p className="text-sm text-zinc-900 dark:text-white font-medium">{networkLabel}</p>
             </div>
           </div>
 

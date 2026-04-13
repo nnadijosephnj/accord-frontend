@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 import { useTheme } from '../context/ThemeContext';
+import { resolveIpfsUrl } from '../lib/ipfs';
 
 function shortenAddress(addr) {
   if (!addr) return '';
@@ -51,7 +52,7 @@ const NAV_ITEMS = [
 ];
 
 export default function DashboardLayout({ children }) {
-  const { address, logout } = useWallet();
+  const { address, logout, userProfile } = useWallet();
   const { isDark, toggle: toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
@@ -67,7 +68,18 @@ export default function DashboardLayout({ children }) {
 
   const closeSidebar = () => setSidebarOpen(false);
 
-  const displayName = address ? shortenAddress(address) : 'Wallet User';
+  const profileName = userProfile?.display_name?.trim();
+  const displayName = profileName || (address ? shortenAddress(address) : 'Wallet User');
+  const avatarUrl = resolveIpfsUrl(userProfile?.avatar_url || '');
+  const avatarFallback = profileName
+    ? profileName
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase() || '')
+        .join('')
+    : address
+      ? address.slice(2, 4).toUpperCase()
+      : 'AC';
 
   const renderNav = () =>
     NAV_ITEMS.map((item) => {
@@ -184,9 +196,13 @@ export default function DashboardLayout({ children }) {
       <div className="px-4 py-4 border-t border-zinc-100 dark:border-white/5 shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl overflow-hidden border border-zinc-200 dark:border-white/10 shrink-0">
-            <div className="w-full h-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center text-white font-bold text-xs">
-              {address ? address.slice(2, 4).toUpperCase() : 'AC'}
-            </div>
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center text-white font-bold text-xs">
+                {avatarFallback}
+              </div>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-bold text-zinc-800 dark:text-white truncate">
@@ -246,7 +262,7 @@ export default function DashboardLayout({ children }) {
             <p className="text-sm text-zinc-600 dark:text-zinc-400 flex items-center gap-2">
               Hi,{' '}
               <Link to="/dashboard/settings" className="group flex items-center gap-1.5 min-w-0">
-                <span className="font-bold text-zinc-900 dark:text-white uppercase transition-colors group-hover:text-orange-600 dark:group-hover:text-orange-400 truncate">
+                <span className="font-bold text-zinc-900 dark:text-white transition-colors group-hover:text-orange-600 dark:group-hover:text-orange-400 truncate">
                   {displayName}
                 </span>
                 <Settings className="w-3.5 h-3.5 text-zinc-400 group-hover:text-orange-500 transition-colors" />

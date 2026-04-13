@@ -5,12 +5,16 @@ export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_KEY
 );
 
-export async function upsertUserByWallet({ walletAddress, walletType = "external" }) {
+function normalizeWalletAddress(walletAddress) {
   if (!walletAddress) {
     throw new Error("walletAddress is required");
   }
 
-  const addr = walletAddress.toLowerCase();
+  return walletAddress.toLowerCase();
+}
+
+export async function upsertUserByWallet({ walletAddress, walletType = "external" }) {
+  const addr = normalizeWalletAddress(walletAddress);
 
   const { data: existing, error: existingError } = await supabase
     .from("users")
@@ -75,7 +79,7 @@ export async function getUserByWallet(walletAddress) {
   const { data, error } = await supabase
     .from("users")
     .select("*")
-    .eq("wallet_address", walletAddress.toLowerCase())
+    .eq("wallet_address", normalizeWalletAddress(walletAddress))
     .maybeSingle();
 
   if (error) {
@@ -84,4 +88,109 @@ export async function getUserByWallet(walletAddress) {
   }
 
   return data || null;
+}
+
+export async function updateUserByWallet(walletAddress, updates) {
+  const addr = normalizeWalletAddress(walletAddress);
+
+  const payload = {
+    ...updates,
+    updated_at: new Date().toISOString(),
+  };
+
+  const { data, error } = await supabase
+    .from("users")
+    .update(payload)
+    .eq("wallet_address", addr)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Supabase updateUserByWallet error:", error.message);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getAddressBookEntries(walletAddress) {
+  const addr = normalizeWalletAddress(walletAddress);
+
+  const { data, error } = await supabase
+    .from("address_book")
+    .select("*")
+    .eq("wallet_address", addr)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Supabase getAddressBookEntries error:", error.message);
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function addAddressBookEntry({ walletAddress, nickname, savedAddress }) {
+  const addr = normalizeWalletAddress(walletAddress);
+
+  const { data, error } = await supabase
+    .from("address_book")
+    .insert([
+      {
+        wallet_address: addr,
+        nickname,
+        saved_address: savedAddress.toLowerCase(),
+      },
+    ])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Supabase addAddressBookEntry error:", error.message);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function updateAddressBookEntry({
+  id,
+  walletAddress,
+  nickname,
+  savedAddress,
+}) {
+  const addr = normalizeWalletAddress(walletAddress);
+
+  const { data, error } = await supabase
+    .from("address_book")
+    .update({
+      nickname,
+      saved_address: savedAddress.toLowerCase(),
+    })
+    .eq("id", id)
+    .eq("wallet_address", addr)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Supabase updateAddressBookEntry error:", error.message);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function deleteAddressBookEntry({ id, walletAddress }) {
+  const addr = normalizeWalletAddress(walletAddress);
+
+  const { error } = await supabase
+    .from("address_book")
+    .delete()
+    .eq("id", id)
+    .eq("wallet_address", addr);
+
+  if (error) {
+    console.error("Supabase deleteAddressBookEntry error:", error.message);
+    throw error;
+  }
 }

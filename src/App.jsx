@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { WalletProvider } from './context/WalletContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { NetworkProvider } from './context/NetworkContext';
 import { ThirdwebProvider } from "thirdweb/react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { client } from "./lib/thirdwebClient";
@@ -10,6 +11,7 @@ import AgreementRoom from './pages/AgreementRoom';
 
 // Dashboard Layout
 import DashboardLayout from './components/DashboardLayout';
+import NetworkBanner from './components/NetworkBanner';
 
 // Dashboard Pages
 import Overview from './pages/dashboard/Overview';
@@ -45,9 +47,11 @@ function App() {
     <ThirdwebProvider client={client}>
       <AuthProvider>
         <ThemeProvider>
-          <Router>
-            <WalletProvider>
-          <Routes>
+          <NetworkProvider>
+            <Router>
+              <WalletProvider>
+                <NetworkBanner />
+                <Routes>
             {/* Public */}
             <Route path="/" element={<Landing />} />
 
@@ -111,9 +115,10 @@ function App() {
 
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-            </WalletProvider>
-          </Router>
+                </Routes>
+              </WalletProvider>
+            </Router>
+          </NetworkProvider>
         </ThemeProvider>
       </AuthProvider>
     </ThirdwebProvider>

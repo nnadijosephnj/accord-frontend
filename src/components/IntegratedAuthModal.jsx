@@ -14,8 +14,9 @@ import {
 import { ConnectButton, useConnectModal } from "thirdweb/react";
 import { inAppWallet } from "thirdweb/wallets";
 import { useAuth } from "../context/AuthContext";
+import { useNetwork } from "../context/NetworkContext";
 import { upsertUserByWallet } from "../lib/supabaseHelpers";
-import { client, injectiveTestnet } from "../lib/thirdwebClient";
+import { client } from "../lib/thirdwebClient";
 import { clearPendingWalletType, setPendingWalletType } from "../lib/walletAuthState";
 
 const flowVariants = {
@@ -26,6 +27,7 @@ const flowVariants = {
 
 export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
   const { closeAuthModal } = useAuth();
+  const { currentChain, currentConfig } = useNetwork();
   const { connect, isConnecting } = useConnectModal();
   const [step, setStep] = useState("CHOICE");
   const [direction, setDirection] = useState(1);
@@ -58,7 +60,7 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
 
       const wallet = await connect({
         client,
-        chain: injectiveTestnet,
+        chain: currentChain,
         wallets: [generatedWallet],
         recommendedWallets: [generatedWallet],
         showAllWallets: false,
@@ -148,13 +150,16 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
                   </div>
                   <h2 className="text-2xl font-black uppercase tracking-tight text-white">Sign In</h2>
                   <p className="mt-1 text-sm text-zinc-500">Choose how to connect to Accord</p>
+                  <p className="mt-2 text-[10px] font-black uppercase tracking-[0.28em] text-orange-500">
+                    {currentConfig.label} network
+                  </p>
                 </div>
 
                 <div className="space-y-4">
                   <div className="connect-wallet-wrapper overflow-hidden rounded-2xl border border-white/10 transition-colors hover:border-orange-500/40">
                     <ConnectButton
                       client={client}
-                      chain={injectiveTestnet}
+                      chain={currentChain}
                       hiddenWallets={["inApp", "embedded"]}
                       showAllWallets={true}
                       theme="dark"
