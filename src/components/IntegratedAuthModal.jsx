@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { motion as Motion, AnimatePresence } from "framer-motion";
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion as Motion } from "framer-motion";
 import {
   ArrowLeft,
   Download,
@@ -15,24 +15,36 @@ import { ConnectButton, useConnectModal } from "thirdweb/react";
 import { inAppWallet } from "thirdweb/wallets";
 import { useAuth } from "../context/AuthContext";
 import { useNetwork } from "../context/NetworkContext";
+import { useTheme } from "../context/ThemeContext";
+import { clearPendingWalletType, setPendingWalletType } from "../lib/walletAuthState";
 import { upsertUserByWallet } from "../lib/supabaseHelpers";
 import { client } from "../lib/thirdwebClient";
-import { clearPendingWalletType, setPendingWalletType } from "../lib/walletAuthState";
 
 const flowVariants = {
-  enter: (direction) => ({ x: direction > 0 ? 300 : -300, opacity: 0 }),
-  center: { x: 0, opacity: 1 },
-  exit: (direction) => ({ x: direction < 0 ? 300 : -300, opacity: 0 }),
+  enter: (direction) => ({ opacity: 0, x: direction > 0 ? 28 : -28 }),
+  center: { opacity: 1, x: 0 },
+  exit: (direction) => ({ opacity: 0, x: direction < 0 ? 28 : -28 }),
 };
 
 export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
-  const { closeAuthModal } = useAuth();
+  const { authModal, closeAuthModal } = useAuth();
   const { currentChain, currentConfig } = useNetwork();
+  const { isDark } = useTheme();
   const { connect, isConnecting } = useConnectModal();
   const [step, setStep] = useState("CHOICE");
   const [direction, setDirection] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    setStep(authModal?.step || "CHOICE");
+    setDirection(1);
+    setError(null);
+  }, [authModal?.step, isOpen]);
 
   const next = (value) => {
     setDirection(1);
@@ -78,8 +90,11 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
         });
       }
 
-      if (onComplete) onComplete();
-      else closeAuthModal();
+      if (onComplete) {
+        onComplete();
+      } else {
+        closeAuthModal();
+      }
     } catch (err) {
       clearPendingWalletType();
       console.error("Create wallet error:", err);
@@ -100,41 +115,57 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
         });
       }
 
-      if (onComplete) onComplete();
-      else closeAuthModal();
+      if (onComplete) {
+        onComplete();
+      } else {
+        closeAuthModal();
+      }
     } catch (err) {
       console.error("External connect error:", err);
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-      <Motion.div
+      <Motion.button
+        type="button"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-black/80 backdrop-blur-xl"
+        className="absolute inset-0 bg-[var(--accord-backdrop)] backdrop-blur-[12px]"
+        aria-label="Close sign in modal"
       />
 
       <Motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="relative flex min-h-[460px] w-full max-w-xl flex-col overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#0a0a0a] shadow-2xl"
+        initial={{ opacity: 0, y: 20, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 20, scale: 0.98 }}
+        className="glass-modal relative z-10 flex min-h-[480px] w-full max-w-[560px] flex-col overflow-hidden"
       >
-        <button
-          onClick={onClose}
-          className="absolute right-8 top-8 z-20 text-zinc-500 transition-colors hover:text-white"
-        >
-          <X size={20} />
-        </button>
+        <div className="flex items-start justify-between border-b border-[var(--accord-border-soft)] px-6 py-5 sm:px-8">
+          <div>
+            <p className="eyebrow">Access</p>
+            <h2 className="mt-2 text-[28px] font-bold leading-tight text-[var(--accord-text)]">Sign in to Accord</h2>
+            <p className="mt-2 text-sm text-[var(--accord-muted)]">Choose a wallet path that fits how you want to work.</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="icon-button h-10 w-10"
+            aria-label="Close modal"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
 
-        <div className="flex flex-grow flex-col justify-center p-10">
+        <div className="flex flex-1 flex-col justify-between px-6 py-6 sm:px-8">
           <AnimatePresence mode="wait" custom={direction}>
-            {step === "CHOICE" && (
+            {step === "CHOICE" ? (
               <Motion.div
                 key="choice"
                 custom={direction}
@@ -144,172 +175,180 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
                 exit="exit"
                 className="space-y-6"
               >
-                <div className="mb-6 text-center">
-                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-500/10">
-                    <Wallet className="h-8 w-8 text-orange-500" />
-                  </div>
-                  <h2 className="text-2xl font-black uppercase tracking-tight text-white">Sign In</h2>
-                  <p className="mt-1 text-sm text-zinc-500">Choose how to connect to Accord</p>
-                  <p className="mt-2 text-[10px] font-black uppercase tracking-[0.28em] text-orange-500">
-                    {currentConfig.label} network
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="connect-wallet-wrapper overflow-hidden rounded-2xl border border-white/10 transition-colors hover:border-orange-500/40">
-                    <ConnectButton
-                      client={client}
-                      chain={currentChain}
-                      hiddenWallets={["inApp", "embedded"]}
-                      showAllWallets={true}
-                      theme="dark"
-                      connectModal={{
-                        title: "Connect to Accord",
-                        size: "compact",
-                        showThirdwebBranding: false,
-                      }}
-                      onConnect={handleExternalConnect}
-                      connectButton={{
-                        label: (
-                          <span className="flex items-center gap-3">
-                            <Wallet className="h-5 w-5" />
-                            <span className="font-black uppercase tracking-wide">Connect Wallet</span>
-                          </span>
-                        ),
-                        style: {
-                          width: "100%",
-                          padding: "20px 24px",
-                          borderRadius: "1rem",
-                          background: "rgba(255,255,255,0.05)",
-                          color: "white",
-                          fontSize: "15px",
-                          border: "none",
-                          cursor: "pointer",
-                        },
-                      }}
-                    />
-                  </div>
-
-                  <div className="relative py-3">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-white/5" />
+                <div className="surface-card">
+                  <div className="mb-6 flex items-center justify-between gap-4">
+                    <div>
+                      <p className="eyebrow">Network</p>
+                      <p className="mt-2 text-base font-semibold text-[var(--accord-text)]">{currentConfig.label}</p>
                     </div>
-                    <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest text-zinc-600">
-                      <span className="bg-[#0a0a0a] px-4">OR</span>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--accord-primary-line)] bg-[var(--accord-primary-soft)]">
+                      <Wallet className="h-5 w-5 text-[var(--accord-primary)]" />
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => next("CREATE_INFO")}
-                    className="group relative w-full overflow-hidden rounded-2xl border border-orange-500/20 bg-gradient-to-br from-orange-600/20 to-orange-500/5 p-6 text-left transition-all hover:border-orange-500/50"
-                  >
-                    <div className="absolute right-0 top-0 -mr-6 -mt-6 h-24 w-24 rounded-full bg-orange-500/10 blur-2xl transition-colors group-hover:bg-orange-500/20" />
-                    <div className="relative z-10 flex items-center gap-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-orange-500/20 transition-transform group-hover:scale-110">
-                        <Sparkles className="h-6 w-6 text-orange-400" />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-black uppercase tracking-wide text-white">Create Wallet</h4>
-                        <p className="mt-0.5 text-[11px] font-medium text-zinc-500">
-                          No extension needed - secure wallet generation
-                        </p>
-                      </div>
+                  <div className="space-y-4">
+                    <div className="overflow-hidden rounded-[10px] border border-[var(--accord-border)]">
+                      <ConnectButton
+                        client={client}
+                        chain={currentChain}
+                        hiddenWallets={["inApp", "embedded"]}
+                        showAllWallets
+                        theme={isDark ? "dark" : "light"}
+                        connectModal={{
+                          title: "Connect to Accord",
+                          size: "compact",
+                          showThirdwebBranding: false,
+                        }}
+                        onConnect={handleExternalConnect}
+                        connectButton={{
+                          label: (
+                            <span className="flex items-center gap-3">
+                              <Wallet className="h-4 w-4" />
+                              <span>Connect Wallet</span>
+                            </span>
+                          ),
+                          style: {
+                            width: "100%",
+                            border: "none",
+                            borderRadius: "10px",
+                            padding: "14px 18px",
+                            background: "var(--accord-surface)",
+                            color: "var(--accord-text)",
+                            fontFamily: '"Plus Jakarta Sans", sans-serif',
+                            fontSize: "14px",
+                            fontWeight: 600,
+                            letterSpacing: "0.08em",
+                            textTransform: "uppercase",
+                            justifyContent: "flex-start",
+                            cursor: "pointer",
+                          },
+                        }}
+                      />
                     </div>
-                  </button>
+
+                    <div className="flex items-center gap-3">
+                      <div className="h-px flex-1 bg-[var(--accord-border)]" />
+                      <span className="text-[12px] font-medium uppercase tracking-[0.18em] text-[var(--accord-muted)]">or</span>
+                      <div className="h-px flex-1 bg-[var(--accord-border)]" />
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => next("CREATE_INFO")}
+                      className="secondary-button w-full justify-start border-[var(--accord-primary-line)] bg-[var(--accord-primary-faint)] text-[var(--accord-text)] hover:bg-[var(--accord-primary-soft)]"
+                    >
+                      <Sparkles className="h-4 w-4 text-[var(--accord-primary)]" />
+                      Create Wallet
+                    </button>
+                  </div>
                 </div>
               </Motion.div>
-            )}
-
-            {step === "CREATE_INFO" && (
+            ) : (
               <Motion.div
-                key="info"
+                key="create-info"
                 custom={direction}
                 variants={flowVariants}
                 initial="enter"
                 animate="center"
                 exit="exit"
-                className="space-y-5"
+                className="space-y-6"
               >
-                <button
-                  onClick={() => back("CHOICE")}
-                  className="flex items-center gap-2 text-xs font-bold text-zinc-500 transition-colors hover:text-white"
-                >
-                  <ArrowLeft size={14} /> Back
+                <button type="button" onClick={() => back("CHOICE")} className="secondary-button self-start px-4 py-2">
+                  <ArrowLeft className="h-4 w-4" />
+                  Back
                 </button>
 
-                <div className="text-center">
-                  <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-blue-500/10">
-                    <ShieldCheck className="h-7 w-7 text-blue-400" />
+                <div className="surface-card space-y-6">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-[var(--accord-primary-line)] bg-[var(--accord-primary-soft)]">
+                      <ShieldCheck className="h-5 w-5 text-[var(--accord-primary)]" />
+                    </div>
+                    <div>
+                      <p className="eyebrow">Generated wallet</p>
+                      <h3 className="mt-2 text-[18px] font-semibold text-[var(--accord-text)]">Before you continue</h3>
+                      <p className="mt-2 text-sm leading-6 text-[var(--accord-muted)]">
+                        Accord can create a secure wallet for you without a browser extension.
+                      </p>
+                    </div>
                   </div>
-                  <h2 className="text-xl font-black uppercase text-white">Before We Begin</h2>
-                  <p className="mt-1 text-xs text-zinc-500">Here&apos;s what creating a wallet means</p>
-                </div>
 
-                <div className="space-y-3 rounded-2xl bg-white/[0.03] p-5 text-[11px] leading-relaxed text-zinc-400">
-                  <div className="flex items-start gap-3">
-                    <Sparkles className="mt-0.5 shrink-0 text-orange-500" size={16} />
-                    <p>
-                      <b className="text-white">Real EVM Wallet:</b> Accord will generate a real EVM wallet for you that works on Injective EVM and all EVM chains.
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Fingerprint className="mt-0.5 shrink-0 text-orange-500" size={16} />
-                    <p>
-                      <b className="text-white">Fully Yours:</b> This wallet is 100% yours. Accord does not control it, and the key material is protected inside secure enclave infrastructure.
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Download className="mt-0.5 shrink-0 text-emerald-500" size={16} />
-                    <p>
-                      <b className="text-white">Export Anytime:</b> You can export your private key or recovery material from Settings, then import it into MetaMask, Keplr, or another EVM wallet.
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Globe className="mt-0.5 shrink-0 text-blue-500" size={16} />
-                    <p>
-                      <b className="text-white">Recovery:</b> Thirdweb secures the generated wallet using the same email or Google account you choose in its wallet flow.
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <ExternalLink className="mt-0.5 shrink-0 text-purple-500" size={16} />
-                    <p>
-                      <b className="text-white">Want your own?</b> You can skip this, create your own wallet on MetaMask or Keplr, and come back to connect it with the wallet picker.
-                    </p>
-                  </div>
-                </div>
+                  <div className="space-y-4">
+                    {[
+                      {
+                        icon: Sparkles,
+                        title: "Real EVM wallet",
+                        description:
+                          "Your wallet works on Injective EVM and other EVM-compatible networks.",
+                      },
+                      {
+                        icon: Fingerprint,
+                        title: "You stay in control",
+                        description:
+                          "Accord does not custody your funds or control the underlying key material.",
+                      },
+                      {
+                        icon: Download,
+                        title: "Export anytime",
+                        description:
+                          "You can move the wallet into MetaMask, Keplr, or another EVM wallet later.",
+                      },
+                      {
+                        icon: Globe,
+                        title: "Account recovery",
+                        description:
+                          "Recovery is tied to the email or Google sign-in used during setup.",
+                      },
+                      {
+                        icon: ExternalLink,
+                        title: "External wallets still work",
+                        description:
+                          "If you prefer your own wallet, go back and use the wallet picker instead.",
+                      },
+                    ].map((item) => {
+                      const Icon = item.icon;
 
-                <div className="space-y-3 pt-2">
-                  <button
-                    onClick={handleCreateWallet}
-                    disabled={isLoading || isConnecting}
-                    className="w-full rounded-xl bg-gradient-to-r from-orange-600 to-orange-500 py-4 text-sm font-black uppercase tracking-wide text-white transition-all hover:shadow-[0_0_30px_rgba(234,88,12,0.4)] disabled:opacity-60"
-                  >
-                    {isLoading || isConnecting ? "Opening Secure Flow..." : "Create My Wallet"}
-                  </button>
-                  <button
-                    onClick={() => back("CHOICE")}
-                    className="w-full py-3 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition-colors hover:text-white"
-                  >
-                    I&apos;ll connect my own wallet
-                  </button>
+                      return (
+                        <div key={item.title} className="surface-muted flex items-start gap-3 px-4 py-4">
+                          <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--accord-primary-soft)]">
+                            <Icon className="h-4 w-4 text-[var(--accord-primary)]" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-[var(--accord-text)]">{item.title}</p>
+                            <p className="mt-1 text-sm leading-6 text-[var(--accord-muted)]">{item.description}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="space-y-3">
+                    <button
+                      type="button"
+                      onClick={handleCreateWallet}
+                      disabled={isLoading || isConnecting}
+                      className="primary-button w-full"
+                    >
+                      {isLoading || isConnecting ? "Opening Secure Flow" : "Create My Wallet"}
+                    </button>
+                    <button type="button" onClick={() => back("CHOICE")} className="secondary-button w-full">
+                      I Will Use My Own Wallet
+                    </button>
+                  </div>
                 </div>
               </Motion.div>
             )}
           </AnimatePresence>
 
-          {error && (
-            <p className="mt-4 text-center text-[10px] font-black uppercase text-red-500">
-              {error}
-            </p>
-          )}
+          {error ? <p className="mt-4 text-sm font-medium text-[var(--accord-danger)]">{error}</p> : null}
         </div>
 
-        <div className="border-t border-white/5 bg-white/[0.02] p-6 text-center">
-          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-800">
-            Accord Trust Execution Framework v2.0
-          </p>
+        <div className="border-t border-[var(--accord-border-soft)] px-6 py-4 sm:px-8">
+          <p className="text-[12px] text-[var(--accord-muted)]">Secure wallet access powered by Thirdweb.</p>
         </div>
       </Motion.div>
     </div>
   );
 }
+
+
+

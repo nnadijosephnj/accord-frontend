@@ -10,11 +10,15 @@ export default function NetworkBanner() {
   }
 
   return (
-    <div className="w-full bg-gradient-to-r from-orange-600 via-orange-500 to-orange-600 px-4 py-2.5 text-white shadow-[0_10px_30px_rgba(234,88,12,0.25)]">
-      <div className="mx-auto flex max-w-7xl items-center justify-center gap-2 text-center text-[11px] font-black uppercase tracking-[0.28em] sm:text-xs">
-        <ShieldAlert className="h-4 w-4 shrink-0" />
-        <span>Testnet Mode Active - No real funds</span>
+    <div className="border-b border-[var(--accord-primary-line)] bg-[var(--accord-primary-soft)] px-4 py-2.5">
+      <div className="page-shell flex items-center justify-center gap-2 text-center">
+        <ShieldAlert className="h-4 w-4 text-[var(--accord-primary)]" />
+        <span className="text-[12px] font-medium uppercase tracking-[0.18em] text-[var(--accord-primary)]">
+          Testnet Mode Active
+        </span>
+        <span className="hidden text-[12px] text-[var(--accord-muted)] sm:inline">No real funds are moved on this network.</span>
       </div>
     </div>
   );
 }
+

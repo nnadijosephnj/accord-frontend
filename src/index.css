@@ -3,108 +3,452 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    color-scheme: light;
+    --accord-background: #f6f3ee;
+    --accord-surface: #ffffff;
+    --accord-surface-strong: #ede7dd;
+    --accord-border: #ddd3c5;
+    --accord-border-soft: rgba(92, 74, 52, 0.08);
+    --accord-primary: #f97316;
+    --accord-primary-hover: #ea6c0a;
+    --accord-primary-contrast: #0a0a0a;
+    --accord-primary-soft: rgba(249, 115, 22, 0.12);
+    --accord-primary-soft-strong: rgba(249, 115, 22, 0.18);
+    --accord-primary-faint: rgba(249, 115, 22, 0.06);
+    --accord-primary-line: rgba(249, 115, 22, 0.22);
+    --accord-primary-hover-line: rgba(249, 115, 22, 0.28);
+    --accord-text: #16130f;
+    --accord-muted: #6f675c;
+    --accord-disabled: #b2a89b;
+    --accord-success: #22c55e;
+    --accord-warning: #eab308;
+    --accord-danger: #ef4444;
+    --accord-surface-muted: rgba(255, 255, 255, 0.7);
+    --accord-table-head: rgba(92, 74, 52, 0.04);
+    --accord-table-row: rgba(92, 74, 52, 0.07);
+    --accord-input-background: #fdfbf8;
+    --accord-input-focus: #ffffff;
+    --accord-modal-surface: rgba(255, 250, 244, 0.86);
+    --accord-modal-border: rgba(249, 115, 22, 0.18);
+    --accord-overlay: rgba(246, 243, 238, 0.92);
+    --accord-backdrop: rgba(11, 10, 8, 0.5);
+    --accord-body-glow: rgba(249, 115, 22, 0.08);
+  }
+
+  html.dark {
+    color-scheme: dark;
+    --accord-background: #0a0a0a;
+    --accord-surface: #111111;
+    --accord-surface-strong: #151515;
+    --accord-border: #1e1e1e;
+    --accord-border-soft: rgba(255, 255, 255, 0.04);
+    --accord-primary-soft: rgba(249, 115, 22, 0.12);
+    --accord-primary-soft-strong: rgba(249, 115, 22, 0.18);
+    --accord-primary-faint: rgba(249, 115, 22, 0.04);
+    --accord-primary-line: rgba(249, 115, 22, 0.25);
+    --accord-primary-hover-line: rgba(249, 115, 22, 0.25);
+    --accord-text: #f5f5f5;
+    --accord-muted: #888888;
+    --accord-disabled: #444444;
+    --accord-surface-muted: rgba(255, 255, 255, 0.01);
+    --accord-table-head: rgba(255, 255, 255, 0.02);
+    --accord-table-row: rgba(255, 255, 255, 0.04);
+    --accord-input-background: #0d0d0d;
+    --accord-input-focus: #101010;
+    --accord-modal-surface: rgba(17, 17, 17, 0.85);
+    --accord-modal-border: rgba(249, 115, 22, 0.15);
+    --accord-overlay: rgba(10, 10, 10, 0.92);
+    --accord-backdrop: rgba(0, 0, 0, 0.72);
+    --accord-body-glow: rgba(249, 115, 22, 0.08);
+  }
+
   html {
-    transition: background-color 0.3s ease, color 0.3s ease;
+    background: var(--accord-background);
+    color: var(--accord-text);
+    font-family: "Plus Jakarta Sans", sans-serif;
+    scroll-behavior: smooth;
   }
+
   body {
-    @apply bg-[#f5f6f7] text-zinc-900 font-sans antialiased;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    @apply antialiased;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at top right, var(--accord-body-glow), transparent 26%),
+      var(--accord-background);
+    color: var(--accord-text);
+    font-family: "Plus Jakarta Sans", sans-serif;
   }
-  .dark body {
-    background-color: #0e0e0e;
-    color: #ffffff;
+
+  #root {
+    min-height: 100vh;
+  }
+
+  * {
+    scrollbar-color: var(--accord-border) var(--accord-background);
+  }
+
+  ::selection {
+    background: rgba(249, 115, 22, 0.2);
+    color: var(--accord-text);
+  }
+
+  a,
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
   }
 }
 
 @layer components {
-  /* ── Glass morphism panel (light) ── */
+  .app-shell {
+    @apply min-h-screen;
+  }
+
+  .page-shell {
+    @apply mx-auto w-full max-w-[1100px];
+  }
+
+  .page-header {
+    @apply flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between;
+  }
+
+  .page-title {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--accord-text);
+  }
+
+  .page-subtitle {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--accord-muted);
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--accord-text);
+  }
+
+  .eyebrow {
+    color: var(--accord-muted);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .surface-card {
+    background: var(--accord-surface);
+    border: 1px solid var(--accord-border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    transition: border-color 0.18s ease, background-color 0.18s ease;
+  }
+
+  .surface-card:hover {
+    border-color: rgba(249, 115, 22, 0.25);
+  }
+
+  .surface-muted {
+    background: var(--accord-surface-muted);
+    border: 1px solid var(--accord-border);
+    border-radius: 10px;
+  }
+
+  .table-shell {
+    background: var(--accord-surface);
+    border: 1px solid var(--accord-border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .table-head {
+    background: var(--accord-table-head);
+    border-bottom: 1px solid var(--accord-border);
+  }
+
+  .table-row {
+    border-bottom: 1px solid var(--accord-table-row);
+    transition: background-color 0.18s ease, border-color 0.18s ease;
+  }
+
+  .table-row:hover {
+    background: var(--accord-primary-faint);
+  }
+
+  .metric-card {
+    background: var(--accord-surface);
+    border: 1px solid var(--accord-border);
+    border-radius: 10px;
+    padding: 20px 24px;
+  }
+
+  .metric-card-primary {
+    background: var(--accord-primary-soft);
+    border: 1px solid var(--accord-primary-line);
+    border-radius: 10px;
+    padding: 20px 24px;
+  }
+
+  .metric-label {
+    color: var(--accord-muted);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .metric-value {
+    color: var(--accord-text);
+    font-size: clamp(1.9rem, 2.2vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.05;
+  }
+
+  .metric-value-primary {
+    color: var(--accord-primary);
+    font-size: clamp(1.9rem, 2.2vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.05;
+  }
+
+  .metric-copy {
+    color: var(--accord-muted);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .primary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    border-radius: 6px;
+    padding: 10px 20px;
+    background: var(--accord-primary);
+    color: var(--accord-primary-contrast);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  }
+
+  .primary-button:hover {
+    background: var(--accord-primary-hover);
+  }
+
+  .primary-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .secondary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    border-radius: 6px;
+    padding: 10px 20px;
+    border: 1px solid var(--accord-border);
+    background: transparent;
+    color: var(--accord-text);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease;
+  }
+
+  .secondary-button:hover {
+    border-color: var(--accord-primary);
+    color: var(--accord-primary);
+  }
+
+  .destructive-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    border-radius: 6px;
+    padding: 10px 20px;
+    border: 1px solid var(--accord-danger);
+    background: transparent;
+    color: var(--accord-danger);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: background-color 0.18s ease;
+  }
+
+  .destructive-button:hover {
+    background: rgba(239, 68, 68, 0.08);
+  }
+
+  .icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid var(--accord-border);
+    background: transparent;
+    color: var(--accord-muted);
+    transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease;
+  }
+
+  .icon-button:hover {
+    border-color: var(--accord-primary);
+    color: var(--accord-primary);
+    background: var(--accord-primary-soft);
+  }
+
+  .field-label {
+    color: var(--accord-muted);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .field-input,
+  .field-select,
+  .field-textarea {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid var(--accord-border);
+    background: var(--accord-input-background);
+    color: var(--accord-text);
+    font-size: 14px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.18s ease, background-color 0.18s ease;
+  }
+
+  .field-input::placeholder,
+  .field-textarea::placeholder {
+    color: var(--accord-muted);
+  }
+
+  .field-input:focus,
+  .field-select:focus,
+  .field-textarea:focus {
+    border-color: var(--accord-primary);
+    background: var(--accord-input-focus);
+  }
+
+  .field-select {
+    appearance: none;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .status-pending {
+    background: rgba(234, 179, 8, 0.12);
+    color: var(--accord-warning);
+  }
+
+  .status-active {
+    background: rgba(249, 115, 22, 0.12);
+    color: var(--accord-primary);
+  }
+
+  .status-completed {
+    background: rgba(34, 197, 94, 0.12);
+    color: var(--accord-success);
+  }
+
+  .status-disputed {
+    background: rgba(239, 68, 68, 0.12);
+    color: var(--accord-danger);
+  }
+
+  .status-cancelled {
+    background: rgba(68, 68, 68, 0.18);
+    color: var(--accord-muted);
+  }
+
+  .glass-modal {
+    background: var(--accord-modal-surface);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--accord-modal-border);
+    border-radius: 12px;
+  }
+
   .glass-panel {
-    background: rgba(255, 255, 255, 0.7);
-    -webkit-backdrop-filter: blur(20px);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 8px 32px 0 rgba(161, 57, 0, 0.05),
-                inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
-    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    background: var(--accord-surface) !important;
+    border: 1px solid var(--accord-border) !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    transition: border-color 0.18s ease !important;
   }
 
-  /* ── Glass morphism panel (dark) ── */
-  .dark .glass-panel {
-    background: rgba(38, 38, 38, 0.6);
-    -webkit-backdrop-filter: blur(20px);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  .glass-panel:hover {
+    border-color: rgba(249, 115, 22, 0.25) !important;
   }
 
-  /* ── Orange gradient CTA button ── */
   .orange-glow-btn {
-    background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
-    box-shadow: 0 10px 25px -5px rgba(234, 88, 12, 0.4),
-                0 8px 10px -6px rgba(234, 88, 12, 0.3);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--accord-primary) !important;
+    color: var(--accord-primary-contrast) !important;
+    box-shadow: none !important;
+    border-radius: 6px !important;
+    transition: background-color 0.18s ease !important;
   }
+
   .orange-glow-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 35px -5px rgba(234, 88, 12, 0.5),
-                0 12px 15px -8px rgba(234, 88, 12, 0.4);
+    background: var(--accord-primary-hover) !important;
   }
-  .dark .orange-glow-btn {
-    background: linear-gradient(135deg, #ff9157 0%, #ff7a2c 100%);
-    box-shadow: 0 0 20px rgba(255, 145, 87, 0.35),
-                0 10px 25px -5px rgba(255, 145, 87, 0.25);
-  }
-  .dark .orange-glow-btn:hover {
-    box-shadow: 0 0 30px rgba(255, 145, 87, 0.5),
-                0 20px 35px -5px rgba(255, 145, 87, 0.3);
-  }
+
   .orange-glow-btn:active {
-    transform: translateY(1px);
-    box-shadow: 0 5px 15px -3px rgba(234, 88, 12, 0.3);
+    transform: none !important;
   }
+
   .orange-glow-btn:disabled {
     opacity: 0.5;
-    transform: none;
   }
 
-  /* ── Orange text gradient ── */
   .thermal-gradient {
-    background: linear-gradient(135deg, #a13900 0%, #ff793e 100%);
-  }
-  .dark .thermal-gradient {
-    background: linear-gradient(135deg, #ff9157 0%, #ff7a2c 100%);
+    background: var(--accord-primary);
+    color: var(--accord-primary);
   }
 
-  /* ── Glass input (light) ── */
   .glass-input {
-    @apply w-full rounded-2xl p-4 text-sm font-semibold text-zinc-800 outline-none transition-all;
-    background: rgba(255, 255, 255, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
-    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.2s ease;
-  }
-  .glass-input:focus {
-    background: rgba(255, 255, 255, 0.9);
-    border-color: rgba(234, 88, 12, 0.4);
-    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.08);
-  }
-  .glass-input::placeholder {
-    @apply text-zinc-400 font-medium;
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid var(--accord-border);
+    background: var(--accord-input-background);
+    color: var(--accord-text);
+    padding: 14px 16px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.18s ease, background-color 0.18s ease;
   }
 
-  /* ── Glass input (dark) ── */
-  .dark .glass-input {
-    background: rgba(19, 19, 19, 0.8);
-    border-color: rgba(255, 255, 255, 0.06);
-    color: #ffffff;
+  .glass-input:focus {
+    border-color: var(--accord-primary);
+    background: var(--accord-input-focus);
+    box-shadow: none;
   }
-  .dark .glass-input:focus {
-    background: rgba(26, 25, 25, 0.95);
-    border-color: rgba(255, 145, 87, 0.4);
-    box-shadow: 0 0 0 3px rgba(255, 145, 87, 0.08);
-  }
-  .dark .glass-input::placeholder {
-    color: rgba(255, 255, 255, 0.2);
+
+  .glass-input::placeholder {
+    color: var(--accord-muted);
   }
 }

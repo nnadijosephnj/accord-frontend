@@ -1,27 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { DollarSign, Lock, TrendingUp, ArrowDownUp, Plus, Wallet } from 'lucide-react';
-import { useWallet } from '../../context/WalletContext';
-import * as ethers from 'ethers';
-import { CONTRACT_ADDRESS, CONTRACT_ABI, USDC_ADDRESS } from '../../utils/contractABI';
+import React, { useEffect, useState } from "react";
+import { ArrowDownUp, DollarSign, Lock, Plus, TrendingUp, Wallet } from "lucide-react";
+import * as ethers from "ethers";
+import { Link } from "react-router-dom";
+import { useWallet } from "../../context/WalletContext";
+import { CONTRACT_ABI, CONTRACT_ADDRESS, USDC_ADDRESS } from "../../utils/contractABI";
 
 export default function VaultPage() {
   const { address, signer, network } = useWallet();
-  const [vaultBalance, setVaultBalance] = useState('0.00');
+  const [vaultBalance, setVaultBalance] = useState("0.00");
   const [loading, setLoading] = useState(true);
-  const networkLabel = network === 'mainnet' ? 'Injective EVM Mainnet' : 'Injective EVM Testnet';
+  const networkLabel = network === "mainnet" ? "Injective EVM Mainnet" : "Injective EVM Testnet";
 
   useEffect(() => {
-    if (signer && address) loadBalance();
-  }, [signer, address]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (signer && address) {
+      loadBalance();
+    }
+  }, [address, signer]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadBalance = async () => {
     try {
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-      const bal = await contract.vaultBalances(address, USDC_ADDRESS);
-      if (bal !== undefined) setVaultBalance(Number(ethers.formatUnits(bal, 6)).toFixed(2));
-    } catch (e) {
-      console.warn('Vault load error:', e);
+      const balance = await contract.vaultBalances(address, USDC_ADDRESS);
+      if (balance !== undefined) {
+        setVaultBalance(Number(ethers.formatUnits(balance, 6)).toFixed(2));
+      }
+    } catch (error) {
+      console.warn("Vault load error:", error);
     } finally {
       setLoading(false);
     }
@@ -29,117 +33,112 @@ export default function VaultPage() {
 
   const cards = [
     {
-      label: 'Vault Balance',
+      label: "Vault balance",
       value: `$${vaultBalance}`,
-      sub: 'Available to use',
+      sub: "Available to assign to new agreements",
       icon: DollarSign,
       primary: true,
     },
     {
-      label: 'In Escrow',
-      value: '$0.00',
-      sub: 'Locked in active agreements',
+      label: "In escrow",
+      value: "$0.00",
+      sub: "Currently locked in active agreements",
       icon: Lock,
-      primary: false,
     },
     {
-      label: 'Total Deposited',
-      value: '$0.00',
-      sub: 'All time deposits',
+      label: "Total deposited",
+      value: "$0.00",
+      sub: "Lifetime incoming funds",
       icon: TrendingUp,
-      primary: false,
     },
   ];
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="space-y-6">
+      <div className="page-header">
         <div>
-          <h1 className="text-xl font-bold text-zinc-900 dark:text-white">Vault</h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">Manage your account balance and deposits</p>
+          <h1 className="page-title">Vault</h1>
+          <p className="page-subtitle">View your Accord balance and move funds into or out of escrow workflows.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Link to="/dashboard/vault/withdraw" className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all">
-            <ArrowDownUp className="w-3.5 h-3.5" /> Withdraw
+        <div className="flex flex-wrap items-center gap-2">
+          <Link to="/dashboard/vault/withdraw" className="secondary-button">
+            <ArrowDownUp className="h-4 w-4" />
+            Withdraw
           </Link>
-          <button className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-orange-600 to-orange-500 shadow-[0_4px_12px_rgba(234,88,12,0.3)] hover:shadow-[0_6px_16px_rgba(234,88,12,0.4)] hover:-translate-y-0.5 transition-all">
-            <Plus className="w-3.5 h-3.5" /> Deposit USDC
+          <button type="button" className="primary-button">
+            <Plus className="h-4 w-4" />
+            Deposit USDC
           </button>
         </div>
       </div>
 
-      {/* Balance Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid gap-4 sm:grid-cols-3">
         {cards.map((card) => {
           const Icon = card.icon;
+
           return (
-            <div
-              key={card.label}
-              className={`relative p-5 rounded-2xl overflow-hidden ${
-                card.primary
-                  ? 'bg-gradient-to-br from-orange-500 to-orange-700 text-white shadow-[0_10px_30px_rgba(234,88,12,0.25)]'
-                  : 'bg-white dark:bg-[#1a1a1a] border border-zinc-200 dark:border-white/5 shadow-sm'
-              }`}
-            >
-              {card.primary && <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-xl" />}
-              <div className="flex justify-between items-start mb-3">
-                <p className={`text-[10px] font-bold uppercase tracking-widest ${card.primary ? 'text-orange-100' : 'text-zinc-400 dark:text-zinc-500'}`}>
-                  {card.label}
-                </p>
-                <div className={`p-1.5 rounded-lg ${card.primary ? 'bg-white/20' : 'bg-zinc-100 dark:bg-white/5'}`}>
-                  <Icon className={`w-3.5 h-3.5 ${card.primary ? 'text-white' : 'text-zinc-400'}`} />
+            <div key={card.label} className={card.primary ? "metric-card-primary" : "metric-card"}>
+              <div className="flex items-start justify-between gap-3">
+                <p className="metric-label">{card.label}</p>
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--accord-border)] bg-[var(--accord-input-background)]">
+                  <Icon className={`h-4 w-4 ${card.primary ? "text-[var(--accord-primary)]" : "text-[var(--accord-muted)]"}`} />
                 </div>
               </div>
-              <p className={`text-3xl font-black font-mono mb-1 ${card.primary ? 'text-white' : 'text-zinc-900 dark:text-white'}`}>
-                {loading && card.primary ? '...' : card.value}
-              </p>
-              <p className={`text-xs ${card.primary ? 'text-orange-200' : 'text-zinc-400 dark:text-zinc-500'}`}>{card.sub}</p>
+              <p className={card.primary ? "metric-value-primary mt-6" : "metric-value mt-6"}>{loading && card.primary ? "..." : card.value}</p>
+              <p className="metric-copy mt-3">{card.sub}</p>
             </div>
           );
         })}
       </div>
 
-      {/* Two columns */}
-      <div className="grid lg:grid-cols-2 gap-4">
-        {/* Recent Activity */}
-        <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl border border-zinc-200 dark:border-white/5 shadow-sm">
-          <div className="px-5 py-4 flex items-center justify-between border-b border-zinc-100 dark:border-white/5">
-            <h2 className="text-sm font-bold text-zinc-900 dark:text-white">Recent Activity</h2>
-            <button className="text-xs font-semibold text-orange-600 dark:text-orange-400 hover:underline">View all</button>
-          </div>
-          <div className="px-5 py-16 flex flex-col items-center gap-3 text-center">
-            <div className="w-12 h-12 bg-zinc-100 dark:bg-white/5 rounded-xl flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-zinc-300 dark:text-zinc-600" />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <section className="surface-card">
+          <div className="flex items-center justify-between gap-4 border-b border-[var(--accord-border)] pb-4">
+            <div>
+              <p className="eyebrow">Recent activity</p>
+              <h2 className="mt-2 text-[18px] font-semibold text-[var(--accord-text)]">Vault events</h2>
             </div>
-            <p className="text-sm text-zinc-400 dark:text-zinc-500">No recent activity</p>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl border border-zinc-200 dark:border-white/5 shadow-sm p-5">
-          <h2 className="text-sm font-bold text-zinc-900 dark:text-white mb-4">Quick Actions</h2>
-          <div className="space-y-3">
-            <button className="w-full py-3 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-orange-600 to-orange-500 shadow-[0_4px_12px_rgba(234,88,12,0.25)] hover:shadow-[0_6px_16px_rgba(234,88,12,0.4)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
-              <Plus className="w-4 h-4" /> Deposit USDC
+            <button type="button" className="secondary-button px-4 py-2 text-xs">
+              View All
             </button>
-            <Link to="/dashboard/vault/withdraw" className="w-full py-3 rounded-xl font-bold text-sm text-orange-600 dark:text-orange-400 border border-orange-300 dark:border-orange-500/40 hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-all flex items-center justify-center gap-2">
-              <ArrowDownUp className="w-4 h-4" /> Withdraw to Keplr
-            </Link>
+          </div>
 
-            {/* Connected Wallet Info */}
-            <div className="mt-4 p-4 bg-zinc-50 dark:bg-white/5 rounded-xl border border-zinc-200 dark:border-white/5">
-              <div className="flex items-center gap-2 mb-2">
-                <Wallet className="w-4 h-4 text-zinc-400" />
-                <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Connected Wallet</span>
-              </div>
-              <p className="text-sm font-mono font-semibold text-zinc-900 dark:text-white mb-1">
-                {address ? `${address.slice(0, 10)}...${address.slice(-8)}` : '—'}
-              </p>
-              <p className="text-xs text-zinc-400 dark:text-zinc-500">Network: {networkLabel}</p>
+          <div className="flex flex-col items-center gap-4 py-16 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-lg border border-[var(--accord-border)] bg-[var(--accord-input-background)]">
+              <TrendingUp className="h-6 w-6 text-[var(--accord-muted)]" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[var(--accord-text)]">No recent vault activity</p>
+              <p className="mt-2 text-sm text-[var(--accord-muted)]">Deposits and withdrawals will show up here once they happen.</p>
             </div>
           </div>
-        </div>
+        </section>
+
+        <section className="surface-card space-y-4">
+          <div>
+            <p className="eyebrow">Quick actions</p>
+            <h2 className="mt-2 text-[18px] font-semibold text-[var(--accord-text)]">Move funds with confidence</h2>
+          </div>
+
+          <button type="button" className="primary-button w-full">
+            <Plus className="h-4 w-4" />
+            Deposit USDC
+          </button>
+          <Link to="/dashboard/vault/withdraw" className="secondary-button w-full">
+            <ArrowDownUp className="h-4 w-4" />
+            Withdraw to Wallet
+          </Link>
+
+          <div className="surface-muted px-4 py-4">
+            <p className="metric-label">Connected wallet</p>
+            <p className="mt-3 break-all text-sm font-semibold text-[var(--accord-text)]">
+              {address ? `${address.slice(0, 10)}...${address.slice(-8)}` : "—"}
+            </p>
+            <p className="mt-2 text-sm text-[var(--accord-muted)]">Network: {networkLabel}</p>
+          </div>
+        </section>
       </div>
     </div>
   );
 }
+

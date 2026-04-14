@@ -1,178 +1,236 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
-    ArrowLeft, RefreshCw, Link as LinkIcon,
-    Briefcase, User, Send, Moon, Sun
-} from 'lucide-react';
-import { useWallet } from '../context/WalletContext';
-import { useTheme } from '../context/ThemeContext';
-import { useNavigate } from 'react-router-dom';
-import { ethers } from 'ethers';
-import { apiCall } from '../utils/api';
-import { USDC_ADDRESS } from '../utils/contractABI';
+  ArrowLeft,
+  Briefcase,
+  Link as LinkIcon,
+  Moon,
+  RefreshCw,
+  Send,
+  Sun,
+  User,
+} from "lucide-react";
+import { ethers } from "ethers";
+import { useNavigate } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
+import { useWallet } from "../context/WalletContext";
+import { USDC_ADDRESS } from "../utils/contractABI";
+import { apiCall } from "../utils/api";
 
 export default function CreateClient() {
-    const { address } = useWallet();
-    const { isDark, toggle } = useTheme();
-    const [loading, setLoading] = useState(false);
-    const [pasteLink, setPasteLink] = useState('');
-    const navigate = useNavigate();
+  const { address } = useWallet();
+  const { isDark, toggle } = useTheme();
+  const [loading, setLoading] = useState(false);
+  const [pasteLink, setPasteLink] = useState("");
+  const navigate = useNavigate();
 
-    const [form, setForm] = useState({
-        title: '',
-        description: '',
-        freelancerAddress: '',
-        amount: '',
-        tokenAddress: USDC_ADDRESS,
-        deadline: ''
-    });
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    freelancerAddress: "",
+    amount: "",
+    tokenAddress: USDC_ADDRESS,
+    deadline: "",
+  });
 
-    const handlePasteSubmit = (e) => {
-        e.preventDefault();
-        try {
-            const url = new URL(pasteLink);
-            const id = url.pathname.split('/').pop();
-            navigate(`/deal/${id}`);
-        } catch {
-            navigate(`/deal/${pasteLink}`);
-        }
-    };
+  const handlePasteSubmit = (event) => {
+    event.preventDefault();
 
-    const handleCreateSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            if (!address) {
-                throw new Error('Connect a wallet before creating an agreement');
-            }
-            setLoading(true);
+    try {
+      const url = new URL(pasteLink);
+      const id = url.pathname.split("/").pop();
+      navigate(`/deal/${id}`);
+    } catch {
+      navigate(`/deal/${pasteLink}`);
+    }
+  };
 
-            // In V2, we generate a random bytes32 ID locally. 
-            // The client will fund it on-chain in the Agreement Room.
-            const contractAgreementId = ethers.hexlify(ethers.randomBytes(32));
+  const handleCreateSubmit = async (event) => {
+    event.preventDefault();
 
-            const agreement = await apiCall('/api/agreements', {
-                method: 'POST',
-                body: JSON.stringify({
-                    title: form.title,
-                    description: form.description,
-                    client_wallet: address.toLowerCase(),
-                    freelancer_wallet: form.freelancerAddress.toLowerCase(),
-                    amount: form.amount,
-                    token_address: form.tokenAddress,
-                    max_revisions: 3,
-                    deadline: form.deadline,
-                    contract_agreement_id: contractAgreementId,
-                    status: 'PENDING'
-                })
-            });
+    try {
+      if (!address) {
+        throw new Error("Connect a wallet before creating an agreement");
+      }
 
-            navigate(`/deal/${agreement.id}`);
-        } catch (error) {
-            console.error(error);
-            alert("Error: " + error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+      setLoading(true);
+      const contractAgreementId = ethers.hexlify(ethers.randomBytes(32));
 
-    return (
-        <div className="min-h-screen bg-[#f5f6f7] dark:bg-[#0e0e0e] font-sans pb-16">
-            <div className="fixed top-0 right-0 w-[400px] h-[400px] bg-orange-200/20 dark:bg-orange-500/[0.04] rounded-full blur-[120px] -z-10" />
-            <div className="fixed bottom-0 left-0 w-[500px] h-[500px] bg-zinc-200/40 dark:bg-orange-500/[0.02] rounded-full blur-[150px] -z-10" />
+      const agreement = await apiCall("/api/agreements", {
+        method: "POST",
+        body: JSON.stringify({
+          title: form.title,
+          description: form.description,
+          client_wallet: address.toLowerCase(),
+          freelancer_wallet: form.freelancerAddress.toLowerCase(),
+          amount: form.amount,
+          token_address: form.tokenAddress,
+          max_revisions: 3,
+          deadline: form.deadline,
+          contract_agreement_id: contractAgreementId,
+          status: "PENDING",
+        }),
+      });
 
-            {/* Nav */}
-            <nav className="bg-white/70 dark:bg-neutral-950/60 backdrop-blur-xl border-b border-white/20 dark:border-orange-500/10 shadow-[0_8px_32px_0_rgba(161,57,0,0.05)] dark:shadow-none py-4 px-6 sticky top-0 z-50">
-                <div className="max-w-2xl mx-auto flex items-center justify-between">
-                    <button onClick={() => navigate('/dashboard')} className="p-2 text-zinc-400 dark:text-neutral-500 hover:text-zinc-700 dark:hover:text-neutral-200 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl transition-all">
-                        <ArrowLeft className="w-6 h-6" />
-                    </button>
-                    <div className="text-center">
-                        <div className="flex items-center justify-center">
-                            <img src="/logo-light.png" alt="Accord" className="h-11 dark:hidden" />
-                            <img src="/logo-dark.png" alt="Accord" className="h-11 hidden dark:block" />
-                        </div>
-                        <p className="text-[10px] text-orange-600 dark:text-orange-400 font-black uppercase tracking-widest">As Client</p>
-                    </div>
-                    <button onClick={toggle} className="p-2 rounded-xl text-zinc-400 dark:text-neutral-500 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all" aria-label="Toggle theme">
-                        {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                    </button>
-                </div>
-            </nav>
+      navigate(`/deal/${agreement.id}`);
+    } catch (error) {
+      console.error(error);
+      alert(`Error: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            <main className="max-w-2xl mx-auto px-6 mt-8">
+  return (
+    <div className="app-shell min-h-screen bg-[var(--accord-background)] pb-12 text-[var(--accord-text)]">
+      <header className="sticky top-0 z-40 border-b border-[var(--accord-border)] bg-[var(--accord-overlay)] backdrop-blur-xl">
+        <div className="page-shell flex items-center justify-between px-4 py-4 sm:px-6">
+          <button type="button" onClick={() => navigate("/dashboard")} className="icon-button h-10 w-10">
+            <ArrowLeft className="h-4 w-4" />
+          </button>
 
-                {/* Option A: Paste Link */}
-                <div className="glass-panel p-7 rounded-[2rem] mb-6">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="p-3 bg-orange-50 dark:bg-orange-500/10 rounded-2xl text-orange-600 dark:text-orange-400">
-                            <LinkIcon className="w-5 h-5" />
-                        </div>
-                        <div>
-                            <h2 className="text-base font-black text-zinc-900 dark:text-white leading-tight">Option A — Have a link?</h2>
-                            <p className="text-xs text-zinc-400 dark:text-neutral-500 font-medium">Your freelancer sent you an Accord link</p>
-                        </div>
-                    </div>
+          <div className="text-center">
+            <p className="eyebrow">Legacy flow</p>
+            <h1 className="mt-2 text-lg font-semibold text-[var(--accord-primary)]">Create as Client</h1>
+          </div>
 
-                    <form onSubmit={handlePasteSubmit} className="flex gap-3">
-                        <input
-                            className="glass-input flex-1 font-mono"
-                            placeholder="Paste agreement link here..."
-                            value={pasteLink}
-                            onChange={(e) => setPasteLink(e.target.value)}
-                        />
-                        <button className="orange-glow-btn text-white font-black text-xs uppercase tracking-widest px-6 rounded-2xl">
-                            Open
-                        </button>
-                    </form>
-                </div>
-
-                <div className="flex items-center gap-4 mb-6">
-                    <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-700/50" />
-                    <span className="text-[10px] text-zinc-400 dark:text-neutral-500 font-black uppercase tracking-[4px]">OR</span>
-                    <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-700/50" />
-                </div>
-
-                {/* Option B: Create and Invite */}
-                <div className="glass-panel p-7 rounded-[2rem]">
-                    <div className="flex items-center gap-3 mb-7">
-                        <div className="p-3 bg-orange-50 dark:bg-orange-500/10 rounded-2xl text-orange-600 dark:text-orange-400">
-                            <Briefcase className="w-5 h-5" />
-                        </div>
-                        <div>
-                            <h2 className="text-base font-black text-zinc-900 dark:text-white leading-tight">Option B — Create & Invite</h2>
-                            <p className="text-xs text-zinc-400 dark:text-neutral-500 font-medium">Create agreement and invite your freelancer</p>
-                        </div>
-                    </div>
-
-                    <form onSubmit={handleCreateSubmit} className="space-y-4">
-                        <input required className="glass-input" placeholder="Job Title" value={form.title} onChange={(e) => setForm({...form, title: e.target.value})} />
-                        <textarea required rows="3" className="glass-input resize-none" placeholder="Job Description" value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} />
-                        <div className="relative">
-                            <input required className="glass-input pl-12 font-mono" placeholder="Freelancer Wallet Address (0x...)" value={form.freelancerAddress} onChange={(e) => setForm({...form, freelancerAddress: e.target.value})} />
-                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-300 dark:text-neutral-600" />
-                        </div>
-                        <div className="relative">
-                            <input required type="number" className="glass-input pr-24" placeholder="Payment Amount" value={form.amount} onChange={(e) => setForm({...form, amount: e.target.value})} />
-                            <select 
-                                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/50 dark:bg-black/30 border border-white/20 dark:border-white/5 rounded-xl px-2 py-1.5 text-[10px] font-black text-orange-600 dark:text-orange-400 outline-none cursor-pointer hover:bg-white/80 dark:hover:bg-white/10 transition-all"
-                                value={form.tokenAddress}
-                                onChange={(e) => setForm({...form, tokenAddress: e.target.value})}
-                            >
-                                <option value={USDC_ADDRESS}>USDC</option>
-                            </select>
-                        </div>
-                        <input type="date" className="glass-input" value={form.deadline} onChange={(e) => setForm({...form, deadline: e.target.value})} />
-
-                        <button
-                            disabled={loading}
-                            className="w-full py-5 orange-glow-btn text-white font-black text-sm uppercase tracking-[4px] rounded-[1.5rem] flex items-center justify-center gap-3"
-                        >
-                            {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-                            Create & Send to Freelancer
-                        </button>
-                    </form>
-                </div>
-            </main>
+          <button type="button" onClick={toggle} className="icon-button h-10 w-10" aria-label="Toggle theme">
+            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
         </div>
-    );
+      </header>
+
+      <main className="page-shell px-4 pt-8 sm:px-6">
+        <div className="mx-auto max-w-3xl space-y-6">
+          <section className="surface-card">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--accord-primary-line)] bg-[var(--accord-primary-soft)]">
+                <LinkIcon className="h-5 w-5 text-[var(--accord-primary)]" />
+              </div>
+              <div className="flex-1">
+                <p className="eyebrow">Option A</p>
+                <h2 className="mt-2 text-[18px] font-semibold text-[var(--accord-text)]">Open a link from a freelancer</h2>
+                <p className="mt-3 text-sm leading-7 text-[var(--accord-muted)]">
+                  If a freelancer already sent you an Accord link, paste it here to jump straight into the agreement room.
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handlePasteSubmit} className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <input
+                className="field-input flex-1 font-mono"
+                placeholder="Paste agreement link here"
+                value={pasteLink}
+                onChange={(event) => setPasteLink(event.target.value)}
+              />
+              <button type="submit" className="primary-button sm:self-start">
+                Open Link
+              </button>
+            </form>
+          </section>
+
+          <div className="flex items-center gap-4">
+            <div className="h-px flex-1 bg-[var(--accord-border)]" />
+            <span className="text-[12px] font-medium uppercase tracking-[0.18em] text-[var(--accord-muted)]">or</span>
+            <div className="h-px flex-1 bg-[var(--accord-border)]" />
+          </div>
+
+          <section className="surface-card">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--accord-primary-line)] bg-[var(--accord-primary-soft)]">
+                <Briefcase className="h-5 w-5 text-[var(--accord-primary)]" />
+              </div>
+              <div className="flex-1">
+                <p className="eyebrow">Option B</p>
+                <h2 className="mt-2 text-[18px] font-semibold text-[var(--accord-text)]">Create and invite a freelancer</h2>
+                <p className="mt-3 text-sm leading-7 text-[var(--accord-muted)]">
+                  Define the work, amount, and freelancer wallet, then create the agreement and share it.
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleCreateSubmit} className="mt-6 space-y-4">
+              <label className="block space-y-2">
+                <span className="field-label">Job title</span>
+                <input
+                  required
+                  className="field-input"
+                  placeholder="Website redesign for client"
+                  value={form.title}
+                  onChange={(event) => setForm({ ...form, title: event.target.value })}
+                />
+              </label>
+
+              <label className="block space-y-2">
+                <span className="field-label">Description</span>
+                <textarea
+                  required
+                  rows="4"
+                  className="field-textarea resize-none"
+                  placeholder="Describe the work, deliverables, and approval terms"
+                  value={form.description}
+                  onChange={(event) => setForm({ ...form, description: event.target.value })}
+                />
+              </label>
+
+              <label className="block space-y-2">
+                <span className="field-label">Freelancer wallet address</span>
+                <div className="relative">
+                  <User className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--accord-muted)]" />
+                  <input
+                    required
+                    className="field-input pl-11 font-mono"
+                    placeholder="0x..."
+                    value={form.freelancerAddress}
+                    onChange={(event) => setForm({ ...form, freelancerAddress: event.target.value })}
+                  />
+                </div>
+              </label>
+
+              <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
+                <label className="block space-y-2">
+                  <span className="field-label">Payment amount</span>
+                  <input
+                    required
+                    type="number"
+                    className="field-input"
+                    placeholder="0.00"
+                    value={form.amount}
+                    onChange={(event) => setForm({ ...form, amount: event.target.value })}
+                  />
+                </label>
+
+                <label className="block space-y-2">
+                  <span className="field-label">Token</span>
+                  <select
+                    className="field-select min-w-[140px]"
+                    value={form.tokenAddress}
+                    onChange={(event) => setForm({ ...form, tokenAddress: event.target.value })}
+                  >
+                    <option value={USDC_ADDRESS}>USDC</option>
+                  </select>
+                </label>
+              </div>
+
+              <label className="block space-y-2">
+                <span className="field-label">Deadline</span>
+                <input
+                  type="date"
+                  className="field-input"
+                  value={form.deadline}
+                  onChange={(event) => setForm({ ...form, deadline: event.target.value })}
+                />
+              </label>
+
+              <button type="submit" disabled={loading} className="primary-button w-full">
+                {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                {loading ? "Creating Agreement" : "Create and Send"}
+              </button>
+            </form>
+          </section>
+        </div>
+      </main>
+    </div>
+  );
 }
+
 

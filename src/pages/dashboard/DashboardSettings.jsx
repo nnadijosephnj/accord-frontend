@@ -106,12 +106,12 @@ function SettingsSection({ title, action, children }) {
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between gap-3 px-1">
-        <p className="text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400 dark:text-zinc-500">
+        <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-[var(--accord-muted)]">
           {title}
         </p>
         {action}
       </div>
-      <div className="overflow-hidden rounded-[28px] border border-zinc-200/80 bg-white shadow-sm dark:border-white/5 dark:bg-[#171717]">
+      <div className="overflow-hidden rounded-[10px] border border-[var(--accord-border)] bg-[var(--accord-surface)]">
         {children}
       </div>
     </section>
@@ -130,30 +130,30 @@ function SettingsRow({
   const content = (
     <>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-zinc-900 dark:text-white">{title}</p>
+        <p className="text-sm font-semibold text-[var(--accord-text)]">{title}</p>
         {subtitle ? (
-          <p className="mt-1 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+          <p className="mt-1 text-xs leading-relaxed text-[var(--accord-muted)]">
             {subtitle}
           </p>
         ) : null}
       </div>
       {value ? (
-        <div className="max-w-[55%] shrink-0 text-right text-sm text-zinc-500 dark:text-zinc-400">
+        <div className="max-w-[55%] shrink-0 text-right text-sm text-[var(--accord-muted)]">
           {value}
         </div>
       ) : null}
       {trailing}
       {onClick ? (
-        <ChevronRight className="h-4 w-4 shrink-0 text-zinc-300 dark:text-zinc-600" />
+        <ChevronRight className="h-4 w-4 shrink-0 text-[var(--accord-muted)]" />
       ) : null}
     </>
   );
 
   const className = `flex w-full items-center gap-4 px-5 py-4 text-left transition-colors ${
-    !isLast ? "border-b border-zinc-100 dark:border-white/5" : ""
+    !isLast ? "border-b border-[var(--accord-border)]" : ""
   } ${
     onClick && !disabled
-      ? "hover:bg-zinc-50/80 dark:hover:bg-white/[0.03]"
+      ? "hover:bg-[var(--accord-primary-faint)]"
       : ""
   } ${disabled ? "cursor-not-allowed opacity-60" : ""}`;
 
@@ -170,7 +170,7 @@ function SettingsRow({
 
 function SegmentedTabs({ activeTab, onChange }) {
   return (
-    <div className="inline-flex rounded-2xl bg-zinc-100 p-1 dark:bg-white/5">
+    <div className="inline-flex rounded-[10px] border border-[var(--accord-border)] bg-[var(--accord-input-background)] p-1">
       {TABS.map((tab) => {
         const active = activeTab === tab.id;
 
@@ -179,10 +179,10 @@ function SegmentedTabs({ activeTab, onChange }) {
             key={tab.id}
             type="button"
             onClick={() => onChange(tab.id)}
-            className={`rounded-2xl px-4 py-2.5 text-sm font-semibold transition-all sm:px-5 ${
+            className={`rounded-[8px] px-4 py-2.5 text-sm font-semibold transition-all sm:px-5 ${
               active
-                ? "bg-orange-500 text-white shadow-[0_10px_24px_rgba(234,88,12,0.28)]"
-                : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                ? "bg-[var(--accord-primary)] text-[var(--accord-primary-contrast)]"
+                : "text-[var(--accord-muted)] hover:text-[var(--accord-text)]"
             }`}
           >
             {tab.label}
@@ -200,8 +200,8 @@ function ToggleButton({ enabled, enabledLabel, disabledLabel, onClick }) {
       onClick={onClick}
       className={`inline-flex items-center gap-3 rounded-full border px-2 py-1.5 transition-all ${
         enabled
-          ? "border-orange-200 bg-orange-50 text-orange-600 dark:border-orange-500/30 dark:bg-orange-500/10 dark:text-orange-400"
-          : "border-zinc-200 bg-zinc-100 text-zinc-500 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400"
+          ? "border-[var(--accord-primary-hover-line)] bg-[var(--accord-primary-soft)] text-[var(--accord-primary)]"
+          : "border-[var(--accord-border)] bg-[var(--accord-input-background)] text-[var(--accord-muted)]"
       }`}
     >
       <span className="px-2 text-xs font-bold uppercase tracking-[0.18em]">
@@ -209,7 +209,7 @@ function ToggleButton({ enabled, enabledLabel, disabledLabel, onClick }) {
       </span>
       <span
         className={`flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-black transition-all ${
-          enabled ? "bg-orange-500 text-white" : "bg-white text-zinc-500 dark:bg-zinc-800 dark:text-zinc-300"
+          enabled ? "bg-[var(--accord-primary)] text-[var(--accord-primary-contrast)]" : "bg-[var(--accord-surface-strong)] text-[var(--accord-muted)]"
         }`}
       >
         {enabled ? "On" : "Off"}
@@ -231,20 +231,20 @@ function ModalShell({ open, onClose, title, description, children, footer }) {
           <button
             type="button"
             onClick={onClose}
-            className="absolute inset-0 bg-black/55 backdrop-blur-sm"
+            className="absolute inset-0 bg-[var(--accord-backdrop)] backdrop-blur-[12px]"
             aria-label="Close modal"
           />
           <Motion.div
             initial={{ opacity: 0, y: 24, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.97 }}
-            className="relative z-10 w-full max-w-lg overflow-hidden rounded-[30px] border border-zinc-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)] dark:border-white/10 dark:bg-[#141414]"
+            className="glass-modal relative z-10 w-full max-w-lg overflow-hidden"
           >
-            <div className="flex items-start justify-between gap-4 border-b border-zinc-100 px-6 py-5 dark:border-white/5">
+            <div className="flex items-start justify-between gap-4 border-b border-[var(--accord-border-soft)] px-6 py-5">
               <div className="min-w-0">
-                <h3 className="text-lg font-bold text-zinc-900 dark:text-white">{title}</h3>
+                <h3 className="text-lg font-bold text-[var(--accord-text)]">{title}</h3>
                 {description ? (
-                  <p className="mt-1 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
+                  <p className="mt-1 text-sm leading-relaxed text-[var(--accord-muted)]">
                     {description}
                   </p>
                 ) : null}
@@ -252,14 +252,14 @@ function ModalShell({ open, onClose, title, description, children, footer }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-white/5 dark:hover:text-white"
+                className="icon-button h-10 w-10"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
             <div className="max-h-[70vh] overflow-y-auto px-6 py-5">{children}</div>
             {footer ? (
-              <div className="border-t border-zinc-100 px-6 py-4 dark:border-white/5">{footer}</div>
+              <div className="border-t border-[var(--accord-border-soft)] px-6 py-4">{footer}</div>
             ) : null}
           </Motion.div>
         </Motion.div>
@@ -278,18 +278,18 @@ function ToastStack({ toasts }) {
             initial={{ opacity: 0, y: -12, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -12, scale: 0.96 }}
-            className={`pointer-events-auto rounded-2xl border px-4 py-3 shadow-lg ${
+            className={`pointer-events-auto rounded-[10px] border px-4 py-3 ${
               toast.type === "error"
-                ? "border-red-200 bg-white text-red-600 dark:border-red-500/20 dark:bg-[#151515] dark:text-red-400"
-                : "border-orange-200 bg-white text-zinc-900 dark:border-orange-500/20 dark:bg-[#151515] dark:text-white"
+                ? "border-[rgba(239,68,68,0.18)] bg-[var(--accord-surface)] text-[var(--accord-danger)]"
+                : "border-[var(--accord-primary-line)] bg-[var(--accord-surface)] text-[var(--accord-text)]"
             }`}
           >
             <div className="flex items-start gap-3">
               <div
                 className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
                   toast.type === "error"
-                    ? "bg-red-50 text-red-500 dark:bg-red-500/10 dark:text-red-400"
-                    : "bg-orange-50 text-orange-500 dark:bg-orange-500/10 dark:text-orange-400"
+                    ? "bg-[rgba(239,68,68,0.12)] text-[var(--accord-danger)]"
+                    : "bg-[var(--accord-primary-soft)] text-[var(--accord-primary)]"
                 }`}
               >
                 {toast.type === "error" ? (
@@ -780,7 +780,7 @@ export default function DashboardSettings() {
     general: (
       <div className="space-y-6">
         {nftOwnershipNotice ? (
-          <div className="rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm font-semibold text-orange-700 dark:border-orange-500/20 dark:bg-orange-500/10 dark:text-orange-300">
+          <div className="rounded-[10px] border border-[var(--accord-primary-line)] bg-[var(--accord-primary-soft)] px-4 py-3 text-sm font-semibold text-[var(--accord-primary)]">
             {nftOwnershipNotice}
           </div>
         ) : null}
@@ -790,14 +790,14 @@ export default function DashboardSettings() {
             title="Display Name"
             value={displayName}
             onClick={() => handleOpenEditor("displayName")}
-            trailing={<PencilLine className="h-4 w-4 shrink-0 text-zinc-300 dark:text-zinc-600" />}
+            trailing={<PencilLine className="h-4 w-4 shrink-0 text-[var(--accord-muted)]" />}
           />
           <SettingsRow
             title="Email"
             subtitle={EMAIL_HINT}
             value={email}
             onClick={() => handleOpenEditor("email")}
-            trailing={<PencilLine className="h-4 w-4 shrink-0 text-zinc-300 dark:text-zinc-600" />}
+            trailing={<PencilLine className="h-4 w-4 shrink-0 text-[var(--accord-muted)]" />}
           />
           <SettingsRow
             title="Profile Photo"
@@ -808,11 +808,11 @@ export default function DashboardSettings() {
             }
             onClick={() => setAvatarModalOpen(true)}
             trailing={
-              <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-zinc-100 dark:border-white/10 dark:bg-white/5">
+              <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-[var(--accord-border)] bg-[var(--accord-input-background)]">
                 {avatarUrl ? (
                   <img src={avatarUrl} alt="Profile avatar" className="h-full w-full object-cover" />
                 ) : (
-                  <span className="text-xs font-black text-zinc-500 dark:text-zinc-300">
+                  <span className="text-xs font-black text-[var(--accord-text)]">
                     {getInitials(activeAvatarLabel)}
                   </span>
                 )}
@@ -851,7 +851,7 @@ export default function DashboardSettings() {
               <button
                 type="button"
                 onClick={() => handleCopy("wallet", address || user?.wallet_address || "")}
-                className="rounded-full p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-orange-500 dark:hover:bg-white/5"
+                className="icon-button h-10 w-10"
               >
                 {copiedField === "wallet" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               </button>
@@ -861,7 +861,7 @@ export default function DashboardSettings() {
             <button
               type="button"
               onClick={logout}
-              className="inline-flex items-center gap-2 rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 dark:border-red-500/20 dark:text-red-400 dark:hover:bg-red-500/10"
+              className="destructive-button"
             >
               <Wallet className="h-4 w-4" />
               Disconnect
@@ -874,7 +874,7 @@ export default function DashboardSettings() {
             <button
               type="button"
               onClick={openNewAddressModal}
-              className="inline-flex items-center gap-2 rounded-full border border-orange-200 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-orange-600 transition-colors hover:bg-orange-50 dark:border-orange-500/20 dark:text-orange-400 dark:hover:bg-orange-500/10"
+              className="secondary-button px-3 py-2 text-xs"
             >
               <Plus className="h-3.5 w-3.5" />
               Add
@@ -882,7 +882,7 @@ export default function DashboardSettings() {
           }
         >
           {addressBookLoading ? (
-            <div className="flex items-center justify-center gap-2 px-5 py-10 text-sm text-zinc-500 dark:text-zinc-400">
+            <div className="flex items-center justify-center gap-2 px-5 py-10 text-sm text-[var(--accord-muted)]">
               <LoaderCircle className="h-4 w-4 animate-spin" />
               Loading address book...
             </div>
@@ -898,14 +898,14 @@ export default function DashboardSettings() {
                     <button
                       type="button"
                       onClick={() => openEditAddressModal(entry)}
-                      className="rounded-full p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-orange-500 dark:hover:bg-white/5"
+                      className="icon-button h-10 w-10"
                     >
                       <PencilLine className="h-4 w-4" />
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDeleteAddress(entry)}
-                      className="rounded-full p-2 text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+                      className="icon-button h-10 w-10 border-[rgba(239,68,68,0.18)] text-[var(--accord-danger)] hover:border-[var(--accord-danger)] hover:bg-[rgba(239,68,68,0.08)] hover:text-[var(--accord-danger)]"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -916,8 +916,8 @@ export default function DashboardSettings() {
             ))
           ) : (
             <div className="px-5 py-10">
-              <p className="text-sm font-semibold text-zinc-900 dark:text-white">No saved addresses yet</p>
-              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+              <p className="text-sm font-semibold text-[var(--accord-text)]">No saved addresses yet</p>
+              <p className="mt-1 text-sm text-[var(--accord-muted)]">
                 Save trusted wallet addresses here to reuse them when creating agreements.
               </p>
             </div>
@@ -952,7 +952,7 @@ export default function DashboardSettings() {
                 : "Only available for wallets created by Accord."
             }
             onClick={handleExportWallet}
-            trailing={<KeyRound className="h-4 w-4 shrink-0 text-zinc-300 dark:text-zinc-600" />}
+            trailing={<KeyRound className="h-4 w-4 shrink-0 text-[var(--accord-muted)]" />}
             isLast
           />
         </SettingsSection>
@@ -967,30 +967,30 @@ export default function DashboardSettings() {
         <button
           type="button"
           onClick={() => navigate("/dashboard/overview")}
-          className="flex h-12 w-12 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-zinc-500 shadow-sm transition-all hover:-translate-y-0.5 hover:border-orange-200 hover:text-orange-500 dark:border-white/10 dark:bg-[#151515] dark:text-zinc-300 dark:hover:border-orange-500/20"
+          className="icon-button h-12 w-12"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-zinc-400 dark:text-zinc-500">
+          <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-[var(--accord-muted)]">
             Account settings
           </p>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white sm:text-3xl">Settings</h1>
+          <h1 className="text-2xl font-bold text-[var(--accord-text)] sm:text-3xl">Settings</h1>
         </div>
       </div>
-      <div className="overflow-hidden rounded-[34px] border border-zinc-200/80 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.08)] dark:border-white/5 dark:bg-[#111111]">
-        <div className="border-b border-zinc-100 px-5 py-6 dark:border-white/5 sm:px-7">
+      <div className="overflow-hidden rounded-[10px] border border-[var(--accord-border)] bg-[var(--accord-surface)]">
+        <div className="border-b border-[var(--accord-border)] px-5 py-6 sm:px-7">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-2">
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              <p className="text-sm text-[var(--accord-muted)]">
                 Manage your profile, wallet, appearance, and network preferences from one place.
               </p>
               <div className="flex flex-wrap items-center gap-3">
-                <span className="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600 dark:bg-white/5 dark:text-zinc-300">
+                <span className="inline-flex items-center gap-2 rounded-full border border-[var(--accord-border)] bg-[var(--accord-input-background)] px-3 py-1.5 text-xs font-semibold text-[var(--accord-text)]">
                   <Wallet className="h-3.5 w-3.5" />
                   {shortenAddress(address || user?.wallet_address)}
                 </span>
-                <span className="inline-flex items-center gap-2 rounded-full bg-orange-50 px-3 py-1.5 text-xs font-semibold text-orange-600 dark:bg-orange-500/10 dark:text-orange-300">
+                <span className="inline-flex items-center gap-2 rounded-full border border-[var(--accord-primary-line)] bg-[var(--accord-primary-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--accord-primary)]">
                   <ShieldAlert className="h-3.5 w-3.5" />
                   {walletType === "generated" ? "Accord-generated wallet" : "External wallet"}
                 </span>
@@ -999,7 +999,7 @@ export default function DashboardSettings() {
             <SegmentedTabs activeTab={activeTab} onChange={setActiveTab} />
           </div>
         </div>
-        <div className="max-h-[72vh] overflow-y-auto bg-zinc-50/80 px-5 py-6 dark:bg-[#0d0d0d] sm:px-7">
+        <div className="max-h-[72vh] overflow-y-auto bg-[var(--accord-background)] px-5 py-6 sm:px-7">
           <AnimatePresence mode="wait">
             <Motion.div
               key={activeTab}
@@ -1023,7 +1023,7 @@ export default function DashboardSettings() {
             <button
               type="button"
               onClick={() => setEditor(null)}
-              className="rounded-full px-4 py-2 text-sm font-semibold text-zinc-500 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-white/5"
+              className="secondary-button px-4 py-2 text-xs"
             >
               Cancel
             </button>
@@ -1031,7 +1031,7 @@ export default function DashboardSettings() {
               type="button"
               onClick={handleSaveEditor}
               disabled={isSavingField}
-              className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-orange-600 disabled:opacity-60"
+              className="primary-button px-4 py-2 text-xs disabled:opacity-60"
             >
               {isSavingField ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
               Save
@@ -1040,14 +1040,14 @@ export default function DashboardSettings() {
         }
       >
         <label className="block space-y-2">
-          <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
+          <span className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--accord-muted)]">
             {editor === "displayName" ? "Display name" : "Email"}
           </span>
           <input
             value={draftValue}
             onChange={(event) => setDraftValue(event.target.value)}
             placeholder={editor === "displayName" ? "Not set" : "name@example.com"}
-            className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-900 outline-none transition-colors focus:border-orange-300 dark:border-white/10 dark:bg-white/5 dark:text-white"
+            className="field-input"
           />
         </label>
       </ModalShell>
@@ -1058,7 +1058,7 @@ export default function DashboardSettings() {
         description="Upload a new image or choose an NFT you currently own."
         footer={
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="text-xs text-[var(--accord-muted)]">
               {avatarMode === "upload"
                 ? "JPG and PNG only. Images are pinned to Pinata IPFS."
                 : "Only ERC-721 NFTs with artwork can be used as your avatar."}
@@ -1067,7 +1067,7 @@ export default function DashboardSettings() {
               <button
                 type="button"
                 onClick={resetAvatarModal}
-                className="rounded-full px-4 py-2 text-sm font-semibold text-zinc-500 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-white/5"
+                className="secondary-button px-4 py-2 text-xs"
               >
                 Cancel
               </button>
@@ -1075,7 +1075,7 @@ export default function DashboardSettings() {
                 type="button"
                 onClick={avatarMode === "upload" ? handleUploadAvatar : handleSaveNftAvatar}
                 disabled={avatarSaving || (avatarMode === "upload" ? !avatarFile : !selectedNftKey)}
-                className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-orange-600 disabled:opacity-60"
+                className="primary-button px-4 py-2 text-xs disabled:opacity-60"
               >
                 {avatarSaving ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
                 Save
@@ -1091,26 +1091,26 @@ export default function DashboardSettings() {
               onClick={() => setAvatarMode("upload")}
               className={`rounded-2xl border px-4 py-4 text-left transition-all ${
                 avatarMode === "upload"
-                  ? "border-orange-200 bg-orange-50 text-orange-600 dark:border-orange-500/20 dark:bg-orange-500/10 dark:text-orange-300"
-                  : "border-zinc-200 bg-zinc-50 text-zinc-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
+                  ? "border-[var(--accord-primary-line)] bg-[var(--accord-primary-soft)] text-[var(--accord-primary)]"
+                  : "border-[var(--accord-border)] bg-[var(--accord-input-background)] text-[var(--accord-muted)]"
               }`}
             >
               <Upload className="mb-3 h-5 w-5" />
               <p className="text-sm font-semibold">Upload Image</p>
-              <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Choose a JPG or PNG file</p>
+              <p className="mt-1 text-xs text-[var(--accord-muted)]">Choose a JPG or PNG file</p>
             </button>
             <button
               type="button"
               onClick={() => setAvatarMode("nft")}
               className={`rounded-2xl border px-4 py-4 text-left transition-all ${
                 avatarMode === "nft"
-                  ? "border-orange-200 bg-orange-50 text-orange-600 dark:border-orange-500/20 dark:bg-orange-500/10 dark:text-orange-300"
-                  : "border-zinc-200 bg-zinc-50 text-zinc-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
+                  ? "border-[var(--accord-primary-line)] bg-[var(--accord-primary-soft)] text-[var(--accord-primary)]"
+                  : "border-[var(--accord-border)] bg-[var(--accord-input-background)] text-[var(--accord-muted)]"
               }`}
             >
               <ImagePlus className="mb-3 h-5 w-5" />
               <p className="text-sm font-semibold">Use NFT from Wallet</p>
-              <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Select owned NFT artwork</p>
+              <p className="mt-1 text-xs text-[var(--accord-muted)]">Select owned NFT artwork</p>
             </button>
           </div>
           {avatarMode === "upload" ? (
@@ -1118,20 +1118,20 @@ export default function DashboardSettings() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex w-full flex-col items-center justify-center gap-3 rounded-[26px] border border-dashed border-zinc-300 px-5 py-10 text-center transition-colors hover:border-orange-300 hover:bg-orange-50/70 dark:border-white/10 dark:hover:border-orange-500/20 dark:hover:bg-orange-500/5"
+                className="flex w-full flex-col items-center justify-center gap-3 rounded-[26px] border border-dashed border-[var(--accord-border)] bg-[var(--accord-input-background)] px-5 py-10 text-center transition-colors hover:border-[var(--accord-primary-hover-line)] hover:bg-[var(--accord-primary-faint)]"
               >
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Avatar preview" className="h-24 w-24 rounded-full object-cover shadow-sm" />
                 ) : (
-                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-zinc-100 text-zinc-400 dark:bg-white/5 dark:text-zinc-500">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full border border-[var(--accord-border)] bg-[var(--accord-surface)] text-[var(--accord-muted)]">
                     <Upload className="h-8 w-8" />
                   </div>
                 )}
                 <div>
-                  <p className="text-sm font-semibold text-zinc-900 dark:text-white">
+                  <p className="text-sm font-semibold text-[var(--accord-text)]">
                     {avatarFile ? avatarFile.name : "Choose image"}
                   </p>
-                  <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">JPG or PNG up to 5MB</p>
+                  <p className="mt-1 text-xs text-[var(--accord-muted)]">JPG or PNG up to 5MB</p>
                 </div>
               </button>
               <input
@@ -1145,12 +1145,12 @@ export default function DashboardSettings() {
           ) : (
             <div className="space-y-4">
               {nftsLoading ? (
-                <div className="flex items-center justify-center gap-2 rounded-3xl border border-zinc-200 bg-zinc-50 px-5 py-10 text-sm text-zinc-500 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400">
+                <div className="flex items-center justify-center gap-2 rounded-3xl border border-[var(--accord-border)] bg-[var(--accord-input-background)] px-5 py-10 text-sm text-[var(--accord-muted)]">
                   <LoaderCircle className="h-4 w-4 animate-spin" />
                   Loading NFTs...
                 </div>
               ) : nftsError ? (
-                <div className="rounded-3xl border border-zinc-200 bg-zinc-50 px-5 py-5 text-sm text-zinc-500 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400">
+                <div className="rounded-3xl border border-[var(--accord-border)] bg-[var(--accord-input-background)] px-5 py-5 text-sm text-[var(--accord-muted)]">
                   {nftsError}
                 </div>
               ) : (
@@ -1166,21 +1166,21 @@ export default function DashboardSettings() {
                         onClick={() => setSelectedNftKey(key)}
                         className={`overflow-hidden rounded-[24px] border text-left transition-all ${
                           selected
-                            ? "border-orange-300 shadow-[0_14px_32px_rgba(234,88,12,0.18)]"
-                            : "border-zinc-200 hover:border-orange-200 dark:border-white/10 dark:hover:border-orange-500/20"
+                            ? "border-[var(--accord-primary-hover-line)] bg-[var(--accord-primary-faint)]"
+                            : "border-[var(--accord-border)] hover:border-[var(--accord-primary-hover-line)]"
                         }`}
                       >
-                        <div className="aspect-square bg-zinc-100 dark:bg-white/5">
+                        <div className="aspect-square bg-[var(--accord-input-background)]">
                           <img src={getNftImage(nft)} alt={getNftDisplayName(nft)} className="h-full w-full object-cover" />
                         </div>
                         <div className="space-y-1 px-3 py-3">
-                          <p className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
+                          <p className="truncate text-sm font-semibold text-[var(--accord-text)]">
                             {getNftDisplayName(nft)}
                           </p>
-                          <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+                          <p className="truncate text-xs text-[var(--accord-muted)]">
                             {shortenAddress(nft.tokenAddress)}
                           </p>
-                          <p className="text-xs text-zinc-400 dark:text-zinc-500">Token #{nft.id.toString()}</p>
+                          <p className="text-xs text-[var(--accord-muted)]">Token #{nft.id.toString()}</p>
                         </div>
                       </button>
                     );
@@ -1201,14 +1201,14 @@ export default function DashboardSettings() {
             <button
               type="button"
               onClick={() => setAddressModalOpen(false)}
-              className="rounded-full px-4 py-2 text-sm font-semibold text-zinc-500 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-white/5"
+              className="secondary-button px-4 py-2 text-xs"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleAddressSave}
-              className="rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-orange-600"
+              className="primary-button px-4 py-2 text-xs"
             >
               Save
             </button>
@@ -1216,29 +1216,29 @@ export default function DashboardSettings() {
         }
       >
         <div className="space-y-4">
-          <div className="rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700 dark:border-orange-500/20 dark:bg-orange-500/10 dark:text-orange-300">
+          <div className="rounded-[10px] border border-[var(--accord-primary-line)] bg-[var(--accord-primary-soft)] px-4 py-3 text-sm text-[var(--accord-primary)]">
             Always double check wallet addresses. Crypto transactions cannot be reversed.
           </div>
           <label className="block space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
+            <span className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--accord-muted)]">
               Nickname
             </span>
             <input
               value={addressForm.nickname}
               onChange={(event) => setAddressForm((current) => ({ ...current, nickname: event.target.value }))}
               placeholder="John Client"
-              className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-900 outline-none transition-colors focus:border-orange-300 dark:border-white/10 dark:bg-white/5 dark:text-white"
+              className="field-input"
             />
           </label>
           <label className="block space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
+            <span className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--accord-muted)]">
               Wallet Address
             </span>
             <input
               value={addressForm.savedAddress}
               onChange={(event) => setAddressForm((current) => ({ ...current, savedAddress: event.target.value }))}
               placeholder="0x..."
-              className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 font-mono text-sm text-zinc-900 outline-none transition-colors focus:border-orange-300 dark:border-white/10 dark:bg-white/5 dark:text-white"
+              className="field-input font-mono"
             />
           </label>
           {addressError ? <p className="text-sm font-semibold text-red-500">{addressError}</p> : null}
@@ -1254,14 +1254,14 @@ export default function DashboardSettings() {
             <button
               type="button"
               onClick={() => setWalletNotice(null)}
-              className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 dark:bg-white dark:text-zinc-900"
+              className="primary-button px-4 py-2 text-xs"
             >
               Close
             </button>
           </div>
         }
       >
-        <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
+        <p className="text-sm leading-relaxed text-[var(--accord-muted)]">
           This feature is only available for wallets created by Accord. Your wallet was connected externally via Keplr or MetaMask. To export your private key please open your wallet app directly.
         </p>
       </ModalShell>
@@ -1275,17 +1275,21 @@ export default function DashboardSettings() {
             <button
               type="button"
               onClick={() => setWalletNotice(null)}
-              className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 dark:bg-white dark:text-zinc-900"
+              className="primary-button px-4 py-2 text-xs"
             >
               Close
             </button>
           </div>
         }
       >
-        <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
+        <p className="text-sm leading-relaxed text-[var(--accord-muted)]">
           Reconnect with the wallet Accord created for you to open Thirdweb&apos;s export flow securely.
         </p>
       </ModalShell>
     </div>
   );
 }
+
+
+
+

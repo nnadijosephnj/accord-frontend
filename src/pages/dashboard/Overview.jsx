@@ -1,41 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion as Motion } from 'framer-motion';
-import {
-  Shield, Clock, CheckCircle2, Wallet, FileText, ArrowRight
-} from 'lucide-react';
-import { useWallet } from '../../context/WalletContext';
-import { apiCall } from '../../utils/api';
-import * as ethers from 'ethers';
-import { CONTRACT_ADDRESS, CONTRACT_ABI, USDC_ADDRESS } from '../../utils/contractABI';
+import React, { useEffect, useState } from "react";
+import { motion as Motion } from "framer-motion";
+import { ArrowRight, CheckCircle2, Clock, FileText, Shield, Wallet } from "lucide-react";
+import * as ethers from "ethers";
+import { Link, useNavigate } from "react-router-dom";
+import { useWallet } from "../../context/WalletContext";
+import { CONTRACT_ABI, CONTRACT_ADDRESS, USDC_ADDRESS } from "../../utils/contractABI";
+import { apiCall } from "../../utils/api";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  show: (i) => ({ opacity: 1, y: 0, transition: { delay: i * 0.07, duration: 0.4 } }),
-};
+function normalizeStatus(status) {
+  const normalized = status?.toUpperCase() || "PENDING";
+  return normalized === "DELIVERED" ? "SUBMITTED" : normalized;
+}
 
-function StatusBadge({ status }) {
-  const map = {
-    FUNDED: 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400',
-    DELIVERED: 'bg-yellow-50 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400',
-    COMPLETED: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400',
-    DISPUTED: 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400',
-    CANCELLED: 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400',
-    PENDING: 'bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400',
-  };
-  const cls = map[status] || 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400';
-  return (
-    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${cls}`}>
-      {status || 'PENDING'}
-    </span>
-  );
+function getStatusBadge(status) {
+  const normalized = normalizeStatus(status);
+
+  if (normalized === "FUNDED") {
+    return "status-badge status-active";
+  }
+  if (["SUBMITTED", "REVISION", "PENDING"].includes(normalized)) {
+    return "status-badge status-pending";
+  }
+  if (normalized === "COMPLETED") {
+    return "status-badge status-completed";
+  }
+  if (normalized === "DISPUTED") {
+    return "status-badge status-disputed";
+  }
+  if (normalized === "CANCELLED") {
+    return "status-badge status-cancelled";
+  }
+
+  return "status-badge status-cancelled";
 }
 
 export default function Overview() {
   const { address, signer } = useWallet();
   const navigate = useNavigate();
   const [agreements, setAgreements] = useState([]);
-  const [vaultBalance, setVaultBalance] = useState('0.00');
+  const [vaultBalance, setVaultBalance] = useState("0.00");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,207 +49,184 @@ export default function Overview() {
 
   const loadData = async () => {
     try {
-      const data = await apiCall('/api/agreements');
+      const data = await apiCall("/api/agreements");
       setAgreements(data || []);
-    } catch (e) {
-      console.warn(e.message);
+    } catch (error) {
+      console.warn(error.message);
     } finally {
       setLoading(false);
     }
+
     try {
       if (signer) {
         const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-        const bal = await contract.vaultBalances(address, USDC_ADDRESS);
-        if (bal !== undefined) setVaultBalance(Number(ethers.formatUnits(bal, 6)).toFixed(2));
+        const balance = await contract.vaultBalances(address, USDC_ADDRESS);
+        if (balance !== undefined) {
+          setVaultBalance(Number(ethers.formatUnits(balance, 6)).toFixed(2));
+        }
       }
-    } catch (e) {
-      console.warn('Vault load error:', e);
+    } catch (error) {
+      console.warn("Vault load error:", error);
     }
   };
 
   const inEscrow = agreements
-    .filter((a) => ['FUNDED', 'DELIVERED'].includes(a.status))
-    .reduce((sum, a) => sum + parseFloat(a.amount || 0), 0)
+    .filter((agreement) => ["FUNDED", "SUBMITTED"].includes(normalizeStatus(agreement.status)))
+    .reduce((sum, agreement) => sum + parseFloat(agreement.amount || 0), 0)
     .toFixed(2);
 
-  const pending = agreements.filter((a) => a.status === 'PENDING').length;
-  const awaitingApproval = agreements.filter((a) => a.status === 'DELIVERED').length;
+  const pending = agreements.filter((agreement) => normalizeStatus(agreement.status) === "PENDING").length;
+  const awaitingApproval = agreements.filter((agreement) => normalizeStatus(agreement.status) === "SUBMITTED").length;
 
   const stats = [
     {
-      label: 'Amount in Escrow',
+      label: "Amount in escrow",
       value: `$${inEscrow}`,
-      sub: 'Total held securely',
+      sub: "Currently locked in active work",
       icon: Shield,
       primary: true,
     },
     {
-      label: 'Pending Agreements',
+      label: "Pending agreements",
       value: pending,
-      sub: 'Awaiting action',
+      sub: "Waiting on the next action",
       icon: Clock,
-      primary: false,
     },
     {
-      label: 'Awaiting Approval',
+      label: "Awaiting approval",
       value: awaitingApproval,
-      sub: 'Requires review',
+      sub: "Submitted and under review",
       icon: CheckCircle2,
-      primary: false,
     },
     {
-      label: 'Vault Balance',
+      label: "Vault balance",
       value: `$${vaultBalance}`,
-      sub: 'Available',
+      sub: "Available for future agreements",
       icon: Wallet,
-      primary: false,
     },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Page title */}
-      <div>
-        <h1 className="text-xl font-bold text-zinc-900 dark:text-white">Overview</h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">Your escrow summary at a glance</p>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Overview</h1>
+          <p className="page-subtitle">A concise view of your escrow activity, balances, and active agreements.</p>
+        </div>
       </div>
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {stats.map((stat, i) => {
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {stats.map((stat, index) => {
           const Icon = stat.icon;
+
           return (
             <Motion.div
               key={stat.label}
-              custom={i}
-              variants={fadeUp}
-              initial="hidden"
-              animate="show"
-              className={`relative p-5 rounded-2xl overflow-hidden ${
-                stat.primary
-                  ? 'bg-gradient-to-br from-orange-500 to-orange-700 text-white shadow-[0_10px_30px_rgba(234,88,12,0.25)]'
-                  : 'bg-white dark:bg-[#1a1a1a] border border-zinc-200 dark:border-white/5 shadow-sm'
-              }`}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05, duration: 0.28 }}
+              className={stat.primary ? "metric-card-primary" : "metric-card"}
             >
-              {stat.primary && (
-                <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-xl" />
-              )}
-              <div className="flex justify-between items-start mb-3">
-                <p className={`text-[10px] font-bold uppercase tracking-widest ${stat.primary ? 'text-orange-100' : 'text-zinc-400 dark:text-zinc-500'}`}>
-                  {stat.label}
-                </p>
-                <div className={`p-1.5 rounded-lg ${stat.primary ? 'bg-white/20' : 'bg-zinc-100 dark:bg-white/5'}`}>
-                  <Icon className={`w-3.5 h-3.5 ${stat.primary ? 'text-white' : 'text-zinc-400'}`} />
+              <div className="flex items-start justify-between gap-3">
+                <p className="metric-label">{stat.label}</p>
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--accord-border)] bg-[var(--accord-input-background)]">
+                  <Icon className={`h-4 w-4 ${stat.primary ? "text-[var(--accord-primary)]" : "text-[var(--accord-muted)]"}`} />
                 </div>
               </div>
-              <p className={`text-3xl font-black font-mono tracking-tight mb-1 ${stat.primary ? 'text-white' : 'text-zinc-900 dark:text-white'}`}>
-                {stat.value}
-              </p>
-              <p className={`text-xs font-medium ${stat.primary ? 'text-orange-200' : 'text-zinc-400 dark:text-zinc-500'}`}>
-                {stat.sub}
-              </p>
+              <p className={stat.primary ? "metric-value-primary mt-6" : "metric-value mt-6"}>{stat.value}</p>
+              <p className="metric-copy mt-3">{stat.sub}</p>
             </Motion.div>
           );
         })}
       </div>
 
-      {/* Agreements Table */}
       <Motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="bg-white dark:bg-[#1a1a1a] rounded-2xl border border-zinc-200 dark:border-white/5 shadow-sm overflow-hidden"
+        transition={{ delay: 0.15, duration: 0.3 }}
+        className="table-shell"
       >
-        <div className="px-5 py-4 flex items-center justify-between border-b border-zinc-100 dark:border-white/5">
-          <h2 className="text-base font-bold text-zinc-900 dark:text-white">Agreements</h2>
-          <Link
-            to="/dashboard/agreements"
-            className="text-xs font-semibold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1"
-          >
-            See all <ArrowRight className="w-3 h-3" />
+        <div className="flex items-center justify-between border-b border-[var(--accord-border)] px-6 py-4">
+          <div>
+            <p className="eyebrow">Recent agreements</p>
+            <h2 className="mt-2 text-[18px] font-semibold text-[var(--accord-text)]">Active agreement activity</h2>
+          </div>
+          <Link to="/dashboard/agreements" className="secondary-button px-4 py-2 text-xs">
+            View All
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-zinc-50 dark:bg-black/20 text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 border-b border-zinc-100 dark:border-white/5">
-                <th className="px-5 py-3">Agreement Type</th>
-                <th className="px-5 py-3">ID</th>
-                <th className="px-5 py-3">Parties</th>
-                <th className="px-5 py-3">Amount</th>
-                <th className="px-5 py-3">Status</th>
-                <th className="px-5 py-3">Created</th>
-                <th className="px-5 py-3 text-right">Actions</th>
+          <table className="w-full min-w-[760px] text-left">
+            <thead className="table-head">
+              <tr>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-[0.14em] text-[var(--accord-muted)]">Agreement</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-[0.14em] text-[var(--accord-muted)]">ID</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-[0.14em] text-[var(--accord-muted)]">Parties</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-[0.14em] text-[var(--accord-muted)]">Amount</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-[0.14em] text-[var(--accord-muted)]">Status</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-[0.14em] text-[var(--accord-muted)]">Created</th>
+                <th className="px-6 py-4 text-right text-xs font-medium uppercase tracking-[0.14em] text-[var(--accord-muted)]">Open</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="px-5 py-16 text-center">
-                    <div className="flex items-center justify-center gap-2 text-zinc-400">
-                      <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
-                      <span className="text-sm">Loading...</span>
+                  <td colSpan="7" className="px-6 py-16 text-center">
+                    <div className="flex items-center justify-center gap-3 text-sm text-[var(--accord-muted)]">
+                      <div className="h-4 w-4 rounded-full border-2 border-[var(--accord-primary-line)] border-t-[var(--accord-primary)] animate-spin" />
+                      Loading agreements
                     </div>
                   </td>
                 </tr>
-              ) : agreements.length > 0 ? (
-                agreements.slice(0, 6).map((item, i) => (
+              ) : agreements.length ? (
+                agreements.slice(0, 6).map((agreement) => (
                   <tr
-                    key={i}
-                    onClick={() => item?.id && navigate(`/deal/${item.id}`)}
-                    className="border-b border-zinc-100 dark:border-white/5 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all cursor-pointer"
+                    key={agreement.id}
+                    onClick={() => agreement?.id && navigate(`/deal/${agreement.id}`)}
+                    className="table-row cursor-pointer"
                   >
-                    <td className="px-5 py-4">
+                    <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-orange-50 dark:bg-orange-500/10 rounded-xl flex items-center justify-center text-sm">
-                          🤝
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--accord-border)] bg-[var(--accord-input-background)]">
+                          <FileText className="h-4 w-4 text-[var(--accord-primary)]" />
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-zinc-900 dark:text-white truncate max-w-[160px]">
-                            {item?.title || 'Untitled'}
-                          </p>
-                          <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-wide">
-                            Standard Escrow
-                          </p>
+                          <p className="text-sm font-semibold text-[var(--accord-text)]">{agreement?.title || "Untitled agreement"}</p>
+                          <p className="mt-1 text-xs text-[var(--accord-muted)]">Standard escrow agreement</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-4 font-mono text-xs text-zinc-400 dark:text-zinc-500">
-                      #{item?.id?.slice(0, 8) || 'N/A'}
+                    <td className="px-6 py-4 text-sm text-[var(--accord-muted)]">#{agreement?.id?.slice(0, 8) || "N/A"}</td>
+                    <td className="px-6 py-4 text-sm text-[var(--accord-muted)]">
+                      <p>Client: {agreement?.client_wallet ? `${agreement.client_wallet.slice(0, 6)}...${agreement.client_wallet.slice(-4)}` : "—"}</p>
+                      <p className="mt-1">Freelancer: {agreement?.freelancer_wallet ? `${agreement.freelancer_wallet.slice(0, 6)}...${agreement.freelancer_wallet.slice(-4)}` : "—"}</p>
                     </td>
-                    <td className="px-5 py-4">
-                      <div className="text-xs text-zinc-600 dark:text-zinc-400">
-                        <p className="font-medium">Client: {item?.client_wallet ? `${item.client_wallet.slice(0,6)}...${item.client_wallet.slice(-4)}` : '—'}</p>
-                        <p className="text-zinc-400">Dev: {item?.freelancer_wallet ? `${item.freelancer_wallet.slice(0,6)}...${item.freelancer_wallet.slice(-4)}` : '—'}</p>
-                      </div>
+                    <td className="px-6 py-4 text-sm font-semibold text-[var(--accord-primary)]">
+                      ${parseFloat(agreement?.amount || 0).toFixed(2)}
                     </td>
-                    <td className="px-5 py-4 text-sm font-bold text-zinc-900 dark:text-white">
-                      ${parseFloat(item?.amount || 0).toFixed(2)}
+                    <td className="px-6 py-4">
+                      <span className={getStatusBadge(agreement?.status)}>{normalizeStatus(agreement?.status)}</span>
                     </td>
-                    <td className="px-5 py-4">
-                      <StatusBadge status={item?.status} />
+                    <td className="px-6 py-4 text-sm text-[var(--accord-muted)]">
+                      {agreement?.created_at ? new Date(agreement.created_at).toLocaleDateString() : "—"}
                     </td>
-                    <td className="px-5 py-4 text-xs text-zinc-400">
-                      {item?.created_at ? new Date(item.created_at).toLocaleDateString() : '—'}
-                    </td>
-                    <td className="px-5 py-4 text-right">
-                      <button className="p-1.5 text-zinc-300 hover:text-orange-500 transition-colors">
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
+                    <td className="px-6 py-4 text-right">
+                      <ArrowRight className="ml-auto h-4 w-4 text-[var(--accord-muted)]" />
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="px-5 py-20 text-center">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="w-14 h-14 bg-zinc-100 dark:bg-white/5 rounded-2xl flex items-center justify-center">
-                        <FileText className="w-6 h-6 text-zinc-300 dark:text-zinc-600" />
+                  <td colSpan="7" className="px-6 py-20 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-lg border border-[var(--accord-border)] bg-[var(--accord-input-background)]">
+                        <FileText className="h-6 w-6 text-[var(--accord-muted)]" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-zinc-900 dark:text-white">No recent agreements found</p>
-                        <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">Create your first agreement to get started</p>
+                        <p className="text-sm font-semibold text-[var(--accord-text)]">No agreements yet</p>
+                        <p className="mt-2 text-sm text-[var(--accord-muted)]">Create your first agreement to start using Accord.</p>
                       </div>
                     </div>
                   </td>
@@ -259,3 +239,5 @@ export default function Overview() {
     </div>
   );
 }
+
+

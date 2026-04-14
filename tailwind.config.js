@@ -3,21 +3,28 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  darkMode: 'class',
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
-        'primary':        '#a13900',
-        'primary-bright': '#ea580c',
-        'primary-light':  '#ff793e',
-        'navy':           '#0A3D62',
-        'teal':           '#17B978',
+        accord: {
+          background: "#0A0A0A",
+          surface: "#111111",
+          border: "#1E1E1E",
+          primary: "#F97316",
+          primaryHover: "#EA6C0A",
+          text: "#F5F5F5",
+          muted: "#888888",
+          disabled: "#444444",
+          success: "#22C55E",
+          warning: "#EAB308",
+          destructive: "#EF4444",
+        },
       },
       fontFamily: {
-        'sans':    ['Manrope', 'sans-serif'],
-        'manrope': ['Manrope', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', "sans-serif"],
       },
     },
   },
   plugins: [],
-}
+};
