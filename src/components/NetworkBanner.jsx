@@ -1,11 +1,13 @@
 import React from "react";
+import { useLocation } from "react-router-dom";
 import { ShieldAlert } from "lucide-react";
 import { useNetwork } from "../context/NetworkContext";
 
 export default function NetworkBanner() {
   const { isTestnet } = useNetwork();
+  const location = useLocation();
 
-  if (!isTestnet) {
+  if (!isTestnet || location.pathname === "/") {
     return null;
   }
 
