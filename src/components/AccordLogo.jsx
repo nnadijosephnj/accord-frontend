@@ -6,7 +6,7 @@ const AccordLogo = ({ variant = "dark" }) => {
     <svg
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
-      viewBox="0 0 1500 1500"
+      viewBox="50 630 1350 340"
       preserveAspectRatio="xMidYMid meet"
       version="1.0"
       className="accord-logo w-full h-full"

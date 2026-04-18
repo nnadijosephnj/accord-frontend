@@ -99,7 +99,7 @@ export default function Landing() {
       <nav className="sticky top-0 z-40 border-b border-[var(--accord-border)] bg-[var(--accord-overlay)] backdrop-blur-xl">
         <div className="page-shell flex h-16 items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-32">
+            <div className="h-9 w-36">
               <AccordLogo variant={isDark ? "dark" : "light"} />
             </div>
           </div>
