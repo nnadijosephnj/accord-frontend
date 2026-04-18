@@ -99,12 +99,8 @@ export default function Landing() {
       <nav className="sticky top-0 z-40 border-b border-[var(--accord-border)] bg-[var(--accord-overlay)] backdrop-blur-xl">
         <div className="page-shell flex h-16 items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9">
+            <div className="h-9 w-32">
               <AccordLogo variant={isDark ? "dark" : "light"} />
-            </div>
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--accord-muted)]">Decentralized Escrow</p>
-              <p className="text-lg font-bold tracking-tight text-[var(--accord-primary)]">Accord</p>
             </div>
           </div>
 
@@ -336,10 +332,10 @@ export default function Landing() {
       <footer className="border-t border-[var(--accord-border)]">
         <div className="page-shell flex flex-col gap-4 px-4 py-8 text-sm text-[var(--accord-muted)] sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8">
+            <div className="h-8 w-32">
               <AccordLogo variant={isDark ? "dark" : "light"} />
             </div>
-            <span>Accord secures agreements for digital work onchain.</span>
+            <span className="text-sm">secures agreements for digital work onchain.</span>
           </div>
           <div className="flex items-center gap-6">
             <span>Built for Injective EVM</span>
