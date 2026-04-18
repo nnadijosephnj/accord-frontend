@@ -1,0 +1,1127 @@
+
+.accord-hero-wrapper {
+  mask-image: radial-gradient(circle at center, black 80%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle at center, black 80%, transparent 100%);
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(3) {
+  animation: pulseGlow 4s ease-in-out infinite alternate;
+}
+
+.hero-svg-container > svg > g:first-of-type > path:nth-child(4) {
+  transform-origin: 890px 455px;
+  animation: rotateRing 15s linear infinite;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(5),
+.hero-svg-container > svg > g:first-of-type > path:nth-child(6) {
+  animation: floatShield 4s ease-in-out infinite alternate;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(7) {
+  animation: pulseGlow 3s ease-in-out infinite alternate;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(8) {
+  opacity: 0;
+  animation: badgeFadeUp 1s ease 1s forwards;
+}
+
+@keyframes pulseGlow {
+  0% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+@keyframes rotateRing {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes floatShield {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-12px); }
+}
+
+@keyframes badgeFadeUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0px); }
+}
+
+@keyframes textSlideIn {
+  0% { opacity: 0; transform: translateX(-30px); }
+  100% { opacity: 1; transform: translateX(0px); }
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(9) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.3s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(10) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.305s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(11) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.31s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(12) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.315s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(13) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.32s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(14) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.325s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(15) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.32999999999999996s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(16) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.33499999999999996s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(17) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.33999999999999997s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(18) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.345s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(19) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.35s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(20) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.355s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(21) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.36s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(22) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.365s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(23) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.37s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(24) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.375s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(25) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.38s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(26) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.385s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(27) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.39s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(28) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.395s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(29) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.4s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(30) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.40499999999999997s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(31) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.41s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(32) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.415s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(33) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.42s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(34) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.425s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(35) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.43s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(36) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.435s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(37) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.44s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(38) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.44499999999999995s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(39) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.44999999999999996s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(40) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.45499999999999996s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(41) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.45999999999999996s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(42) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.46499999999999997s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(43) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.47s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(44) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.475s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(45) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.48s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(46) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.485s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(47) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.49s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(48) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.495s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(49) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.5s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(50) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.505s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(51) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.51s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(52) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.515s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(53) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.52s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(54) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.525s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(55) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.53s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(56) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.535s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(57) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.54s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(58) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.5449999999999999s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(59) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.55s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(60) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.5549999999999999s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(61) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.56s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(62) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.565s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(63) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.5700000000000001s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(64) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.575s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(65) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.5800000000000001s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(66) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.585s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(67) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.59s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(68) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.595s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(69) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.6s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(70) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.605s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(71) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.61s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(72) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.615s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(73) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.62s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(74) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.625s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(75) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.63s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(76) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.635s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(77) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.64s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(78) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.645s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(79) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.65s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(80) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.655s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(81) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.6599999999999999s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(82) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.665s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(83) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.6699999999999999s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(84) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.675s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(85) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.6799999999999999s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(86) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.685s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(87) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.69s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(88) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.6950000000000001s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(89) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.7s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(90) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.7050000000000001s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(91) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.71s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(92) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.7150000000000001s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(93) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.72s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(94) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.725s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(95) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.73s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(96) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.735s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(97) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.74s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(98) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.745s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(99) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.75s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(100) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.755s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(101) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.76s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(102) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.765s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(103) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.77s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(104) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.775s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(105) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.78s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(106) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.7849999999999999s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(107) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.79s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(108) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.7949999999999999s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(109) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.8s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(110) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.8049999999999999s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(111) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.81s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(112) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.815s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(113) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.8200000000000001s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(114) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.825s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(115) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.8300000000000001s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(116) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.835s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(117) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.8400000000000001s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(118) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.845s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(119) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.8500000000000001s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(120) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.855s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(121) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.8600000000000001s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(122) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.865s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(123) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.8700000000000001s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(124) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.875s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(125) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.8799999999999999s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(126) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.885s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(127) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.8899999999999999s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(128) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.895s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(129) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.8999999999999999s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(130) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.905s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(131) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.9099999999999999s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(132) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.915s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(133) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.9199999999999999s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(134) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.925s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(135) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.9299999999999999s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(136) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.935s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(137) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.94s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(138) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.9450000000000001s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(139) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.95s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(140) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.9550000000000001s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(141) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.96s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(142) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.9650000000000001s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(143) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.97s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(144) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.9750000000000001s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(145) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.98s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(146) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.9850000000000001s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(147) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.99s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(148) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 0.9950000000000001s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(149) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(150) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.005s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(151) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.01s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(152) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.015s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(153) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.02s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(154) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.025s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(155) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.03s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(156) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.035s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(157) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.04s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(158) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.045s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(159) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.05s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(160) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.055s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(161) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.06s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(162) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.065s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(163) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.07s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(164) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.075s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(165) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.08s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(166) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.085s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(167) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.09s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(168) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.095s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(169) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.1s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(170) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.105s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(171) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.11s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(172) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.115s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(173) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.12s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(174) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.125s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(175) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.1300000000000001s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(176) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.135s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(177) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.14s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(178) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.145s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(179) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.15s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(180) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.155s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(181) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.16s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(182) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.165s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(183) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.17s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(184) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.175s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(185) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.18s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(186) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.185s;
+}
+
+.hero-svg-container > svg > g:first-of-type > g:nth-child(187) {
+  opacity: 0;
+  animation: textSlideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.19s;
+}

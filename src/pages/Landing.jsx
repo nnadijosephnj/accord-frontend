@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AccordLogo from "../components/AccordLogo";
+import AccordHero from "../components/AccordHero";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useWallet } from "../context/WalletContext";
@@ -116,20 +117,10 @@ export default function Landing() {
       </nav>
 
       <main className="page-shell px-4 pb-16 pt-10 sm:px-6 sm:pt-14">
-        <section className="grid gap-8 border-b border-[var(--accord-border)] pb-16 lg:grid-cols-[1.3fr_0.9fr]">
-          <Motion.div initial="hidden" animate="show" variants={reveal} className="space-y-8">
-            <div className="space-y-5">
-              <p className="eyebrow text-[var(--accord-primary)]">Freelance escrow, done seriously</p>
-              <h1 className="max-w-3xl text-4xl font-bold leading-tight text-[var(--accord-text)] sm:text-5xl lg:text-[56px]">
-                Secure agreements for digital work without the marketplace overhead.
-              </h1>
-              <p className="max-w-2xl text-base leading-7 text-[var(--accord-muted)] sm:text-lg">
-                Accord gives freelancers and clients a cleaner way to structure payment, delivery, and approval onchain.
-                Create an agreement, share the link, and move the work forward inside one escrow flow.
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row">
+        <section className="border-b border-[var(--accord-border)] pb-12 mb-16">
+          <div className="mx-auto w-full max-w-6xl">
+            <AccordHero />
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row justify-center">
               <button type="button" onClick={handleLoginStart} className="primary-button">
                 {isConnecting ? "Opening Access" : "Launch Dashboard"}
                 <ArrowRight className="h-4 w-4" />
@@ -138,77 +129,7 @@ export default function Landing() {
                 See How It Works
               </a>
             </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              {[
-                "Single workflow for agreements, chat, and payout",
-                "Built for Injective EVM and wallet-native users",
-                "No marketplace custody over project funds",
-              ].map((item) => (
-                <div key={item} className="surface-muted px-4 py-4 text-sm leading-6 text-[var(--accord-muted)]">
-                  {item}
-                </div>
-              ))}
-            </div>
-          </Motion.div>
-
-          <Motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.08 }}
-            className="space-y-4"
-          >
-            <div className="surface-card">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="eyebrow">Escrow snapshot</p>
-                  <h2 className="mt-2 text-[18px] font-semibold text-[var(--accord-text)]">What matters most at a glance</h2>
-                </div>
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-[var(--accord-primary-line)] bg-[var(--accord-primary-soft)]">
-                  <Shield className="h-5 w-5 text-[var(--accord-primary)]" />
-                </div>
-              </div>
-
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <div className="surface-muted px-4 py-4">
-                  <p className="metric-label">Middleman fee</p>
-                  <p className="metric-value-primary mt-3">$<Counter from={0} to={0} formattingFn={(value) => value.toFixed(0)} /></p>
-                </div>
-                <div className="surface-muted px-4 py-4">
-                  <p className="metric-label">Funds handled by contract</p>
-                  <p className="metric-value-primary mt-3">
-                    <Counter from={0} to={100} formattingFn={(value) => `${value.toFixed(0)}%`} />
-                  </p>
-                </div>
-                <div className="surface-muted px-4 py-4">
-                  <p className="metric-label">Agreement flow</p>
-                  <p className="metric-copy mt-3">Create, fund, deliver, approve, release.</p>
-                </div>
-                <div className="surface-muted px-4 py-4">
-                  <p className="metric-label">Best fit</p>
-                  <p className="metric-copy mt-3">Freelancers, agencies, and direct client work.</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="surface-card">
-              <p className="eyebrow">Built for finance-grade clarity</p>
-              <div className="mt-5 space-y-4">
-                {[
-                  "Escrow amount stays visually prominent across the product.",
-                  "Status changes are visible without visual noise or template effects.",
-                  "Wallet-first access keeps the account model simple for Web3 users.",
-                ].map((item, index) => (
-                  <div key={item} className="flex items-start gap-4">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accord-primary-soft)] text-sm font-semibold text-[var(--accord-primary)]">
-                      {index + 1}
-                    </div>
-                    <p className="text-sm leading-6 text-[var(--accord-muted)]">{item}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Motion.div>
+          </div>
         </section>
 
         <section id="how-it-works" className="space-y-8 py-16">
