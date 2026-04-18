@@ -21,6 +21,7 @@ import {
 import { useTheme } from "../context/ThemeContext";
 import { useWallet } from "../context/WalletContext";
 import { resolveIpfsUrl } from "../lib/ipfs";
+import AccordLogo from "./AccordLogo";
 
 function shortenAddress(address) {
   if (!address) {
@@ -170,7 +171,9 @@ export default function DashboardLayout({ children }) {
     <div className="flex h-full flex-col bg-[var(--accord-background)]">
       <div className="flex h-16 items-center justify-between border-b border-[var(--accord-border)] px-5">
         <Link to="/dashboard/overview" onClick={closeSidebar} className="flex items-center gap-3">
-          <img src="/logo-icon.png" alt="Accord" className="h-8 w-8 rounded-md" />
+          <div className="h-8 w-8">
+            <AccordLogo variant={isDark ? "dark" : "light"} />
+          </div>
           <div>
             <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--accord-muted)]">Escrow</p>
             <p className="text-lg font-bold tracking-tight text-[var(--accord-primary)]">Accord</p>
