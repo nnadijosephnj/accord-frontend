@@ -13,6 +13,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import AccordLogo from "../components/AccordLogo";
 import AccordHero from "../components/AccordHero";
+import TransparentHeroText from "../assets/Tranparentherotext.png";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useWallet } from "../context/WalletContext";
@@ -97,6 +98,7 @@ export default function Landing() {
 
   return (
     <div className="app-shell min-h-screen text-[var(--accord-text)]">
+      {/* ── Top Navigation ── */}
       <nav className="sticky top-0 z-40 border-b border-[var(--accord-border)] bg-[var(--accord-overlay)] backdrop-blur-xl">
         <div className="page-shell flex h-16 items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
@@ -116,21 +118,42 @@ export default function Landing() {
         </div>
       </nav>
 
-      <main className="page-shell px-4 pb-16 pt-10 sm:px-6 sm:pt-14">
-        <section className="border-b border-[var(--accord-border)] pb-12 mb-16">
-          <div className="mx-auto w-full max-w-6xl">
-            <AccordHero />
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row justify-center">
-              <button type="button" onClick={handleLoginStart} className="primary-button">
-                {isConnecting ? "Opening Access" : "Launch Dashboard"}
-                <ArrowRight className="h-4 w-4" />
-              </button>
-              <a href="#how-it-works" className="secondary-button">
-                See How It Works
-              </a>
-            </div>
+      {/* ── Section 1: Vimeo video background with High-Res PNG Overlay ── */}
+      <section className="landing-video-section">
+        <div className="landing-video-wrapper">
+          <iframe
+            src="https://player.vimeo.com/video/1184472502?autoplay=1&loop=1&muted=1&background=1&autopause=0"
+            frameBorder="0"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowFullScreen
+            title="Accord intro video"
+            className="landing-video-iframe"
+          />
+          <img 
+            src={TransparentHeroText} 
+            alt="Accord Secure Escrow Text Overlay" 
+            className="landing-video-overlay" 
+          />
+        </div>
+      </section>
+
+      {/* ── Section 2: Existing hero content ── */}
+      <section className="landing-hero-section">
+        <div className="landing-hero-inner">
+          <AccordHero />
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row justify-center">
+            <button type="button" onClick={handleLoginStart} className="primary-button">
+              {isConnecting ? "Opening Access" : "Launch Dashboard"}
+              <ArrowRight className="h-4 w-4" />
+            </button>
+            <a href="#how-it-works" className="secondary-button">
+              See How It Works
+            </a>
           </div>
-        </section>
+        </div>
+      </section>
+
+      <main className="page-shell px-4 pb-16 pt-10 sm:px-6 sm:pt-14">
 
         <section id="how-it-works" className="space-y-8 py-16">
           <Motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} variants={reveal}>

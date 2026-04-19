@@ -108,7 +108,8 @@
   }
 
   .page-shell {
-    @apply mx-auto w-full max-w-[1100px];
+    /* Set to 100% width with large structural max-width (like massive monitors), removing the narrow 1100px look */
+    @apply mx-auto w-full max-w-[1600px];
   }
 
   .page-header {
@@ -450,5 +451,68 @@
 
   .glass-input::placeholder {
     color: var(--accord-muted);
+  }
+
+  /* ── Landing fullscreen sections ── */
+  .landing-video-section {
+    position: relative;
+    width: 100%;
+    /* We make the container slightly "shorter" than a full 16:9 (e.g., 16:8.2). */
+    /* This physically crops the bottom ~10% of the video off, perfectly hiding the "Veo" watermark! */
+    aspect-ratio: 16 / 8.2;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .landing-video-wrapper {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Natively scales perfectly, but since the container is shorter, the bottom hangs out and is cropped */
+  .landing-video-iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    /* Force the iframe itself to always be a full 16:9 */
+    aspect-ratio: 16 / 9;
+    border: 0;
+    pointer-events: none;
+  }
+
+  /* Sits perfectly centered over the background video to deliver a crystal clear text overlay */
+  .landing-video-overlay {
+    position: absolute;
+    /* Pushed slightly lower than 50% to compensate for the bottom crop */
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+
+  .landing-hero-section {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accord-background);
+    border-top: 1px solid var(--accord-border);
+  }
+
+  .landing-hero-inner {
+    width: 100%;
+    /* Remove max-w: 1100px so it matches the new ultra-wide, fluid layout */
+    max-width: 1600px;
+    padding: 64px 32px;
+    margin: 0 auto;
   }
 }
