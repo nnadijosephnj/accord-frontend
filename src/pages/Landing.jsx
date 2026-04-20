@@ -13,7 +13,9 @@ import {
 import { useNavigate } from "react-router-dom";
 import AccordLogo from "../components/AccordLogo";
 import AccordHero from "../components/AccordHero";
-import TransparentHeroText from "../assets/Tranparentherotext.png";
+import Hero1SectionBackground from "../assets/hero1sectionbackground.png";
+import PictureElementsToLayer from "../assets/pictureelementstobelayerdontopofherobackground.png";
+import HeroElementsSVG from "../components/HeroElementsSVG";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useWallet } from "../context/WalletContext";
@@ -118,22 +120,40 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* ── Section 1: Vimeo video background with High-Res PNG Overlay ── */}
+      {/* ── Section 1: Fully Native Layered Background Stack ── */}
       <section className="landing-video-section">
         <div className="landing-video-wrapper">
-          <iframe
-            src="https://player.vimeo.com/video/1184472502?autoplay=1&loop=1&muted=1&background=1&autopause=0"
-            frameBorder="0"
-            allow="autoplay; fullscreen; picture-in-picture"
-            allowFullScreen
-            title="Accord intro video"
+          {/* Layer 1: Background Base */}
+          <Motion.img
+            src={Hero1SectionBackground}
+            alt="Hero Background"
             className="landing-video-iframe"
+            style={{ objectFit: 'cover' }}
+            initial={{ opacity: 0, x: 80 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
           />
-          <img 
-            src={TransparentHeroText} 
-            alt="Accord Secure Escrow Text Overlay" 
+
+          {/* Layer 2: Middle Transparent Elements */}
+          <Motion.img
+            src={PictureElementsToLayer}
+            alt="Middle Graphic Layer"
+            className="landing-video-overlay"
+            initial={{ opacity: 0, scale: 1.03 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.2, delay: 0.4, ease: "easeOut" }}
+          />
+
+          {/* Layer 3: Top SVG Elements (Raw DOM injection for CSS animation) */}
+          <Motion.div 
             className="landing-video-overlay" 
-          />
+            style={{ zIndex: 20 }}
+            initial={{ opacity: 0, clipPath: "inset(0 100% 0 0)" }}
+            animate={{ opacity: 1, clipPath: "inset(0 0% 0 0)" }}
+            transition={{ duration: 1.5, delay: 0.6, ease: "easeInOut" }}
+          >
+            <HeroElementsSVG />
+          </Motion.div>
         </div>
       </section>
 

@@ -32,6 +32,7 @@
   z-index: 0;
   pointer-events: none;
 }
+
 .hero-glow-left {
   width: 360px;
   height: 360px;
@@ -39,6 +40,7 @@
   left: -100px;
   background: radial-gradient(circle, rgba(255, 117, 31, 0.18) 0%, transparent 70%);
 }
+
 .hero-glow-right {
   width: 420px;
   height: 420px;
@@ -285,6 +287,7 @@
     opacity: 0;
     transform: translateY(16px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

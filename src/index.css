@@ -457,9 +457,8 @@
   .landing-video-section {
     position: relative;
     width: 100%;
-    /* We make the container slightly "shorter" than a full 16:9 (e.g., 16:8.2). */
-    /* This physically crops the bottom ~10% of the video off, perfectly hiding the "Veo" watermark! */
-    aspect-ratio: 16 / 8.2;
+    /* Restored to pure 16:9 since the watermarked video is gone */
+    aspect-ratio: 16 / 9;
     overflow: hidden;
     background: #000;
   }
@@ -471,30 +470,41 @@
     height: 100%;
   }
 
-  /* Natively scales perfectly, but since the container is shorter, the bottom hangs out and is cropped */
+  /* Layer 1 Base Layer */
   .landing-video-iframe {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    /* Force the iframe itself to always be a full 16:9 */
-    aspect-ratio: 16 / 9;
+    height: 100%;
+    object-fit: cover;
     border: 0;
     pointer-events: none;
   }
 
-  /* Sits perfectly centered over the background video to deliver a crystal clear text overlay */
+  /* Sits perfectly aligned over the background layer to deliver pixel-perfect transparency */
   .landing-video-overlay {
     position: absolute;
-    /* Pushed slightly lower than 50% to compensate for the bottom crop */
-    top: 55%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    height: 90%;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
     pointer-events: none;
     z-index: 10;
+  }
+
+  /* Independent vector float animation for optical layers without exploding the source matrix */
+  @keyframes floating-glow {
+    0%, 100% {
+      translate: 0 0;
+    }
+    50% {
+      translate: 0 -12px;
+    }
+  }
+
+  .landing-front-svg-wrapper image {
+    animation: floating-glow 4.5s ease-in-out infinite;
   }
 
 
