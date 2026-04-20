@@ -105,24 +105,24 @@ export default function Landing() {
     <div className="app-shell min-h-screen text-[var(--accord-text)]">
       {/* ── Top Navigation ── */}
       <nav className="sticky top-0 z-40 border-b border-[var(--accord-border)] bg-[var(--accord-overlay)] backdrop-blur-xl">
-        <div className="page-shell flex h-16 items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-36">
+        <div className="page-shell flex h-16 items-center justify-between px-3 sm:px-6">
+          <div className="flex shrink-0 items-center gap-2">
+            <div className="h-8 w-24 sm:h-9 sm:w-36">
               <AccordLogo variant={isDark ? "dark" : "light"} />
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button type="button" className="icon-button h-10 w-10" aria-label="Language">
-              <Globe className="h-4 w-4" />
+          <div className="flex items-center gap-1 sm:gap-2">
+            <button type="button" className="icon-button h-8 w-8 sm:h-10 sm:w-10" aria-label="Language">
+              <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </button>
-            <button type="button" onClick={toggle} className="icon-button h-10 w-10" aria-label="Toggle theme">
-              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            <button type="button" onClick={toggle} className="icon-button h-8 w-8 sm:h-10 sm:w-10" aria-label="Toggle theme">
+              {isDark ? <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : <Moon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
             </button>
-            <button type="button" className="icon-button h-10 w-10" aria-label="Menu">
-              <Menu className="h-4 w-4" />
+            <button type="button" className="icon-button h-8 w-8 sm:h-10 sm:w-10" aria-label="Menu">
+              <Menu className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </button>
-            <button type="button" onClick={handleLoginStart} className="primary-button">
+            <button type="button" onClick={handleLoginStart} className="primary-button px-2.5 py-1.5 text-[10px] sm:px-5 sm:py-2.5 sm:text-[13px]">
               {isConnecting ? "Opening Access" : "Launch App"}
             </button>
           </div>

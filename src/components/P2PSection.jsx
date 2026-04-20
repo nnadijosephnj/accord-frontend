@@ -71,7 +71,7 @@ const P2PSection = () => {
     width: '100%',
     maxWidth: '100%',
     margin: '0 auto',
-    padding: '88px 32px 100px 32px',
+    padding: 'clamp(40px, 10vw, 88px) clamp(16px, 5vw, 32px) clamp(40px, 10vw, 100px) clamp(16px, 5vw, 32px)',
     backgroundColor: isDark ? '#E85D04' : '#ffffff',
     borderRadius: '0 0 64px 64px',
     display: 'flex',
