@@ -9,6 +9,8 @@ import {
   Sun,
   UserCheck,
   Wallet,
+  Globe,
+  Menu,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AccordLogo from "../components/AccordLogo";
@@ -16,6 +18,7 @@ import AccordHero from "../components/AccordHero";
 import Hero1SectionBackground from "../assets/hero1sectionbackground.png";
 import PictureElementsToLayer from "../assets/pictureelementstobelayerdontopofherobackground.png";
 import HeroElementsSVG from "../components/HeroElementsSVG";
+import P2PSection from "../components/P2PSection";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useWallet } from "../context/WalletContext";
@@ -110,11 +113,17 @@ export default function Landing() {
           </div>
 
           <div className="flex items-center gap-2">
+            <button type="button" className="icon-button h-10 w-10" aria-label="Language">
+              <Globe className="h-4 w-4" />
+            </button>
             <button type="button" onClick={toggle} className="icon-button h-10 w-10" aria-label="Toggle theme">
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
+            <button type="button" className="icon-button h-10 w-10" aria-label="Menu">
+              <Menu className="h-4 w-4" />
+            </button>
             <button type="button" onClick={handleLoginStart} className="primary-button">
-              {isConnecting ? "Opening Access" : "Sign In"}
+              {isConnecting ? "Opening Access" : "Launch App"}
             </button>
           </div>
         </div>
@@ -157,7 +166,10 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Section 2: Existing hero content ── */}
+      {/* ── Section 2: P2P Trustless Escrow (New) ── */}
+      <P2PSection />
+
+      {/* ── Section 3: Original hero content ── */}
       <section className="landing-hero-section">
         <div className="landing-hero-inner">
           <AccordHero />
