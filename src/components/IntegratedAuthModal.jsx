@@ -59,22 +59,17 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
   };
 
   const handleCreateWallet = async () => {
-    console.log("ACCORD_AUTH: Starting handleCreateWallet flow...");
-    console.log("ACCORD_AUTH: Client ID present:", !!client.clientId);
-    
     setIsLoading(true);
     setError(null);
     setPendingWalletType("generated");
 
     try {
-      console.log("ACCORD_AUTH: Initializing inAppWallet strategy...");
       const generatedWallet = inAppWallet({
         auth: {
           options: ["email", "google"],
         },
       });
 
-      console.log("ACCORD_AUTH: Triggering thirdweb connect modal/UI...");
       const wallet = await connect({
         client,
         chain: currentChain,
@@ -86,11 +81,9 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
         showThirdwebBranding: false,
       });
 
-      console.log("ACCORD_AUTH: Wallet connection result:", wallet ? "SUCCESS" : "CANCELLED/FAILED");
       const account = wallet?.getAccount();
 
       if (account?.address) {
-        console.log("ACCORD_AUTH: Syncing new wallet with Supabase...", account.address);
         await upsertUserByWallet({
           walletAddress: account.address,
           walletType: "generated",
@@ -104,7 +97,7 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
       }
     } catch (err) {
       clearPendingWalletType();
-      console.error("ACCORD_AUTH: FATAL - Create wallet error:", err);
+      console.error("Create wallet error:", err);
       setError(err?.message || "Wallet creation failed. Please try again.");
     } finally {
       setIsLoading(false);

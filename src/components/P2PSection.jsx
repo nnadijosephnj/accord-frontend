@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion as Motion } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 
 const Typewriter = ({ phrases }) => {
@@ -12,18 +12,18 @@ const Typewriter = ({ phrases }) => {
   useEffect(() => {
     const handleType = () => {
       const fullPhrase = phrases[currentPhraseIndex];
-      
+
       if (!isDeleting) {
         setCurrentText(fullPhrase.substring(0, currentText.length + 1));
         setSpeed(100);
-        
+
         if (currentText === fullPhrase) {
           setTimeout(() => setIsDeleting(true), 2000);
         }
       } else {
         setCurrentText(fullPhrase.substring(0, currentText.length - 1));
         setSpeed(50);
-        
+
         if (currentText === '') {
           setIsDeleting(false);
           setCurrentPhraseIndex((prev) => (prev + 1) % phrases.length);
@@ -38,7 +38,7 @@ const Typewriter = ({ phrases }) => {
   return (
     <span style={{ color: isDark ? '#0f172a' : '#E85D04', fontWeight: 700 }}>
       {currentText}
-      <span className="blinking-cursor" style={{ 
+      <span className="blinking-cursor" style={{
         borderRight: `2px solid ${isDark ? '#0f172a' : '#E85D04'}`,
         marginLeft: '2px',
         animation: 'blink 1s step-end infinite'
@@ -49,7 +49,7 @@ const Typewriter = ({ phrases }) => {
 
 const P2PSection = () => {
   const { isDark } = useTheme();
-  
+
   const phrases = [
     "For freelancers.",
     "For crypto traders.",
@@ -153,11 +153,18 @@ const P2PSection = () => {
     padding: '0',
     borderRadius: '0',
     fontWeight: 700,
-    textDecoration: 'none',
+    textDecoration: isDark ? 'underline' : 'none',
     transition: 'all 0.2s ease',
     cursor: 'pointer',
     display: 'inline',
     marginTop: '0'
+  };
+
+  const blueLinkStyle = {
+    ...orangeLinkStyle,
+    color: isDark ? '#0f172a' : '#2563eb',
+    textDecoration: isDark ? 'underline' : 'none',
+    textUnderlineOffset: '4px'
   };
 
   const buttonContainerStyle = {
@@ -191,9 +198,11 @@ const P2PSection = () => {
     transition: 'all 0.2s ease'
   };
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
     <section style={sectionStyle}>
-      <Motion.div 
+      <Motion.div
         style={containerStyle}
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
@@ -201,50 +210,124 @@ const P2PSection = () => {
       >
         <div style={contentWrapperStyle}>
           <span style={badgeStyle}>Decentralized Escrow</span>
-          
+
           <h2 style={headlineStyle}>
             The Safest Way to Secure Peer-to-Peer Transactions.
           </h2>
-          
+
           <div style={typewriterContainerStyle}>
             <Typewriter phrases={phrases} />
           </div>
 
-          <p style={bodyStyle}>
-            Accord is a decentralized escrow platform built on the Injective blockchain. 
-            It is designed to protect payments between freelancers and clients, 
-            P2P crypto traders, NFT buyers and sellers, and any two parties who 
-            don't know each other giving both sides confidence that the deal will 
-            be honored. No company holds your money not even us. Funds are managed 
-            entirely by a smart contract published publicly on the blockchain 
-            meaning anyone can verify exactly how it works, no hidden terms, no 
-            fine print. The code itself enforces the agreement. Accord simply 
-            provides the space for the transaction to happen. Whether you're a 
-            freelancer getting paid for a project, settling a P2P crypto trade, 
-            buying or selling an NFT, tokenizing real estate, or closing any deal 
-            where trust is the missing piece the smart contract holds, protects, 
-            and releases funds automatically when both sides are satisfied.
-            
-            <span style={boldTextStyle}>Audited. Fully Transparent. Zero Middlemen.</span>
-          </p>
+          <div style={{ ...bodyStyle, textAlign: 'justify', textJustify: 'inter-word' }}>
+            <p className="mb-6">
+              Accord is a decentralized escrow platform built on the{" "}
+              <a 
+                href="https://injective.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={blueLinkStyle}
+              >
+                Injective blockchain
+              </a>{" "}
+              to secure P2P digital transactions, 
+              covering both off-chain deliverables and on-chain assets. 
+              It secures P2P digital Transactions for crypto payments (P2P trading), 
+              NFTs and tokenized assets, freelance works (design, video, writing, etc.), digital files 
+              (audio, video, documents, software, etc.), and access to APIs or digital services such as{" "}
+              {!isExpanded ? (
+                <button 
+                  onClick={() => setIsExpanded(true)}
+                  style={{ color: isDark ? '#0f172a' : '#E85D04', fontWeight: 400, border: 'none', background: 'none', padding: 0, cursor: 'pointer', textDecoration: 'none' }}
+                >
+                  read more
+                </button>
+              ) : (
+                <Motion.span 
+                  initial={{ opacity: 0 }} 
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  subscriptions, SaaS rentals, developer APIs, and 
+                  restricted software tools, between 
+                  freelancers, crypto traders, buyers, sellers, 
+                  and other digital counterparties who do not know each other.
+                </Motion.span>
+              )}
+            </p>
+
+            <AnimatePresence>
+              {isExpanded && (
+                <Motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  style={{ overflow: "hidden" }}
+                >
+                  <p className="mb-6">
+                    No company or intermediary holds user funds, not even Accord. Funds are locked and managed by a transparent smart contract 
+                    deployed on the Injective blockchain network where anyone can verify the contract logic and rules in real time. 
+                    Every transaction is executed transparently, with rules enforced by audited code rather than a centralized platform.
+                  </p>
+
+                  <p className="mb-6">
+                    The smart contract locks both payment and the transaction agreement, ensuring neither party can complete the 
+                    exchange alone. This reduces fraud by keeping funds and deliverables secured under predefined conditions until 
+                    the transaction is resolved. In a freelance transaction, for example, the client’s payment is locked in escrow 
+                    while the freelancer’s deliverable is committed under the contract. Neither side can access the final settlement 
+                    until conditions are met, such as mutual approval or predefined settlement rules.
+                  </p>
+
+                  <p className="mb-6">
+                    If both parties are satisfied, the smart contract automatically releases the funds and finalizes the exchange. 
+                    If not, either party can trigger a dispute or withdrawal according to the contract rules before completion.
+                  </p>
+
+                  <div style={{ textAlign: 'center', width: '100%' }}>
+                    <span style={{ ...boldTextStyle, color: isDark ? '#0f172a' : '#E85D04', display: 'inline-block' }}>
+                      Accord provides a trust layer for digital transactions where outcomes are enforced by verifiable rules on-chain.
+                    </span>
+                  </div>
+
+                  <div style={{ textAlign: 'center', marginTop: '24px' }}>
+                    <button 
+                      onClick={() => setIsExpanded(false)}
+                      style={{ 
+                        color: isDark ? '#0f172a' : '#6b7280', 
+                        fontSize: '13px', 
+                        border: 'none', 
+                        background: 'none', 
+                        cursor: 'pointer', 
+                        textDecoration: isDark ? 'underline' : 'none' 
+                      }}
+                    >
+                      Show less
+                    </button>
+                  </div>
+                </Motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           <div style={learnMoreStyle}>
-            <div>Want to know how Accord works, what escrow is, or what DeFi escrow means?</div>
+            <div>Want to understand how Accord works, what escrow means, or what DeFi escrow is all about?</div>
             <div>
-              New to blockchain and smart contracts? Don't worry, it's simpler than you think.{" "}
+              If you’re new to blockchain and smart contracts, don’t worry it’s easier to grasp than it sounds.{" "}
               <a 
                 href="#how-it-works" 
                 style={orangeLinkStyle}
                 onMouseOver={(e) => e.target.style.opacity = '0.8'}
                 onMouseOut={(e) => e.target.style.opacity = '1'}
               >
-                Learn More
-              </a>
+                Learn the basics
+              </a>{" "}
+              and see how it all comes together.
             </div>
           </div>
 
           <div style={buttonContainerStyle}>
-            <button 
+            <button
               style={primaryButtonStyle}
               onMouseOver={(e) => {
                 if (isDark) {
@@ -263,7 +346,7 @@ const P2PSection = () => {
             >
               Get Started
             </button>
-            <button 
+            <button
               style={secondaryButtonStyle}
               onMouseOver={(e) => {
                 if (isDark) {
