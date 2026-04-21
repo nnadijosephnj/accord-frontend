@@ -107,35 +107,32 @@ export default function Landing() {
     <div className="app-shell min-h-screen text-[var(--accord-text)]">
       {/* ── Top Navigation ── */}
       <nav className="sticky top-0 z-40 border-b border-[var(--accord-border)] bg-[var(--accord-overlay)] backdrop-blur-xl">
-        <div className="page-shell flex h-14 sm:h-20 items-center justify-between px-3 sm:px-8">
+        <div className="page-shell flex h-14 sm:h-18 items-center justify-between px-3 sm:px-8">
           {/* LEFT SIDE: Brand Identity */}
           <div className="flex shrink-0 items-center">
-            <div className="h-7 w-22 sm:h-9 sm:w-36">
+            <div className="h-6 w-24 sm:h-8 sm:w-36">
               <AccordLogo variant={isDark ? "dark" : "light"} />
             </div>
           </div>
 
           {/* RIGHT SIDE: Compact Action Dock */}
-          <div className="flex items-center gap-0.5 sm:gap-4">
+          <div className="flex items-center gap-0 sm:gap-4">
             <div className="relative">
               <button 
                 type="button" 
                 onClick={() => setLangOpen(!langOpen)}
-                className={`icon-button flex h-11 w-auto px-2 sm:h-12 sm:px-3 items-center justify-center transition-all duration-200 ${langOpen ? 'bg-[var(--accord-primary-soft)] border-[var(--accord-primary)]' : ''}`} 
+                className={`icon-button flex h-9 w-auto px-1.5 sm:h-11 sm:px-3 items-center justify-center transition-all duration-200 ${langOpen ? 'bg-[var(--accord-primary-soft)] border-[var(--accord-primary)]' : 'border-transparent'}`} 
                 aria-label="Language selection"
               >
-                <Globe className={`h-[17px] w-[17px] sm:h-5 sm:w-5 ${langOpen ? 'text-[var(--accord-primary)]' : ''}`} />
-                <span className={`ml-1.5 text-[11px] sm:text-[13px] font-bold uppercase tracking-tight ${langOpen ? 'text-[var(--accord-primary)]' : 'text-[var(--accord-text)]'}`}>EN</span>
-                <ChevronDown className={`ml-1 h-3 w-3 transition-transform duration-200 ${langOpen ? 'rotate-180 text-[var(--accord-primary)]' : 'text-[var(--accord-muted)]'}`} />
+                <Globe className={`h-[15px] w-[15px] sm:h-5 sm:w-5 ${langOpen ? 'text-[var(--accord-primary)]' : ''}`} />
+                <span className={`ml-1 text-[10px] sm:text-[12px] font-bold uppercase tracking-tight ${langOpen ? 'text-[var(--accord-primary)]' : 'text-[var(--accord-text)]'}`}>EN</span>
+                <ChevronDown className={`ml-0.5 h-2 w-2 transition-transform duration-200 ${langOpen ? 'rotate-180 text-[var(--accord-primary)]' : 'text-[var(--accord-muted)]'}`} />
               </button>
 
               <AnimatePresence>
                 {langOpen && (
                   <>
-                    <div 
-                      className="fixed inset-0 z-40" 
-                      onClick={() => setLangOpen(false)} 
-                    />
+                    <div className="fixed inset-0 z-40" onClick={() => setLangOpen(false)} />
                     <Motion.div
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -154,7 +151,7 @@ export default function Landing() {
                           key={lang.code}
                           type="button"
                           onClick={() => setLangOpen(false)}
-                          className="flex h-12 w-full items-center justify-between px-4 text-left transition-colors hover:bg-[var(--accord-primary-faint)] group"
+                          className="flex h-11 w-full items-center justify-between px-4 text-left transition-colors hover:bg-[var(--accord-primary-faint)] group"
                         >
                           <span className="text-sm font-semibold text-[var(--accord-text)] group-hover:text-[var(--accord-primary)]">
                             {lang.name}
@@ -170,14 +167,14 @@ export default function Landing() {
               </AnimatePresence>
             </div>
 
-            <button type="button" onClick={toggle} className="icon-button flex h-11 w-8 sm:h-12 sm:w-12 items-center justify-center" aria-label="Toggle light/dark mode">
-              {isDark ? <Sun className="h-[17px] w-[17px] sm:h-5 sm:w-5" /> : <Moon className="h-[17px] w-[17px] sm:h-5 sm:w-5" />}
+            <button type="button" onClick={toggle} className="icon-button flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center border-transparent" aria-label="Toggle light/dark mode">
+              {isDark ? <Sun className="h-[16px] w-[16px] sm:h-5 sm:w-5" /> : <Moon className="h-[16px] w-[16px] sm:h-5 sm:w-5" />}
             </button>
-            <button type="button" className="icon-button h-11 w-8 sm:h-12 sm:w-12 flex items-center justify-center" aria-label="Navigation menu">
-              <Menu className="h-[17px] w-[17px] sm:h-5 sm:w-5" />
+            <button type="button" className="icon-button h-9 w-9 sm:h-11 sm:w-11 flex items-center justify-center border-transparent" aria-label="Navigation menu">
+              <Menu className="h-[16px] w-[16px] sm:h-5 sm:w-5" />
             </button>
 
-            <button type="button" onClick={handleLoginStart} className="primary-button h-12 px-2.5 text-[10px] sm:px-8 sm:text-[14px] shrink-0 ml-1">
+            <button type="button" onClick={handleLoginStart} className="primary-button ml-1 h-9 px-3 text-[10px] sm:ml-2 sm:h-11 sm:px-8 sm:text-[13px] shrink-0 font-bold uppercase tracking-[0.08em] rounded-lg">
               {isConnecting ? "..." : "Launch App"}
             </button>
           </div>
