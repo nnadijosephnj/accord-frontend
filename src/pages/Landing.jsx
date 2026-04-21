@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from "react";
-import { animate, motion as Motion, useInView } from "framer-motion";
+import React, { useEffect, useRef, useState } from "react";
+import { AnimatePresence, animate, motion as Motion, useInView } from "framer-motion";
 import {
   ArrowRight,
+  ChevronDown,
   Lock,
   LockKeyhole,
   Moon,
@@ -57,6 +58,7 @@ export default function Landing() {
   const { isConnected } = useAuth();
   const { isDark, toggle } = useTheme();
   const navigate = useNavigate();
+  const [langOpen, setLangOpen] = useState(false);
 
   useEffect(() => {
     if (isConnected) {
@@ -105,25 +107,78 @@ export default function Landing() {
     <div className="app-shell min-h-screen text-[var(--accord-text)]">
       {/* ── Top Navigation ── */}
       <nav className="sticky top-0 z-40 border-b border-[var(--accord-border)] bg-[var(--accord-overlay)] backdrop-blur-xl">
-        <div className="page-shell flex h-16 items-center justify-between px-3 sm:px-6">
-          <div className="flex shrink-0 items-center gap-2">
-            <div className="h-8 w-24 sm:h-9 sm:w-36">
+        <div className="page-shell flex h-14 sm:h-20 items-center justify-between px-3 sm:px-8">
+          {/* LEFT SIDE: Brand Identity */}
+          <div className="flex shrink-0 items-center">
+            <div className="h-7 w-22 sm:h-9 sm:w-36">
               <AccordLogo variant={isDark ? "dark" : "light"} />
             </div>
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-2">
-            <button type="button" className="icon-button h-8 w-8 sm:h-10 sm:w-10" aria-label="Language">
-              <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          {/* RIGHT SIDE: Compact Action Dock */}
+          <div className="flex items-center gap-0.5 sm:gap-4">
+            <div className="relative">
+              <button 
+                type="button" 
+                onClick={() => setLangOpen(!langOpen)}
+                className={`icon-button flex h-11 w-auto px-2 sm:h-12 sm:px-3 items-center justify-center transition-all duration-200 ${langOpen ? 'bg-[var(--accord-primary-soft)] border-[var(--accord-primary)]' : ''}`} 
+                aria-label="Language selection"
+              >
+                <Globe className={`h-[17px] w-[17px] sm:h-5 sm:w-5 ${langOpen ? 'text-[var(--accord-primary)]' : ''}`} />
+                <span className={`ml-1.5 text-[11px] sm:text-[13px] font-bold uppercase tracking-tight ${langOpen ? 'text-[var(--accord-primary)]' : 'text-[var(--accord-text)]'}`}>EN</span>
+                <ChevronDown className={`ml-1 h-3 w-3 transition-transform duration-200 ${langOpen ? 'rotate-180 text-[var(--accord-primary)]' : 'text-[var(--accord-muted)]'}`} />
+              </button>
+
+              <AnimatePresence>
+                {langOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setLangOpen(false)} 
+                    />
+                    <Motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.2, ease: "easeOut" }}
+                      className="absolute right-0 top-full mt-2 z-50 min-w-[160px] overflow-hidden rounded-xl border border-[var(--accord-border)] bg-[var(--accord-overlay)] backdrop-blur-2xl shadow-2xl"
+                    >
+                      {[
+                        { code: 'EN', name: 'English' },
+                        { code: 'ES', name: 'Español' },
+                        { code: 'FR', name: 'Français' },
+                        { code: 'DE', name: 'Deutsch' },
+                        { code: 'ID', name: 'Bahasa' }
+                      ].map((lang) => (
+                        <button
+                          key={lang.code}
+                          type="button"
+                          onClick={() => setLangOpen(false)}
+                          className="flex h-12 w-full items-center justify-between px-4 text-left transition-colors hover:bg-[var(--accord-primary-faint)] group"
+                        >
+                          <span className="text-sm font-semibold text-[var(--accord-text)] group-hover:text-[var(--accord-primary)]">
+                            {lang.name}
+                          </span>
+                          <span className="text-[10px] font-bold text-[var(--accord-muted)] opacity-50">
+                            {lang.code}
+                          </span>
+                        </button>
+                      ))}
+                    </Motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <button type="button" onClick={toggle} className="icon-button flex h-11 w-8 sm:h-12 sm:w-12 items-center justify-center" aria-label="Toggle light/dark mode">
+              {isDark ? <Sun className="h-[17px] w-[17px] sm:h-5 sm:w-5" /> : <Moon className="h-[17px] w-[17px] sm:h-5 sm:w-5" />}
             </button>
-            <button type="button" onClick={toggle} className="icon-button h-8 w-8 sm:h-10 sm:w-10" aria-label="Toggle theme">
-              {isDark ? <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : <Moon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+            <button type="button" className="icon-button h-11 w-8 sm:h-12 sm:w-12 flex items-center justify-center" aria-label="Navigation menu">
+              <Menu className="h-[17px] w-[17px] sm:h-5 sm:w-5" />
             </button>
-            <button type="button" className="icon-button h-8 w-8 sm:h-10 sm:w-10" aria-label="Menu">
-              <Menu className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            </button>
-            <button type="button" onClick={handleLoginStart} className="primary-button px-2.5 py-1.5 text-[10px] sm:px-5 sm:py-2.5 sm:text-[13px]">
-              {isConnecting ? "Opening Access" : "Launch App"}
+
+            <button type="button" onClick={handleLoginStart} className="primary-button h-12 px-2.5 text-[10px] sm:px-8 sm:text-[14px] shrink-0 ml-1">
+              {isConnecting ? "..." : "Launch App"}
             </button>
           </div>
         </div>

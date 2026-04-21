@@ -238,7 +238,7 @@ const P2PSection = () => {
                 onMouseOver={(e) => e.target.style.opacity = '0.8'}
                 onMouseOut={(e) => e.target.style.opacity = '1'}
               >
-                → Learn How It Works
+                Learn More
               </a>
             </div>
           </div>
@@ -276,7 +276,7 @@ const P2PSection = () => {
                 e.target.style.backgroundColor = 'transparent';
               }}
             >
-              Learn How It Works
+              Learn More
             </button>
           </div>
         </div>
