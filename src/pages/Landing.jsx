@@ -171,10 +171,16 @@ export default function Landing() {
                     >
                       {[
                         { code: 'EN', name: 'English' },
-                        { code: 'ES', name: 'Español' },
                         { code: 'FR', name: 'Français' },
-                        { code: 'DE', name: 'Deutsch' },
-                        { code: 'ID', name: 'Bahasa' }
+                        { code: 'AR', name: 'العربية' },
+                        { code: 'PT', name: 'Português' },
+                        { code: 'ES', name: 'Español' },
+                        { code: 'ZH', name: '中文' },
+                        { code: 'HI', name: 'हिन्दी' },
+                        { code: 'RU', name: 'Русский' },
+                        { code: 'ID', name: 'Bahasa Indonesia' },
+                        { code: 'SW', name: 'Kiswahili' },
+                        { code: 'KO', name: '한국어' }
                       ].map((lang) => (
                         <button
                           key={lang.code}
