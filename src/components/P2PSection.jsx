@@ -92,7 +92,7 @@ const P2PSection = () => {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    fontFamily: "'ABC Whyte', sans-serif",
+    fontFamily: "'ABC Marist', serif",
     transition: 'background-color 0.4s ease'
   };
 
@@ -115,7 +115,7 @@ const P2PSection = () => {
   const contentWrapperStyle = {
     maxWidth: '680px',
     width: '100%',
-    fontFamily: "'ABC Whyte', sans-serif"
+    fontFamily: "'ABC Marist', serif"
   };
 
   const badgeStyle = {
