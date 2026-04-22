@@ -177,8 +177,8 @@ const P2PSection = () => {
 
   const learnMoreStyle = {
     fontSize: '14px',
-    color: isDark ? '#E85D04' : '#6b7280',
-    opacity: isDark ? 0.9 : 1,
+    color: isDark ? '#a1a1aa' : '#6b7280',
+    opacity: isDark ? 0.85 : 1,
     lineHeight: 1.9,
     marginTop: '32px'
   };
@@ -321,7 +321,7 @@ const P2PSection = () => {
                   </p>
 
                   <div style={{ textAlign: 'center', width: '100%' }}>
-                    <span style={{ ...boldTextStyle, color: isDark ? '#E85D04' : '#E85D04', display: 'inline-block' }}>
+                    <span style={{ ...boldTextStyle, color: isDark ? '#ffffff' : '#E85D04', display: 'inline-block' }}>
                       Accord provides a trust layer for digital transactions where outcomes are enforced by verifiable rules on-chain.
                     </span>
                   </div>
@@ -330,12 +330,13 @@ const P2PSection = () => {
                     <button 
                       onClick={() => setIsExpanded(false)}
                       style={{ 
-                        color: isDark ? '#E85D04' : '#6b7280', 
+                        color: isDark ? '#a1a1aa' : '#6b7280', 
                         fontSize: '13px', 
                         border: 'none', 
                         background: 'none', 
                         cursor: 'pointer', 
-                        textDecoration: isDark ? 'underline' : 'none' 
+                        textDecoration: isDark ? 'underline' : 'none',
+                        opacity: 0.8
                       }}
                     >
                       Show less
