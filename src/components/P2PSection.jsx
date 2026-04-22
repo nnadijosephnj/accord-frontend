@@ -47,6 +47,35 @@ const Typewriter = ({ phrases }) => {
   );
 };
 
+function LiquidCircuitBorder() {
+  return (
+    <div className="conduit-shell">
+      <svg className="conduit-svg" preserveAspectRatio="none" viewBox="0 0 100 40">
+        <defs>
+          <linearGradient id="silicon-gradient-p2p" x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#f97316" />
+            <stop offset="25%" stopColor="#facc15" />
+            <stop offset="50%" stopColor="#ffffff" />
+            <stop offset="75%" stopColor="#a855f7" />
+            <stop offset="100%" stopColor="#f97316" />
+            <animateTransform
+              attributeName="gradientTransform"
+              type="rotate"
+              from="0 50 20"
+              to="360 50 20"
+              dur="8s"
+              repeatCount="indefinite"
+            />
+          </linearGradient>
+        </defs>
+        <rect x="1" y="1" width="98" height="38" rx="11" style={{ fill: 'none', stroke: 'rgba(255, 117, 31, 0.1)', strokeWidth: 1 }} vectorEffect="non-scaling-stroke" />
+        <rect x="1" y="1" width="98" height="38" rx="11" style={{ fill: 'none', stroke: '#ff9d00', strokeWidth: 6, filter: 'blur(6px)', opacity: 0.3 }} vectorEffect="non-scaling-stroke" />
+        <rect x="1" y="1" width="98" height="38" rx="11" style={{ fill: 'none', stroke: 'url(#silicon-gradient-p2p)', strokeWidth: 2.2 }} vectorEffect="non-scaling-stroke" />
+      </svg>
+    </div>
+  );
+}
+
 const P2PSection = () => {
   const { isDark } = useTheme();
 
@@ -90,16 +119,23 @@ const P2PSection = () => {
   };
 
   const badgeStyle = {
-    display: 'inline-block',
-    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.15)' : '#E85D0412',
+    position: 'relative',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(232, 93, 4, 0.06)',
+    backdropFilter: 'blur(10px)',
+    WebkitBackdropFilter: 'blur(10px)',
     color: isDark ? '#ffffff' : '#E85D04',
-    fontSize: '12px',
-    fontWeight: 700,
+    fontSize: '11px',
+    fontWeight: 800,
     textTransform: 'uppercase',
-    letterSpacing: '0.1em',
-    padding: '6px 16px',
-    borderRadius: '100px',
-    marginBottom: '24px'
+    letterSpacing: '0.14em',
+    padding: '8px 24px',
+    borderRadius: '12px',
+    marginBottom: '28px',
+    border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(232, 93, 4, 0.15)',
+    zIndex: 10
   };
 
   const headlineStyle = {
@@ -209,7 +245,10 @@ const P2PSection = () => {
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <div style={contentWrapperStyle}>
-          <span style={badgeStyle}>Decentralized Escrow</span>
+          <div style={badgeStyle}>
+            <LiquidCircuitBorder />
+            <span style={{ position: 'relative', zIndex: 10 }}>Decentralized Escrow</span>
+          </div>
 
           <h2 style={headlineStyle}>
             The Safest Way to Secure Peer-to-Peer Transactions.
