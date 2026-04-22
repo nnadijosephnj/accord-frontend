@@ -61,7 +61,17 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
     const observer = new MutationObserver(() => {
       const headings = document.getElementsByTagName("h2");
       for (const h2 of headings) {
-        if (h2.textContent.trim() === "Connect to Accord" && !h2.querySelector(".accord-sublabel")) {
+        const text = h2.textContent.trim();
+        const needsBranding = (text === "Sign into Accord" || text === "Connect to Accord" || text === "Connect into Accord") && h2.getAttribute("data-branded") !== "true";
+        
+        if (needsBranding) {
+          h2.setAttribute("data-branded", "true");
+          const isConnect = text === "Connect to Accord" || text === "Connect into Accord";
+          const titleText = isConnect ? "Connect your EVM-compatible wallet to get started" : "Sign into Accord";
+          const titleFont = isConnect ? "'ABC Whyte', sans-serif" : "'ABC Marist', serif";
+          const titleColor = isConnect ? "var(--accord-text-muted)" : "var(--accord-text)";
+          const titleSize = isConnect ? "0.94rem" : "1.22rem";
+          const titleWeight = isConnect ? "500" : "700";
           // 1. Rebuild header with FULL Logo + Title
           h2.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 14px; width: 100%;">
@@ -80,28 +90,11 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
                   <path fill="#ff751f" d="M 202.777344 648.179688 C 153.5 649.421875 104.8125 662.582031 61.140625 685.316406 C 65.964844 735.246094 81.308594 783.992188 107.34375 826.859375 C 111.957031 834.53125 116.910156 842 122.164062 849.242188 C 112.304688 833.476562 104.296875 816.554688 98.472656 798.855469 C 98.472656 798.855469 112.304688 833.476562 122.164062 849.242188 C 112.304688 833.476562 104.296875 816.554688 98.472656 798.855469 C 88.125 767.679688 83.808594 734.402344 85.480469 701.613281 C 120.304688 680.8125 160.097656 667.964844 200.445312 663.535156 C 249.183594 658.179688 299.613281 665.082031 344.675781 684.445312 C 300.890625 661.898438 252.058594 649.125 202.777344 648.179688 Z M 344.675781 684.445312 C 323.421875 677.5625 301.691406 672.535156 279.691406 669.621094 C 213.542969 660.664062 145.507812 672.542969 85.480469 701.613281 C 122.164062 684.378906 162.355469 674.738281 202.863281 673.523438 C 243.371094 674.46875 283.621094 683.847656 320.40625 700.855469 C 328.066406 752.28125 319.316406 806.214844 295.683594 852.542969 C 286.121094 871.695312 273.828125 889.707031 259.644531 905.71875 C 243.472656 924.007812 224.632812 939.992188 203.835938 952.726562 C 204.535156 952.335938 210.289062 949.152344 212.949219 947.628906 L 217.214844 945.128906 C 228.214844 938.523438 238.777344 931.164062 248.753906 923.085938 C 320.144531 865.890625 353.101562 774.480469 344.675781 684.445312 Z M 308.054688 798.179688 C 291.800781 848.648438 257.878906 892.945312 213.644531 922.160156 C 210.476562 924.277344 207.027344 926.46875 203.699219 928.476562 C 162.496094 904.730469 127.707031 870.082031 103.046875 829.472656 C 76.796875 786.308594 61.765625 735.820312 61.140625 685.316406 C 53.199219 775.375 86.859375 866.679688 158.59375 923.375 C 168.613281 931.390625 179.207031 938.683594 190.257812 945.214844 L 194.539062 947.6875 C 197.40625 949.292969 203.757812 952.765625 203.757812 952.765625 C 203.765625 952.765625 203.765625 952.757812 203.773438 952.757812 C 213.550781 945.5 222.925781 937.777344 231.765625 929.515625 C 251.617188 910.964844 268.828125 889.582031 282.640625 866.195312 C 311.855469 816.644531 324.265625 758.082031 320.402344 700.851562 C 322.296875 733.625 318.199219 766.9375 308.054688 798.179688 Z" />
                 </svg>
               </div>
-              <span style="font-size: 1.22rem; font-weight: 700; color: var(--accord-text); font-family: 'ABC Marist', serif;">Connect to Accord</span>
+              <span style="font-size: ${titleSize}; font-weight: ${titleWeight}; color: ${titleColor}; font-family: ${titleFont}; letter-spacing: -0.01em;">${titleText}</span>
             </div>
           `;
           
-          // 2. Append the small gray sub-label beneath the Stack
-          const subLabel = document.createElement("div");
-          subLabel.className = "accord-sublabel";
-          subLabel.textContent = "Connect your EVM-compatible wallet to get started";
-          
-          Object.assign(subLabel.style, {
-            fontSize: "12px",
-            fontWeight: "400",
-            color: "#6f675c",
-            marginTop: "6px",
-            lineHeight: "1.4",
-            display: "block",
-            textTransform: "none",
-            letterSpacing: "normal",
-            fontFamily: "'ABC Whyte', sans-serif"
-          });
-          
-          h2.appendChild(subLabel);
+          h2.appendChild(document.createElement("span")); // Tiny spacer
         }
       }
     });
@@ -213,10 +206,7 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
       >
         <div className="flex items-start justify-between border-b border-[var(--accord-border-soft)] px-6 py-5 sm:px-8">
           <div>
-            <div className="h-6 w-24 sm:h-7 sm:w-28 mb-3">
-              <AccordLogo variant={isDark ? "dark" : "light"} />
-            </div>
-            <h2 className="text-[28px] font-bold leading-tight text-[var(--accord-text)]">Sign in to Accord</h2>
+            <h2 className="text-[28px] font-bold leading-tight tracking-tight text-[var(--accord-text)]">Sign into Accord</h2>
             <p className="mt-2 text-sm text-[var(--accord-muted)]">Choose a wallet path that fits how you want to work.</p>
           </div>
           <button
@@ -245,7 +235,7 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
                   <div className="mb-6 flex items-center justify-between gap-4">
                     <div>
                       <p className="eyebrow">Network</p>
-                      <p className="mt-2 text-base font-semibold text-[var(--accord-text)]">{currentConfig.label}</p>
+                      <p className="mt-2 text-base font-semibold text-[var(--accord-text)]">{currentConfig.label.replace(' Wallet', '')}</p>
                     </div>
                     <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--accord-primary-line)] bg-[var(--accord-primary-soft)]">
                       <Wallet className="h-5 w-5 text-[var(--accord-primary)]" />
