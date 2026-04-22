@@ -36,10 +36,10 @@ const Typewriter = ({ phrases }) => {
   }, [currentText, isDeleting, currentPhraseIndex, phrases, speed]);
 
   return (
-    <span style={{ color: isDark ? '#0f172a' : '#E85D04', fontWeight: 700 }}>
+    <span style={{ color: isDark ? '#E85D04' : '#E85D04', fontWeight: 700 }}>
       {currentText}
       <span className="blinking-cursor" style={{
-        borderRight: `2px solid ${isDark ? '#0f172a' : '#E85D04'}`,
+        borderRight: `2px solid ${isDark ? '#E85D04' : '#E85D04'}`,
         marginLeft: '2px',
         animation: 'blink 1s step-end infinite'
       }}></span>
@@ -101,7 +101,7 @@ const P2PSection = () => {
     maxWidth: '100%',
     margin: '0 auto',
     padding: 'clamp(40px, 10vw, 88px) clamp(16px, 5vw, 32px) clamp(40px, 10vw, 100px) clamp(16px, 5vw, 32px)',
-    backgroundColor: isDark ? '#E85D04' : '#ffffff',
+    backgroundColor: isDark ? '#000000' : '#ffffff',
     borderRadius: '0 0 64px 64px',
     display: 'flex',
     flexDirection: 'column',
@@ -177,14 +177,14 @@ const P2PSection = () => {
 
   const learnMoreStyle = {
     fontSize: '14px',
-    color: isDark ? '#0f172a' : '#6b7280',
+    color: isDark ? '#E85D04' : '#6b7280',
     opacity: isDark ? 0.9 : 1,
     lineHeight: 1.9,
     marginTop: '32px'
   };
 
   const orangeLinkStyle = {
-    color: isDark ? '#0f172a' : '#E85D04',
+    color: isDark ? '#E85D04' : '#E85D04',
     background: 'transparent',
     padding: '0',
     borderRadius: '0',
@@ -198,7 +198,7 @@ const P2PSection = () => {
 
   const blueLinkStyle = {
     ...orangeLinkStyle,
-    color: isDark ? '#0f172a' : '#2563eb',
+    color: isDark ? '#E85D04' : '#2563eb',
     textDecoration: isDark ? 'underline' : 'none',
     textUnderlineOffset: '4px'
   };
@@ -211,7 +211,7 @@ const P2PSection = () => {
   };
 
   const primaryButtonStyle = {
-    backgroundColor: isDark ? '#0f172a' : '#E85D04',
+    backgroundColor: isDark ? '#E85D04' : '#E85D04',
     color: '#ffffff',
     fontWeight: 700,
     padding: '14px 32px',
@@ -277,7 +277,7 @@ const P2PSection = () => {
               {!isExpanded ? (
                 <button 
                   onClick={() => setIsExpanded(true)}
-                  style={{ color: isDark ? '#0f172a' : '#E85D04', fontWeight: 400, border: 'none', background: 'none', padding: 0, cursor: 'pointer', textDecoration: 'none' }}
+                  style={{ color: isDark ? '#E85D04' : '#E85D04', fontWeight: 400, border: 'none', background: 'none', padding: 0, cursor: 'pointer', textDecoration: 'none' }}
                 >
                   read more
                 </button>
@@ -321,7 +321,7 @@ const P2PSection = () => {
                   </p>
 
                   <div style={{ textAlign: 'center', width: '100%' }}>
-                    <span style={{ ...boldTextStyle, color: isDark ? '#0f172a' : '#E85D04', display: 'inline-block' }}>
+                    <span style={{ ...boldTextStyle, color: isDark ? '#E85D04' : '#E85D04', display: 'inline-block' }}>
                       Accord provides a trust layer for digital transactions where outcomes are enforced by verifiable rules on-chain.
                     </span>
                   </div>
@@ -330,7 +330,7 @@ const P2PSection = () => {
                     <button 
                       onClick={() => setIsExpanded(false)}
                       style={{ 
-                        color: isDark ? '#0f172a' : '#6b7280', 
+                        color: isDark ? '#E85D04' : '#6b7280', 
                         fontSize: '13px', 
                         border: 'none', 
                         background: 'none', 
@@ -374,7 +374,7 @@ const P2PSection = () => {
               }}
               onMouseOut={(e) => {
                 if (isDark) {
-                  e.target.style.backgroundColor = '#0f172a';
+                  e.target.style.backgroundColor = '#E85D04';
                 } else {
                   e.target.style.backgroundColor = '#E85D04';
                 }
