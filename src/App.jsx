@@ -1,8 +1,10 @@
+import { AnimatePresence } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-dom";
 import { ThirdwebProvider } from "thirdweb/react";
 import DashboardLayout from "./components/DashboardLayout";
 import NetworkBanner from "./components/NetworkBanner";
+import SplashScreen from "./components/SplashScreen";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { NetworkProvider } from "./context/NetworkContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -27,6 +29,8 @@ function DashboardWrapper({ children }) {
 }
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
   useEffect(() => {
     const handleError = (error) => {
       console.error("GLOBAL ERROR CAUGHT:", error);
@@ -36,167 +40,177 @@ function App() {
     return () => window.removeEventListener("error", handleError);
   }, []);
 
+  const handleSplashComplete = () => {
+    setShowSplash(false);
+  };
+
   return (
     <ThirdwebProvider client={client}>
-      <AuthProvider>
-        <ThemeProvider>
-          <NetworkProvider>
-            <Router>
-              <WalletProvider>
-                <NetworkBanner />
-                <Routes>
-                  <Route path="/" element={<Landing />} />
-                  <Route
-                    path="/dashboard"
-                    element={
-                      <ProtectedRoute>
-                        <Navigate to="/dashboard/overview" replace />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard/overview"
-                    element={
-                      <ProtectedRoute>
-                        <DashboardWrapper>
-                          <Overview />
-                        </DashboardWrapper>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard/agreements"
-                    element={
-                      <ProtectedRoute>
-                        <DashboardWrapper>
-                          <MyAgreements />
-                        </DashboardWrapper>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard/agreements/create"
-                    element={
-                      <ProtectedRoute>
-                        <DashboardWrapper>
-                          <CreateAgreement />
-                        </DashboardWrapper>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard/agreements/deals"
-                    element={
-                      <ProtectedRoute>
-                        <DashboardWrapper>
-                          <MyDeals />
-                        </DashboardWrapper>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard/agreements/received"
-                    element={
-                      <ProtectedRoute>
-                        <DashboardWrapper>
-                          <ReceivedLinks />
-                        </DashboardWrapper>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard/vault"
-                    element={
-                      <ProtectedRoute>
-                        <DashboardWrapper>
-                          <VaultPage />
-                        </DashboardWrapper>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard/vault/withdraw"
-                    element={
-                      <ProtectedRoute>
-                        <DashboardWrapper>
-                          <WithdrawPage />
-                        </DashboardWrapper>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard/vault/wallet"
-                    element={
-                      <ProtectedRoute>
-                        <DashboardWrapper>
-                          <ConnectedWallet />
-                        </DashboardWrapper>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard/notifications"
-                    element={
-                      <ProtectedRoute>
-                        <DashboardWrapper>
-                          <Notifications />
-                        </DashboardWrapper>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard/disputes"
-                    element={
-                      <ProtectedRoute>
-                        <DashboardWrapper>
-                          <Disputes />
-                        </DashboardWrapper>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard/settings"
-                    element={
-                      <ProtectedRoute>
-                        <DashboardWrapper>
-                          <DashboardSettings />
-                        </DashboardWrapper>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/agreement/:id" element={<AgreementRoom />} />
-                  <Route path="/deal/:id" element={<AgreementRoom />} />
-                  <Route
-                    path="/create/freelancer"
-                    element={
-                      <ProtectedRoute>
-                        <Navigate to="/dashboard/agreements/create" replace />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/create/client"
-                    element={
-                      <ProtectedRoute>
-                        <Navigate to="/dashboard/agreements/create" replace />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/profile"
-                    element={
-                      <ProtectedRoute>
-                        <Navigate to="/dashboard/settings" replace />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-              </WalletProvider>
-            </Router>
-          </NetworkProvider>
-        </ThemeProvider>
-      </AuthProvider>
+      <AnimatePresence mode="wait">
+        {showSplash ? (
+          <SplashScreen key="splash" onComplete={handleSplashComplete} />
+        ) : (
+          <AuthProvider key="app">
+            <ThemeProvider>
+              <NetworkProvider>
+                <Router>
+                  <WalletProvider>
+                    <NetworkBanner />
+                    <Routes>
+                      <Route path="/" element={<Landing />} />
+                      <Route
+                        path="/dashboard"
+                        element={
+                          <ProtectedRoute>
+                            <Navigate to="/dashboard/overview" replace />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/dashboard/overview"
+                        element={
+                          <ProtectedRoute>
+                            <DashboardWrapper>
+                              <Overview />
+                            </DashboardWrapper>
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/dashboard/agreements"
+                        element={
+                          <ProtectedRoute>
+                            <DashboardWrapper>
+                              <MyAgreements />
+                            </DashboardWrapper>
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/dashboard/agreements/create"
+                        element={
+                          <ProtectedRoute>
+                            <DashboardWrapper>
+                              <CreateAgreement />
+                            </DashboardWrapper>
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/dashboard/agreements/deals"
+                        element={
+                          <ProtectedRoute>
+                            <DashboardWrapper>
+                              <MyDeals />
+                            </DashboardWrapper>
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/dashboard/agreements/received"
+                        element={
+                          <ProtectedRoute>
+                            <DashboardWrapper>
+                              <ReceivedLinks />
+                            </DashboardWrapper>
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/dashboard/vault"
+                        element={
+                          <ProtectedRoute>
+                            <DashboardWrapper>
+                              <VaultPage />
+                            </DashboardWrapper>
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/dashboard/vault/withdraw"
+                        element={
+                          <ProtectedRoute>
+                            <DashboardWrapper>
+                              <WithdrawPage />
+                            </DashboardWrapper>
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/dashboard/vault/wallet"
+                        element={
+                          <ProtectedRoute>
+                            <DashboardWrapper>
+                              <ConnectedWallet />
+                            </DashboardWrapper>
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/dashboard/notifications"
+                        element={
+                          <ProtectedRoute>
+                            <DashboardWrapper>
+                              <Notifications />
+                            </DashboardWrapper>
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/dashboard/disputes"
+                        element={
+                          <ProtectedRoute>
+                            <DashboardWrapper>
+                              <Disputes />
+                            </DashboardWrapper>
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/dashboard/settings"
+                        element={
+                          <ProtectedRoute>
+                            <DashboardWrapper>
+                              <DashboardSettings />
+                            </DashboardWrapper>
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route path="/agreement/:id" element={<AgreementRoom />} />
+                      <Route path="/deal/:id" element={<AgreementRoom />} />
+                      <Route
+                        path="/create/freelancer"
+                        element={
+                          <ProtectedRoute>
+                            <Navigate to="/dashboard/agreements/create" replace />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/create/client"
+                        element={
+                          <ProtectedRoute>
+                            <Navigate to="/dashboard/agreements/create" replace />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/profile"
+                        element={
+                          <ProtectedRoute>
+                            <Navigate to="/dashboard/settings" replace />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                  </WalletProvider>
+                </Router>
+              </NetworkProvider>
+            </ThemeProvider>
+          </AuthProvider>
+        )}
+      </AnimatePresence>
     </ThirdwebProvider>
   );
 }
@@ -244,5 +258,3 @@ function ProtectedRoute({ children }) {
 }
 
 export default App;
-
-

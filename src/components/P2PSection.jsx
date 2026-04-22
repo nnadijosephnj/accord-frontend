@@ -272,14 +272,11 @@ const P2PSection = () => {
                   </p>
 
                   <p className="mb-6">
-                    The smart contract locks both payment and the transaction agreement, ensuring neither party can complete the 
+                    The smart contract locks both payment and the digital asset agreement, ensuring neither party can complete the 
                     exchange alone. This reduces fraud by keeping funds and deliverables secured under predefined conditions until 
                     the transaction is resolved. In a freelance transaction, for example, the client’s payment is locked in escrow 
                     while the freelancer’s deliverable is committed under the contract. Neither side can access the final settlement 
                     until conditions are met, such as mutual approval or predefined settlement rules.
-                  </p>
-
-                  <p className="mb-6">
                     If both parties are satisfied, the smart contract automatically releases the funds and finalizes the exchange. 
                     If not, either party can trigger a dispute or withdrawal according to the contract rules before completion.
                   </p>
