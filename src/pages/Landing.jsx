@@ -24,6 +24,35 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useWallet } from "../context/WalletContext";
 
+function LiquidCircuitBorder() {
+  return (
+    <div className="conduit-shell">
+      <svg className="conduit-svg" preserveAspectRatio="none" viewBox="0 0 100 40">
+        <defs>
+          <linearGradient id="silicon-gradient" x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#f97316" />
+            <stop offset="25%" stopColor="#facc15" />
+            <stop offset="50%" stopColor="#ffffff" />
+            <stop offset="75%" stopColor="#a855f7" />
+            <stop offset="100%" stopColor="#f97316" />
+            <animateTransform
+              attributeName="gradientTransform"
+              type="rotate"
+              from="0 50 20"
+              to="360 50 20"
+              dur="8s"
+              repeatCount="indefinite"
+            />
+          </linearGradient>
+        </defs>
+        <rect x="1" y="1" width="98" height="38" rx="11" className="conduit-pipe" vectorEffect="non-scaling-stroke" />
+        <rect x="1" y="1" width="98" height="38" rx="11" className="conduit-glow" vectorEffect="non-scaling-stroke" />
+        <rect x="1" y="1" width="98" height="38" rx="11" className="conduit-pulse" vectorEffect="non-scaling-stroke" />
+      </svg>
+    </div>
+  );
+}
+
 function Counter({ from, to, duration = 1.8, formattingFn = (value) => value }) {
   const nodeRef = useRef(null);
   const inView = useInView(nodeRef, { once: true, margin: "-80px" });
@@ -174,8 +203,9 @@ export default function Landing() {
               <Menu className="h-[16px] w-[16px] sm:h-5 sm:w-5" />
             </button>
 
-            <button type="button" onClick={handleLoginStart} className="primary-button ml-1 h-9 px-3 text-[10px] sm:ml-2 sm:h-11 sm:px-8 sm:text-[13px] shrink-0 font-bold uppercase tracking-[0.08em] rounded-lg">
-              {isConnecting ? "..." : "Launch App"}
+            <button type="button" onClick={handleLoginStart} className="neon-launch-button ml-1 h-9 px-4 text-[10px] sm:ml-2 sm:h-11 sm:px-8 sm:text-[13px] shrink-0 font-bold uppercase tracking-[0.08em] rounded-lg">
+              <LiquidCircuitBorder />
+              <span className="relative z-10">{isConnecting ? "..." : "Launch App"}</span>
             </button>
           </div>
         </div>
@@ -226,9 +256,12 @@ export default function Landing() {
         <div className="landing-hero-inner">
           <AccordHero />
           <div className="mt-8 flex flex-col gap-3 sm:flex-row justify-center">
-            <button type="button" onClick={handleLoginStart} className="primary-button">
-              {isConnecting ? "Opening Access" : "Launch Dashboard"}
-              <ArrowRight className="h-4 w-4" />
+            <button type="button" onClick={handleLoginStart} className="neon-launch-button rounded-lg px-8 py-3">
+              <LiquidCircuitBorder />
+              <div className="relative z-10 flex items-center gap-2">
+                {isConnecting ? "Opening Access" : "Launch Dashboard"}
+                <ArrowRight className="h-4 w-4" />
+              </div>
             </button>
             <a href="#how-it-works" className="secondary-button">
               See How It Works

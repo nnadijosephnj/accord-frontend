@@ -13,12 +13,12 @@ function readStoredTheme() {
     return null;
   }
 
-  return normalizeTheme(window.localStorage.getItem(THEME_STORAGE_KEY) || "dark");
+  return normalizeTheme(window.localStorage.getItem(THEME_STORAGE_KEY) || "light");
 }
 
 export function ThemeProvider({ children }) {
   const { user } = useAuth();
-  const [theme, setThemeState] = useState(() => readStoredTheme() || "dark");
+  const [theme, setThemeState] = useState(() => readStoredTheme() || "light");
 
   useEffect(() => {
     if (typeof window === "undefined") {

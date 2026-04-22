@@ -529,4 +529,75 @@
     padding: 64px 32px;
     margin: 0 auto;
   }
+
+  /* ── Neon Launch Button (Liquid Circuit Conduit) ── */
+  /* ── Neon Launch Button (Apple Silicon Liquid Vault) ── */
+  /* ── Neon Launch Button (Infinite Circuit Flow) ── */
+  .neon-launch-button {
+    position: relative;
+    z-index: 10;
+    background: #e65600 !important; 
+    color: #ffffff !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border: none !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 8px;
+    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.5);
+  }
+
+  .neon-launch-button:hover {
+    transform: scale(1.05);
+  }
+
+  .conduit-shell {
+    position: absolute;
+    inset: -7px; /* THE "GOLDILOCKS" GAP: Clean and professional */
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .conduit-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .conduit-pipe {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.1);
+    stroke-width: 1;
+    stroke-linecap: round;
+  }
+
+  /* The "Full Loop" Pulse (Joined together) */
+  .conduit-pulse {
+    fill: none;
+    stroke: url(#silicon-gradient);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    /* Removed the snake gap -> Solid Line */
+    stroke-dasharray: none; 
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.3));
+  }
+
+  /* The atmospheric glow loop */
+  .conduit-glow {
+    fill: none;
+    stroke: #ff9d00;
+    stroke-width: 6;
+    stroke-linecap: round;
+    filter: blur(6px);
+    opacity: 0.3;
+  }
+
+  .neon-launch-button:hover .conduit-pulse {
+    stroke-width: 2.5;
+  }
+  
+  .neon-launch-button:hover .conduit-glow {
+    opacity: 0.6;
+    filter: blur(8px);
+  }
 }
