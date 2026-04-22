@@ -10,7 +10,7 @@ export const injectiveMainnet = defineChain(1776);
 export const NETWORK_CONFIGS = {
   testnet: {
     key: "testnet",
-    label: "Testnet",
+    label: "Injective EVM Testnet Wallet",
     chain: injectiveTestnet,
     chainId: 1439,
     contractAddress:
@@ -24,7 +24,7 @@ export const NETWORK_CONFIGS = {
   },
   mainnet: {
     key: "mainnet",
-    label: "Mainnet",
+    label: "Injective Mainnet",
     chain: injectiveMainnet,
     chainId: 1776,
     contractAddress:
