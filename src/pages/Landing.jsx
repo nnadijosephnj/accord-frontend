@@ -33,7 +33,7 @@ function LiquidCircuitBorder() {
             <stop offset="0%" stopColor="#f97316" />
             <stop offset="25%" stopColor="#facc15" />
             <stop offset="50%" stopColor="#ffffff" />
-            <stop offset="75%" stopColor="#a855f7" />
+            <stop offset="75%" stopColor="#ffb950" />
             <stop offset="100%" stopColor="#f97316" />
             <animateTransform
               attributeName="gradientTransform"
