@@ -4,7 +4,7 @@ import {
   DEFAULT_NETWORK,
   getNetworkConfig,
   NETWORK_STORAGE_KEY,
-} from "../lib/thirdwebClient";
+} from "../lib/web3Config";
 
 const NetworkContext = createContext(null);
 

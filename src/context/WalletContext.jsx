@@ -1,79 +1,78 @@
-import React, { createContext, useContext, useEffect, useLayoutEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ethers6Adapter } from "thirdweb/adapters/ethers6";
-import { useActiveAccount, useActiveWallet, useDisconnect } from "thirdweb/react";
+import { useWalletClient } from "wagmi";
+import { BrowserProvider, JsonRpcSigner } from "ethers";
 import IntegratedAuthModal from "../components/IntegratedAuthModal";
 import { useAuth } from "./AuthContext";
-import { client } from "../lib/thirdwebClient";
 import { clearWalletApiAuth, configureWalletApiAuth } from "../lib/walletApiAuth";
 import { useNetwork } from "./NetworkContext";
+import { getMagic } from "../lib/magicClient";
 
 const WalletContext = createContext();
 
 export function WalletProvider({ children }) {
   const navigate = useNavigate();
-  const { user, isConnected, authModal, closeAuthModal, openAuthModal } = useAuth();
+  const { user, isConnected, authModal, closeAuthModal, openAuthModal, logout: authLogout, walletAddress, isMagic } = useAuth();
   const { currentChain, network } = useNetwork();
-  const activeAccount = useActiveAccount();
-  const activeWallet = useActiveWallet();
-  const { disconnect } = useDisconnect();
+  const { data: walletClient } = useWalletClient();
   const [signer, setSigner] = useState(null);
-  const provider = activeWallet ?? null;
 
   useEffect(() => {
-    if (!activeAccount) {
-      setSigner(null);
-      return;
-    }
-
     let isMounted = true;
+    const generateSigner = async () => {
+      if (!isConnected || !walletAddress) {
+        if (isMounted) setSigner(null);
+        return;
+      }
 
-    const syncSigner = async () => {
-      try {
-        const nextSigner = await ethers6Adapter.signer.toEthers({
-          client,
-          chain: currentChain,
-          account: activeAccount,
-        });
-
-        if (isMounted) {
-          setSigner(nextSigner);
+      if (isMagic) {
+        try {
+          const magic = getMagic();
+          if (magic?.rpcProvider) {
+            const provider = new BrowserProvider(magic.rpcProvider);
+            const ethersSigner = await provider.getSigner();
+            if (isMounted) setSigner(ethersSigner);
+          }
+        } catch(e) {
+          console.error("Failed to convert Magic to signer:", e);
         }
-      } catch (err) {
-        console.error("Error converting to Ethers signer:", err);
+      } else {
+        if (walletClient) {
+          try {
+            const networkDef = {
+              chainId: walletClient.chain.id,
+              name: walletClient.chain.name,
+              ensAddress: walletClient.chain.contracts?.ensRegistry?.address,
+            };
+            const provider = new BrowserProvider(walletClient.transport, networkDef);
+            const ethersSigner = new JsonRpcSigner(provider, walletClient.account.address);
+            if (isMounted) setSigner(ethersSigner);
+          } catch(e) {
+            console.error("Failed to convert Wagmi to signer:", e);
+          }
+        } else {
+          if (isMounted) setSigner(null);
+        }
       }
     };
-
-    syncSigner();
-    return () => {
-      isMounted = false;
-    };
-  }, [activeAccount, currentChain]);
+    generateSigner();
+    return () => { isMounted = false; };
+  }, [isConnected, walletAddress, isMagic, walletClient]);
 
   useLayoutEffect(() => {
-    if (!activeAccount?.address || typeof activeAccount.signMessage !== "function") {
+    if (!walletAddress || !signer) {
       clearWalletApiAuth();
       return;
     }
 
     configureWalletApiAuth({
-      walletAddress: activeAccount.address,
-      signMessage: async (message) => activeAccount.signMessage({ message }),
+      walletAddress: walletAddress,
+      signMessage: async (message) => await signer.signMessage(message),
     });
-  }, [activeAccount]);
+  }, [walletAddress, signer]);
 
   const logout = async () => {
-    try {
-      if (activeWallet) {
-        await disconnect(activeWallet);
-      }
-    } catch (err) {
-      console.error("Logout failed:", err);
-    } finally {
-      clearWalletApiAuth();
-      setSigner(null);
-      window.location.href = "/";
-    }
+    authLogout(); 
   };
 
   const connectWallet = (preferredStep = "CHOICE") => {
@@ -83,8 +82,8 @@ export function WalletProvider({ children }) {
   return (
     <WalletContext.Provider
       value={{
-        address: activeAccount?.address?.toLowerCase() || null,
-        provider,
+        address: walletAddress,
+        provider: null,
         signer,
         userProfile: user,
         isLoggedIn: isConnected,

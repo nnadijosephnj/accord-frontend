@@ -1,7 +1,11 @@
 import { AnimatePresence } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-dom";
-import { ThirdwebProvider } from "thirdweb/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { WagmiProvider } from "wagmi";
+import { RainbowKitProvider, darkTheme, lightTheme } from "@rainbow-me/rainbowkit";
+import "@rainbow-me/rainbowkit/styles.css";
+import { wagmiConfig } from "./lib/web3Config";
 import DashboardLayout from "./components/DashboardLayout";
 import NetworkBanner from "./components/NetworkBanner";
 import SplashScreen from "./components/SplashScreen";
@@ -9,7 +13,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { NetworkProvider } from "./context/NetworkContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { WalletProvider } from "./context/WalletContext";
-import { client } from "./lib/thirdwebClient";
+
 import AgreementRoom from "./pages/AgreementRoom";
 import Landing from "./pages/Landing";
 import ConnectedWallet from "./pages/dashboard/ConnectedWallet";
@@ -28,6 +32,8 @@ function DashboardWrapper({ children }) {
   return <DashboardLayout>{children}</DashboardLayout>;
 }
 
+const queryClient = new QueryClient();
+
 function App() {
   const [showSplash, setShowSplash] = useState(true);
 
@@ -45,13 +51,15 @@ function App() {
   };
 
   return (
-    <ThirdwebProvider client={client}>
-      <AnimatePresence mode="wait">
-        {showSplash ? (
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        <AnimatePresence mode="wait">
+          {showSplash ? (
           <SplashScreen key="splash" onComplete={handleSplashComplete} />
         ) : (
           <AuthProvider key="app">
             <ThemeProvider>
+              <RainbowKitProvider>
               <NetworkProvider>
                 <Router>
                   <WalletProvider>
@@ -207,11 +215,13 @@ function App() {
                   </WalletProvider>
                 </Router>
               </NetworkProvider>
+              </RainbowKitProvider>
             </ThemeProvider>
           </AuthProvider>
         )}
       </AnimatePresence>
-    </ThirdwebProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }
 

@@ -1,23 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion as Motion } from "framer-motion";
-import {
-  ArrowLeft,
-  Download,
-  Fingerprint,
-  ShieldCheck,
-  Sparkles,
-  Wallet,
-  X,
-} from "lucide-react";
-import { ConnectButton, useConnectModal } from "thirdweb/react";
+import { ArrowLeft, X, Wallet, ShieldCheck, Sparkles, Download, Fingerprint } from "lucide-react";
 import AccordLogo from "./AccordLogo";
-import { inAppWallet, createWallet } from "thirdweb/wallets";
 import { useAuth } from "../context/AuthContext";
 import { useNetwork } from "../context/NetworkContext";
 import { useTheme } from "../context/ThemeContext";
-import { clearPendingWalletType, setPendingWalletType } from "../lib/walletAuthState";
+import { setPendingWalletType, clearPendingWalletType } from "../lib/walletAuthState";
 import { upsertUserByWallet } from "../lib/supabaseHelpers";
-import { client } from "../lib/thirdwebClient";
+import { getMagic } from "../lib/magicClient";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 
 const flowVariants = {
   enter: (direction) => ({ opacity: 0, x: direction > 0 ? 28 : -28 }),
@@ -25,34 +16,34 @@ const flowVariants = {
   exit: (direction) => ({ opacity: 0, x: direction < 0 ? 28 : -28 }),
 };
 
-const wallets = [
-  createWallet("io.metamask"),
-  createWallet("com.trustwallet.app"),
-  createWallet("com.coinbase.wallet"),
-  createWallet("io.rabby"),
-];
-
 export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
-  const { authModal, closeAuthModal } = useAuth();
-  const { currentChain, currentConfig } = useNetwork();
+  const { authModal, closeAuthModal, setUser, walletAddress } = useAuth();
+  const { currentConfig } = useNetwork();
   const { isDark } = useTheme();
-  const { connect, isConnecting } = useConnectModal();
+
+  const { openConnectModal } = useConnectModal();
+  
   const [step, setStep] = useState("CHOICE");
   const [direction, setDirection] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  const [email, setEmail] = useState("");
+  const [showOtp, setShowOtp] = useState(false);
+  const [otpHandler, setOtpHandler] = useState(null);
+  const [otpCode, setOtpCode] = useState("");
+
+  const appleEnabled = import.meta.env.VITE_ENABLE_APPLE_LOGIN === "true";
 
   useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
+    if (!isOpen) return;
     setStep(authModal?.step || "CHOICE");
     setDirection(1);
     setError(null);
+    setShowOtp(false);
+    setOtpCode("");
   }, [authModal?.step, isOpen]);
 
-  // Full Brand Injection: Places the COMPLETE Logo (Icon + Wordmark) above the title
   useEffect(() => {
     if (!isOpen) return;
 
@@ -70,12 +61,10 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
           const titleColor = isConnect ? "var(--accord-text-muted)" : "var(--accord-text)";
           const titleSize = isConnect ? "0.94rem" : "1.22rem";
           const titleWeight = isConnect ? "500" : "700";
-          // 1. Rebuild header with FULL Logo + Title
           h2.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 14px; width: 100%;">
               <div style="height: 32px; width: 140px; margin-left: -4px;">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="50 630 1350 340" preserveAspectRatio="xMidYMid meet" style="width: 100%; height: 100%;">
-                  <!-- The Wordmark (Dynamic Color) -->
                   <g fill="var(--accord-text)">
                     <g transform="translate(109.064534, 838.745308)"><path d="M 128.78125 -133.359375 C 155.125 -133.359375 168.296875 -120.1875 168.296875 -93.84375 L 168.296875 -5.09375 C 168.296875 -1.695312 166.597656 0 163.203125 0 L 134.125 0 C 130.726562 0 129.03125 -1.695312 129.03125 -5.09375 L 129.03125 -17.078125 L 127.25 -17.078125 C 122.3125 -5.179688 112.453125 0.765625 97.671875 0.765625 L 49.21875 0.765625 C 38.164062 0.765625 30.085938 -1.828125 24.984375 -7.015625 C 19.890625 -12.203125 17.34375 -20.316406 17.34375 -31.359375 L 17.34375 -45.390625 C 17.34375 -56.441406 19.890625 -64.515625 24.984375 -69.609375 C 30.085938 -74.710938 38.164062 -77.265625 49.21875 -77.265625 L 129.03125 -77.265625 L 129.03125 -92.3125 C 129.03125 -97.75 127.925781 -101.613281 125.71875 -103.90625 C 123.507812 -106.207031 119.679688 -107.359375 114.234375 -107.359375 L 73.6875 -107.359375 C 69.101562 -107.359375 65.832031 -106.460938 63.875 -104.671875 C 61.914062 -102.890625 60.9375 -99.957031 60.9375 -95.875 L 60.9375 -93.578125 C 60.9375 -90.523438 59.320312 -89 56.09375 -89 L 24.984375 -89 C 21.585938 -89 19.890625 -90.695312 19.890625 -94.09375 L 19.890625 -97.671875 C 19.890625 -109.910156 22.945312 -118.914062 29.0625 -124.6875 C 35.1875 -130.46875 45.050781 -133.359375 58.65625 -133.359375 Z M 114.234375 -26.015625 C 119.679688 -26.015625 123.507812 -27.160156 125.71875 -29.453125 C 127.925781 -31.742188 129.03125 -35.613281 129.03125 -41.0625 L 129.03125 -52.28125 L 67.3125 -52.28125 C 63.914062 -52.28125 61.453125 -51.554688 59.921875 -50.109375 C 58.390625 -48.660156 57.625 -46.238281 57.625 -42.84375 L 57.625 -36.203125 C 57.625 -32.460938 58.429688 -29.828125 60.046875 -28.296875 C 61.660156 -26.773438 64.335938 -26.015625 68.078125 -26.015625 Z"/></g>
                     <g transform="translate(337.7992, 838.745308)"><path d="M 57.375 0.765625 C 31.019531 0.765625 17.84375 -12.492188 17.84375 -39.015625 L 17.84375 -93.84375 C 17.84375 -120.1875 31.019531 -133.359375 57.375 -133.359375 L 131.328125 -133.359375 C 157.671875 -133.359375 170.84375 -120.1875 170.84375 -93.84375 L 170.84375 -85.421875 C 170.84375 -82.191406 169.144531 -80.578125 165.75 -80.578125 L 135.15625 -80.578125 C 131.75 -80.578125 130.046875 -82.191406 130.046875 -85.421875 L 130.046875 -88.734375 C 130.046875 -94.003906 129.023438 -97.703125 126.984375 -99.828125 C 124.953125 -101.953125 121.300781 -103.015625 116.03125 -103.015625 L 72.171875 -103.015625 C 66.554688 -103.015625 62.644531 -101.867188 60.4375 -99.578125 C 58.226562 -97.285156 57.125 -93.414062 57.125 -87.96875 L 57.125 -44.875 C 57.125 -39.269531 58.226562 -35.316406 60.4375 -33.015625 C 62.644531 -30.722656 66.554688 -29.578125 72.171875 -29.578125 L 116.03125 -29.578125 C 121.300781 -29.578125 124.953125 -30.640625 126.984375 -32.765625 C 129.023438 -34.890625 130.046875 -38.585938 130.046875 -43.859375 L 130.046875 -47.4375 C 130.046875 -50.832031 131.75 -52.53125 135.15625 -52.53125 L 165.75 -52.53125 C 169.144531 -52.53125 170.84375 -50.832031 170.84375 -47.4375 L 170.84375 -39.015625 C 170.84375 -12.492188 157.671875 0.765625 131.328125 0.765625 Z"/></g>
@@ -84,15 +73,13 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
                     <g transform="translate(1030.88815, 838.745308)"><path d="M 25.25 0 C 21.84375 0 20.140625 -1.695312 20.140625 -5.09375 L 20.140625 -127.5 C 20.140625 -130.894531 21.84375 -132.59375 25.25 -132.59375 L 54.3125 -132.59375 C 57.539062 -132.59375 59.15625 -130.894531 59.15625 -127.5 L 59.15625 -114.75 L 61.203125 -114.75 C 63.410156 -120.53125 67.359375 -125.078125 73.046875 -128.390625 C 78.742188 -131.703125 85.585938 -133.359375 93.578125 -133.359375 L 128.78125 -133.359375 C 132.175781 -133.359375 133.875 -131.660156 133.875 -128.265625 L 133.875 -102.765625 C 133.875 -99.367188 132.175781 -97.671875 128.78125 -97.671875 L 74.453125 -97.671875 C 69.015625 -97.671875 65.101562 -96.519531 62.71875 -94.21875 C 60.34375 -91.925781 59.15625 -88.0625 59.15625 -82.625 L 59.15625 -5.09375 C 59.15625 -1.695312 57.539062 0 54.3125 0 Z"/></g>
                     <g transform="translate(1211.172954, 838.745308)"><path d="M 57.375 0.765625 C 31.019531 0.765625 17.84375 -12.492188 17.84375 -39.015625 L 17.84375 -93.328125 C 17.84375 -119.503906 31.019531 -132.59375 57.375 -132.59375 L 132.34375 -132.59375 L 132.34375 -173.40625 C 132.34375 -176.800781 134.039062 -178.5 137.4375 -178.5 L 166.515625 -178.5 C 169.910156 -178.5 171.609375 -176.800781 171.609375 -173.40625 L 171.609375 -5.09375 C 171.609375 -1.695312 169.910156 0 166.515625 0 L 137.4375 0 C 134.039062 0 132.34375 -1.695312 132.34375 -5.09375 L 132.34375 -18.109375 L 130.3125 -18.109375 C 128.4375 -12.328125 124.609375 -7.734375 118.828125 -4.328125 C 113.046875 -0.929688 106.078125 0.765625 97.921875 0.765625 Z M 117.296875 -29.328125 C 122.734375 -29.328125 126.597656 -30.472656 128.890625 -32.765625 C 131.191406 -35.054688 132.34375 -38.925781 132.34375 -44.375 L 132.34375 -102.765625 L 72.171875 -102.765625 C 66.554688 -102.765625 62.644531 -101.613281 60.4375 -99.3125 C 58.226562 -97.019531 57.125 -93.15625 57.125 -87.71875 L 57.125 -44.375 C 57.125 -38.925781 58.226562 -35.054688 60.4375 -32.765625 C 62.644531 -30.472656 66.554688 -29.328125 72.171875 -29.328125 Z"/></g>
                   </g>
-                  <!-- The Shield Icon (Orange) -->
                   <path fill="#ff751f" d="M 202.777344 648.179688 C 153.5 649.421875 104.8125 662.582031 61.140625 685.316406 C 65.964844 735.246094 81.308594 783.992188 107.34375 826.859375 C 111.957031 834.53125 116.910156 842 122.164062 849.242188 C 112.304688 833.476562 104.296875 816.554688 98.472656 798.855469 C 98.472656 798.855469 112.304688 833.476562 122.164062 849.242188 C 112.304688 833.476562 104.296875 816.554688 98.472656 798.855469 C 88.125 767.679688 83.808594 734.402344 85.480469 701.613281 C 120.304688 680.8125 160.097656 667.964844 200.445312 663.535156 C 249.183594 658.179688 299.613281 665.082031 344.675781 684.445312 C 300.890625 661.898438 252.058594 649.125 202.777344 648.179688 Z M 344.675781 684.445312 C 323.421875 677.5625 301.691406 672.535156 279.691406 669.621094 C 213.542969 660.664062 145.507812 672.542969 85.480469 701.613281 C 122.164062 684.378906 162.355469 674.738281 202.863281 673.523438 C 243.371094 674.46875 283.621094 683.847656 320.40625 700.855469 C 328.066406 752.28125 319.316406 806.214844 295.683594 852.542969 C 286.121094 871.695312 273.828125 889.707031 259.644531 905.71875 C 243.472656 924.007812 224.632812 939.992188 203.835938 952.726562 C 204.535156 952.335938 210.289062 949.152344 212.949219 947.628906 L 217.214844 945.128906 C 228.214844 938.523438 238.777344 931.164062 248.753906 923.085938 C 320.144531 865.890625 353.101562 774.480469 344.675781 684.445312 Z M 308.054688 798.179688 C 291.800781 848.648438 257.878906 892.945312 213.644531 922.160156 C 210.476562 924.277344 207.027344 926.46875 203.699219 928.476562 C 162.496094 904.730469 127.707031 870.082031 103.046875 829.472656 C 76.796875 786.308594 61.765625 735.820312 61.140625 685.316406 C 53.199219 775.375 86.859375 866.679688 158.59375 923.375 C 168.613281 931.390625 179.207031 938.683594 190.257812 945.214844 L 194.539062 947.6875 C 197.40625 949.292969 203.757812 952.765625 203.757812 952.765625 C 203.765625 952.765625 203.765625 952.757812 203.773438 952.757812 C 213.550781 945.5 222.925781 937.777344 231.765625 929.515625 C 251.617188 910.964844 268.828125 889.582031 282.640625 866.195312 C 311.855469 816.644531 324.265625 758.082031 320.402344 700.851562 C 322.296875 733.625 318.199219 766.9375 308.054688 798.179688 Z" />
                 </svg>
               </div>
               <span style="font-size: ${titleSize}; font-weight: ${titleWeight}; color: ${titleColor}; font-family: ${titleFont}; letter-spacing: -0.01em;">${titleText}</span>
             </div>
           `;
-          
-          h2.appendChild(document.createElement("span")); // Tiny spacer
+          h2.appendChild(document.createElement("span"));
         }
       }
     });
@@ -100,6 +87,92 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
     observer.observe(document.body, { childList: true, subtree: true });
     return () => observer.disconnect();
   }, [isOpen]);
+
+  const handleMagicSocial = async (provider) => {
+    setIsLoading(true);
+    setError(null);
+    setPendingWalletType("generated");
+    try {
+      const magic = getMagic();
+      if (!magic) throw new Error("Magic not initialized");
+      
+      magic.oauth2.loginWithRedirect({
+        provider: provider,
+        redirectURI: window.location.origin + "/",
+      });
+    } catch(err) {
+      clearPendingWalletType();
+      setError(err?.message || "Login failed");
+      setIsLoading(false);
+    }
+  };
+
+  const handleMagicEmailStart = async (e) => {
+    e.preventDefault();
+    if (!email) return;
+    setIsLoading(true);
+    setError(null);
+    setPendingWalletType("generated");
+    try {
+      const magic = getMagic();
+      if (!magic) throw new Error("Magic not initialized");
+      
+      const handler = magic.auth.loginWithEmailOTP({ email, showUI: false });
+      setOtpHandler(handler);
+      
+      handler.on('email-otp-sent', () => {
+        setShowOtp(true);
+        setIsLoading(false);
+      });
+      
+      handler.on('invalid-email-otp', () => {
+        setError("Invalid OTP code. Please try again.");
+      });
+      
+      handler.on('done', (result) => {
+        if (result) handleMagicLoginSuccess();
+      });
+      
+      handler.catch((err) => {
+        clearPendingWalletType();
+        setError(err?.message || "Email login failed");
+        setIsLoading(false);
+      });
+      
+    } catch(err) {
+      clearPendingWalletType();
+      setError(err?.message || "Email login failed");
+      setIsLoading(false);
+    }
+  };
+
+  const submitOtp = (e) => {
+    e.preventDefault();
+    if (!otpCode || !otpHandler) return;
+    setError(null);
+    otpHandler.emit('verify-email-otp', otpCode);
+  };
+
+  const handleMagicLoginSuccess = async () => {
+    try {
+      const magic = getMagic();
+      const userInfo = await magic.user.getInfo();
+      if (userInfo?.publicAddress) {
+        await upsertUserByWallet({ walletAddress: userInfo.publicAddress, walletType: "generated" });
+        if (onComplete) onComplete();
+        else closeAuthModal();
+      }
+    } catch (e) {
+      setError("Failed to fetch wallet info");
+    }
+  };
+
+  const handleRainbowConnect = () => {
+    onClose();
+    if (openConnectModal) {
+      openConnectModal();
+    }
+  };
 
   const next = (value) => {
     setDirection(1);
@@ -111,75 +184,6 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
     setDirection(-1);
     setStep(value);
     setError(null);
-  };
-
-  const handleCreateWallet = async () => {
-    setIsLoading(true);
-    setError(null);
-    setPendingWalletType("generated");
-
-    try {
-      const generatedWallet = inAppWallet({
-        auth: {
-          options: ["email", "google"],
-          mode: "redirect",
-          redirectUrl: window.location.origin + "/",
-        },
-      });
-
-      const wallet = await connect({
-        client,
-        chain: currentChain,
-        wallets: [generatedWallet],
-        recommendedWallets: [generatedWallet],
-        showAllWallets: false,
-        size: "compact",
-        title: "Create Your Accord Wallet",
-        showThirdwebBranding: false,
-      });
-
-      const account = wallet?.getAccount();
-
-      if (account?.address) {
-        await upsertUserByWallet({
-          walletAddress: account.address,
-          walletType: "generated",
-        });
-      }
-
-      if (onComplete) {
-        onComplete();
-      } else {
-        closeAuthModal();
-      }
-    } catch (err) {
-      clearPendingWalletType();
-      console.error("Create wallet error:", err);
-      setError(err?.message || "Wallet creation failed. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleExternalConnect = async (wallet) => {
-    try {
-      const account = wallet.getAccount();
-
-      if (account?.address) {
-        await upsertUserByWallet({
-          walletAddress: account.address,
-          walletType: "external",
-        });
-      }
-
-      if (onComplete) {
-        onComplete();
-      } else {
-        closeAuthModal();
-      }
-    } catch (err) {
-      console.error("External connect error:", err);
-    }
   };
 
   if (!isOpen) {
@@ -243,46 +247,14 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
                   </div>
 
                   <div className="space-y-4">
-                    <div className="overflow-hidden rounded-[10px] border border-[var(--accord-border)]">
-                      <ConnectButton
-                        client={client}
-                        chain={currentChain}
-                        wallets={wallets}
-                        recommendedWallets={[createWallet("io.metamask")]}
-                        showAllWallets={false}
-                        hiddenWallets={["inApp", "embedded"]}
-                        theme={isDark ? "dark" : "light"}
-                        connectModal={{
-                          title: "Connect to Accord",
-                          size: "compact",
-                          showThirdwebBranding: false,
-                        }}
-                        onConnect={handleExternalConnect}
-                        connectButton={{
-                          label: (
-                            <span className="flex items-center gap-3">
-                              <Wallet className="h-4 w-4" />
-                              <span>Connect Wallet</span>
-                            </span>
-                          ),
-                          style: {
-                            width: "100%",
-                            border: "none",
-                            borderRadius: "10px",
-                            padding: "14px 18px",
-                            background: "var(--accord-surface)",
-                            color: "var(--accord-text)",
-                            fontFamily: '"Plus Jakarta Sans", sans-serif',
-                            fontSize: "14px",
-                            fontWeight: 600,
-                            letterSpacing: "0.08em",
-                            textTransform: "uppercase",
-                            justifyContent: "flex-start",
-                            cursor: "pointer",
-                          },
-                        }}
-                      />
-                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRainbowConnect}
+                      className="primary-button w-full justify-start text-[14px]"
+                    >
+                      <Wallet className="h-4 w-4 mr-3" />
+                      Connect Wallet
+                    </button>
 
                     <div className="flex items-center gap-3">
                       <div className="h-px flex-1 bg-[var(--accord-border)]" />
@@ -292,10 +264,10 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
 
                     <button
                       type="button"
-                      onClick={() => next("CREATE_INFO")}
-                      className="secondary-button w-full justify-start border-[var(--accord-primary-line)] bg-[var(--accord-primary-faint)] text-[var(--accord-text)] hover:bg-[var(--accord-primary-soft)]"
+                      onClick={() => next("CREATE")}
+                      className="secondary-button w-full justify-start border-[var(--accord-primary-line)] bg-[var(--accord-primary-faint)] text-[var(--accord-text)] hover:bg-[var(--accord-primary-soft)] text-[14px]"
                     >
-                      <Sparkles className="h-4 w-4 text-[var(--accord-primary)]" />
+                      <Sparkles className="h-4 w-4 mr-3 text-[var(--accord-primary)]" />
                       Create Wallet
                     </button>
                   </div>
@@ -303,7 +275,7 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
               </Motion.div>
             ) : (
               <Motion.div
-                key="create-info"
+                key="create"
                 custom={direction}
                 variants={flowVariants}
                 initial="enter"
@@ -312,7 +284,7 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
                 className="space-y-6"
               >
                 <button type="button" onClick={() => back("CHOICE")} className="secondary-button self-start px-4 py-2">
-                  <ArrowLeft className="h-4 w-4" />
+                  <ArrowLeft className="h-4 w-4 mr-2" />
                   Back
                 </button>
 
@@ -329,34 +301,70 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
                     </div>
                   </div>
 
-                  <div className="surface-muted space-y-3 px-4 py-4">
-                    {[
-                      { icon: Sparkles, text: "Real EVM wallet — works on Injective and other chains" },
-                      { icon: Fingerprint, text: "Non-custodial — Accord never holds your keys" },
-                      { icon: Download, text: "Exportable — move to MetaMask or Keplr anytime" },
-                    ].map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <div key={item.text} className="flex items-center gap-3">
-                          <Icon className="h-4 w-4 shrink-0 text-[var(--accord-primary)]" />
-                          <p className="text-sm text-[var(--accord-muted)]">{item.text}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-
                   <div className="space-y-3">
                     <button
                       type="button"
-                      onClick={handleCreateWallet}
-                      disabled={isLoading || isConnecting}
-                      className="primary-button w-full"
+                      onClick={() => handleMagicSocial('google')}
+                      disabled={isLoading}
+                      className="secondary-button w-full justify-start border-[var(--accord-border)] bg-[var(--accord-surface)] text-[var(--accord-text)] font-semibold px-4 py-3"
                     >
-                      {isLoading || isConnecting ? "Opening Secure Flow" : "Create My Wallet"}
+                      <svg className="h-5 w-5 mr-3" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27c3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10c5.35 0 9.25-3.67 9.25-9.09c0-1.15-.15-1.81-.15-1.81z"/></svg>
+                      Continue with Google
                     </button>
-                    <button type="button" onClick={() => back("CHOICE")} className="secondary-button w-full">
-                      Use My Own Wallet
-                    </button>
+
+                    {appleEnabled && (
+                      <button
+                        type="button"
+                        onClick={() => handleMagicSocial('apple')}
+                        disabled={isLoading}
+                        className="secondary-button w-full justify-start border-[var(--accord-border)] bg-[var(--accord-surface)] text-[var(--accord-text)] font-semibold px-4 py-3"
+                      >
+                        <svg className="h-5 w-5 mr-3" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2zm3.88 15.39c-.48.24-.95.45-1.46.61c-.51.15-1.05.23-1.6.23c-.76 0-1.42-.16-1.99-.46c-.57-.31-1-.74-1.32-1.3c-.32-.56-.47-1.22-.47-1.95c0-.85.2-1.6.61-2.26c.41-.66 1-1.17 1.76-1.54A6.16 6.16 0 0 1 14 10.22a4.4 4.4 0 0 1-1.38.3c-.45 0-.85-.05-1.22-.16c-.37-.1-.7-.25-1-.44l.8-1.5c.29.17.62.3.99.4c.37.1.75.15 1.15.15c.57 0 1.05-.14 1.44-.42c.38-.28.58-.69.58-1.21v-.15c-.24.3-.53.53-.87.72c-.34.18-.74.28-1.2.28c-.8 0-1.48-.28-2.02-.85c-.55-.57-.82-1.32-.82-2.27c0-1.02.32-1.82.96-2.42c.64-.6 1.43-.89 2.37-.89c.47 0 .93.1 1.34.28c.42.19.74.45 1 .79V2l-.18 6.64c0 .82-.12 1.5-.37 2.06c-.24.56-.58 1-.99 1.35c-.42.34-.9.57-1.44.7z M12.8 7.08c-.46 0-.82.16-1.09.47c-.27.31-.4.76-.4 1.34c0 .59.13 1.04.4 1.36c.27.32.63.48 1.1.48c.45 0 .8-.15 1.08-.46c.27-.31.42-.75.42-1.32c0-.58-.14-1.04-.42-1.36c-.27-.32-.63-.51-1.09-.51z"/></svg>
+                        Continue with Apple
+                      </button>
+                    )}
+
+                    {!showOtp ? (
+                      <form onSubmit={handleMagicEmailStart} className="flex flex-col gap-2">
+                        <input
+                          type="email"
+                          placeholder="Email address"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="w-full h-12 bg-[var(--accord-input-background)] border border-[var(--accord-border)] rounded-[10px] px-4 text-sm outline-none focus:border-[var(--accord-primary)] transition-colors"
+                          required
+                          disabled={isLoading}
+                        />
+                        <button
+                          type="submit"
+                          disabled={isLoading || !email}
+                          className="primary-button h-12 w-full"
+                        >
+                          {isLoading ? "..." : "Continue with Email"}
+                        </button>
+                      </form>
+                    ) : (
+                      <form onSubmit={submitOtp} className="flex flex-col gap-2 p-4 border border-[var(--accord-border)] rounded-[10px] bg-[var(--accord-surface-strong)]">
+                        <p className="text-xs text-[var(--accord-text)] font-semibold mb-2">Enter the verification code sent to {email}</p>
+                        <input
+                          type="text"
+                          placeholder="123456"
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value)}
+                          className="w-full h-12 bg-[var(--accord-input-background)] border border-[var(--accord-border)] rounded-[10px] px-4 text-sm outline-none focus:border-[var(--accord-primary)] tracking-widest text-center transition-colors"
+                          required
+                          maxLength={6}
+                          disabled={isLoading}
+                        />
+                        <button
+                          type="submit"
+                          disabled={isLoading || otpCode.length < 6}
+                          className="primary-button h-12 w-full mt-2"
+                        >
+                          Verify
+                        </button>
+                      </form>
+                    )}
                   </div>
                 </div>
               </Motion.div>
@@ -367,12 +375,9 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
         </div>
 
         <div className="border-t border-[var(--accord-border-soft)] px-6 py-4 sm:px-8">
-          <p className="text-[12px] text-[var(--accord-muted)]">Secure wallet access powered by Thirdweb.</p>
+          <p className="text-[12px] text-[var(--accord-muted)]">Secure wallet access powered by Magic and RainbowKit.</p>
         </div>
       </Motion.div>
     </div>
   );
 }
-
-
-

@@ -19,13 +19,12 @@ import {
   X,
 } from "lucide-react";
 import { ethers } from "ethers";
-import { Insight, getContract } from "thirdweb";
-import { useActiveWallet, useWalletDetailsModal } from "thirdweb/react";
-import { ownerOf } from "thirdweb/extensions/erc721";
 import { useAuth } from "../../context/AuthContext";
 import { useNetwork } from "../../context/NetworkContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useWallet } from "../../context/WalletContext";
+import { usePublicClient } from "wagmi";
+import { getMagic } from "../../lib/magicClient";
 import { resolveIpfsUrl, toIpfsUri } from "../../lib/ipfs";
 import {
   addAddressBookEntry,
@@ -34,7 +33,6 @@ import {
   updateAddressBookEntry,
   updateUserByWallet,
 } from "../../lib/supabaseHelpers";
-import { client } from "../../lib/thirdwebClient";
 import { uploadFileCall } from "../../utils/api";
 
 const TABS = [
@@ -310,8 +308,8 @@ function ToastStack({ toasts }) {
 export default function DashboardSettings() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-  const { address, logout } = useWallet();
-  const { user, setUser } = useAuth();
+  const { user, setUser, address } = useWallet();
+  const publicClient = usePublicClient();
   const { isDark, setTheme } = useTheme();
   const { network, setNetwork, currentChain } = useNetwork();
   const activeWallet = useActiveWallet();
@@ -388,16 +386,9 @@ export default function DashboardSettings() {
       setNftsError("");
 
       try {
-        const ownedNfts = await Insight.getOwnedNFTs({
-          client,
-          chains: [currentChain],
-          ownerAddress: address,
-          includeMetadata: true,
-        });
-
-        const eligibleNfts = ownedNfts.filter(
-          (nft) => nft.type === "ERC721" && Boolean(getNftImage(nft))
-        );
+        // Insight indexer is unavailable without Thirdweb.
+        // Return empty array visually to gracefully handle this tab for now.
+        const eligibleNfts = [];
 
         if (isMounted) {
           setNfts(eligibleNfts);
@@ -434,15 +425,13 @@ export default function DashboardSettings() {
 
     const verifyNftOwnership = async () => {
       try {
-        const contract = getContract({
-          client,
-          chain: currentChain,
+        if (!publicClient) return;
+        
+        const currentOwner = await publicClient.readContract({
           address: user.nft_contract,
-        });
-
-        const currentOwner = await ownerOf({
-          contract,
-          tokenId: BigInt(user.nft_token_id),
+          abi: [{ type: "function", name: "ownerOf", inputs: [{ type: "uint256" }], outputs: [{ type: "address" }] }],
+          functionName: "ownerOf",
+          args: [BigInt(user.nft_token_id)],
         });
 
         if (!isMounted) {
