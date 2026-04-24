@@ -389,6 +389,21 @@
     color: var(--accord-muted);
   }
 
+  .status-draft {
+    background: rgba(100, 116, 139, 0.12);
+    color: #94a3b8;
+  }
+
+  .status-pending-funding {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+  }
+
+  .status-pending-approval {
+    background: rgba(168, 85, 247, 0.12);
+    color: #a855f7;
+  }
+
   .glass-modal {
     background: var(--accord-modal-surface);
     -webkit-backdrop-filter: blur(12px);
@@ -608,5 +623,441 @@
   .neon-launch-button:hover .conduit-glow {
     opacity: 0.6;
     filter: blur(8px);
+  }
+
+  /* ── Step Tracker ── */
+  .step-tracker {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    gap: 0;
+  }
+
+  .step-tracker-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    text-align: center;
+  }
+
+  .step-tracker-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--accord-border);
+    background: var(--accord-surface);
+    color: var(--accord-muted);
+    font-size: 12px;
+    font-weight: 600;
+    position: relative;
+    z-index: 2;
+    transition: all 0.25s ease;
+  }
+
+  .step-tracker-dot.completed {
+    border-color: var(--accord-primary);
+    background: var(--accord-primary);
+    color: var(--accord-primary-contrast);
+  }
+
+  .step-tracker-dot.active {
+    border-color: var(--accord-primary);
+    background: var(--accord-primary-soft);
+    color: var(--accord-primary);
+    box-shadow: 0 0 0 4px var(--accord-primary-faint);
+  }
+
+  .step-tracker-line {
+    position: absolute;
+    top: 15px;
+    left: calc(50% + 16px);
+    right: calc(-50% + 16px);
+    height: 2px;
+    background: var(--accord-border);
+    z-index: 1;
+  }
+
+  .step-tracker-line.completed {
+    background: var(--accord-primary);
+  }
+
+  .step-tracker-label {
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--accord-muted);
+    text-transform: uppercase;
+    line-height: 1.3;
+    max-width: 80px;
+  }
+
+  .step-tracker-label.active,
+  .step-tracker-label.completed {
+    color: var(--accord-text);
+  }
+
+  .step-tracker-time {
+    margin-top: 4px;
+    font-size: 10px;
+    color: var(--accord-muted);
+  }
+
+  /* ── Activity Feed ── */
+  .activity-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .activity-feed-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--accord-table-row);
+    transition: background-color 0.15s ease;
+  }
+
+  .activity-feed-item:last-child {
+    border-bottom: none;
+  }
+
+  .activity-feed-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid var(--accord-border);
+    background: var(--accord-input-background);
+  }
+
+  .activity-feed-icon.primary {
+    border-color: var(--accord-primary-line);
+    background: var(--accord-primary-soft);
+  }
+
+  .activity-feed-icon.success {
+    border-color: rgba(34, 197, 94, 0.2);
+    background: rgba(34, 197, 94, 0.08);
+  }
+
+  .activity-feed-icon.warning {
+    border-color: rgba(245, 158, 11, 0.2);
+    background: rgba(245, 158, 11, 0.08);
+  }
+
+  .activity-feed-icon.danger {
+    border-color: rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.08);
+  }
+
+  .activity-feed-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .activity-feed-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accord-text);
+    line-height: 1.4;
+  }
+
+  .activity-feed-desc {
+    font-size: 13px;
+    color: var(--accord-muted);
+    margin-top: 2px;
+    line-height: 1.5;
+  }
+
+  .activity-feed-time {
+    font-size: 11px;
+    color: var(--accord-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* ── Wallet Address Chip ── */
+  .wallet-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--accord-border);
+    background: var(--accord-input-background);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    color: var(--accord-text);
+    transition: border-color 0.18s ease;
+  }
+
+  .wallet-chip:hover {
+    border-color: var(--accord-primary-line);
+  }
+
+  .wallet-chip-copy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--accord-muted);
+    transition: color 0.18s ease;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  .wallet-chip-copy:hover {
+    color: var(--accord-primary);
+  }
+
+  /* ── Action Item Card ── */
+  .action-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--accord-border);
+    background: var(--accord-surface);
+    cursor: pointer;
+    transition: border-color 0.18s ease, background-color 0.18s ease;
+  }
+
+  .action-item:hover {
+    border-color: var(--accord-primary-line);
+    background: var(--accord-primary-faint);
+  }
+
+  .action-item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .action-item-icon.amber {
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    background: rgba(245, 158, 11, 0.08);
+    color: #f59e0b;
+  }
+
+  .action-item-icon.blue {
+    border: 1px solid var(--accord-primary-line);
+    background: var(--accord-primary-soft);
+    color: var(--accord-primary);
+  }
+
+  .action-item-icon.red {
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.08);
+    color: #ef4444;
+  }
+
+  .action-item-icon.purple {
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    background: rgba(168, 85, 247, 0.08);
+    color: #a855f7;
+  }
+
+  .action-item-icon.green {
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    background: rgba(34, 197, 94, 0.08);
+    color: #22c55e;
+  }
+
+  .action-item-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .action-item-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accord-text);
+  }
+
+  .action-item-desc {
+    font-size: 12px;
+    color: var(--accord-muted);
+    margin-top: 2px;
+  }
+
+  .action-item-arrow {
+    color: var(--accord-muted);
+    flex-shrink: 0;
+    transition: color 0.18s ease, transform 0.18s ease;
+  }
+
+  .action-item:hover .action-item-arrow {
+    color: var(--accord-primary);
+    transform: translateX(2px);
+  }
+
+  /* ── Quick Action Grid ── */
+  .quick-action {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    border-radius: 10px;
+    border: 1px solid var(--accord-border);
+    background: var(--accord-surface);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .quick-action:hover {
+    border-color: var(--accord-primary-line);
+    background: var(--accord-primary-faint);
+  }
+
+  .quick-action-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid var(--accord-primary-line);
+    background: var(--accord-primary-soft);
+    color: var(--accord-primary);
+  }
+
+  .quick-action-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .quick-action-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accord-text);
+  }
+
+  .quick-action-desc {
+    font-size: 12px;
+    color: var(--accord-muted);
+    margin-top: 2px;
+  }
+
+  /* ── Vault Hero Balance ── */
+  .vault-hero {
+    position: relative;
+    padding: 32px;
+    border-radius: 14px;
+    border: 1px solid var(--accord-primary-line);
+    background:
+      radial-gradient(ellipse at top left, var(--accord-primary-faint), transparent 60%),
+      var(--accord-surface);
+    overflow: hidden;
+  }
+
+  .vault-hero-label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accord-primary);
+  }
+
+  .vault-hero-amount {
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.05;
+    color: var(--accord-text);
+    margin-top: 12px;
+  }
+
+  .vault-hero-sub {
+    font-size: 14px;
+    color: var(--accord-muted);
+    margin-top: 8px;
+  }
+
+  /* ── Tab Pills (filter tabs) ── */
+  .tab-pills {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 10px;
+    background: var(--accord-surface-strong);
+    overflow-x: auto;
+  }
+
+  .tab-pill {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accord-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.18s ease;
+    border: none;
+    background: transparent;
+  }
+
+  .tab-pill:hover {
+    color: var(--accord-text);
+  }
+
+  .tab-pill.active {
+    background: var(--accord-surface);
+    color: var(--accord-text);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+
+  /* ── Empty State ── */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 48px 24px;
+    text-align: center;
+  }
+
+  .empty-state-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--accord-border);
+    background: var(--accord-input-background);
+  }
+
+  .empty-state-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accord-text);
+  }
+
+  .empty-state-desc {
+    font-size: 14px;
+    color: var(--accord-muted);
+    max-width: 320px;
+    line-height: 1.6;
   }
 }

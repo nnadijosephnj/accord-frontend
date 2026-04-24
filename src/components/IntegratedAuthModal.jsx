@@ -3,9 +3,7 @@ import { AnimatePresence, motion as Motion } from "framer-motion";
 import {
   ArrowLeft,
   Download,
-  ExternalLink,
   Fingerprint,
-  Globe,
   ShieldCheck,
   Sparkles,
   Wallet,
@@ -124,6 +122,8 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
       const generatedWallet = inAppWallet({
         auth: {
           options: ["email", "google"],
+          mode: "redirect",
+          redirectUrl: window.location.origin + "/",
         },
       });
 
@@ -316,64 +316,30 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
                   Back
                 </button>
 
-                <div className="surface-card space-y-6">
+                <div className="surface-card space-y-5">
                   <div className="flex items-start gap-4">
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-[var(--accord-primary-line)] bg-[var(--accord-primary-soft)]">
                       <ShieldCheck className="h-5 w-5 text-[var(--accord-primary)]" />
                     </div>
                     <div>
-                      <p className="eyebrow">Generated wallet</p>
-                      <h3 className="mt-2 text-[18px] font-semibold text-[var(--accord-text)]">Before you continue</h3>
-                      <p className="mt-2 text-sm leading-6 text-[var(--accord-muted)]">
-                        Accord can create a secure wallet for you without a browser extension.
+                      <h3 className="text-[18px] font-semibold text-[var(--accord-text)]">Create a wallet</h3>
+                      <p className="mt-1 text-sm leading-6 text-[var(--accord-muted)]">
+                        No extension needed. Sign in with Google or email to get started.
                       </p>
                     </div>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="surface-muted space-y-3 px-4 py-4">
                     {[
-                      {
-                        icon: Sparkles,
-                        title: "Real EVM wallet",
-                        description:
-                          "Your wallet works on Injective EVM and other EVM-compatible networks.",
-                      },
-                      {
-                        icon: Fingerprint,
-                        title: "You stay in control",
-                        description:
-                          "Accord does not custody your funds or control the underlying key material.",
-                      },
-                      {
-                        icon: Download,
-                        title: "Export anytime",
-                        description:
-                          "You can move the wallet into MetaMask, Keplr, or another EVM wallet later.",
-                      },
-                      {
-                        icon: Globe,
-                        title: "Account recovery",
-                        description:
-                          "Recovery is tied to the email or Google sign-in used during setup.",
-                      },
-                      {
-                        icon: ExternalLink,
-                        title: "External wallets still work",
-                        description:
-                          "If you prefer your own wallet, go back and use the wallet picker instead.",
-                      },
+                      { icon: Sparkles, text: "Real EVM wallet — works on Injective and other chains" },
+                      { icon: Fingerprint, text: "Non-custodial — Accord never holds your keys" },
+                      { icon: Download, text: "Exportable — move to MetaMask or Keplr anytime" },
                     ].map((item) => {
                       const Icon = item.icon;
-
                       return (
-                        <div key={item.title} className="surface-muted flex items-start gap-3 px-4 py-4">
-                          <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--accord-primary-soft)]">
-                            <Icon className="h-4 w-4 text-[var(--accord-primary)]" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-semibold text-[var(--accord-text)]">{item.title}</p>
-                            <p className="mt-1 text-sm leading-6 text-[var(--accord-muted)]">{item.description}</p>
-                          </div>
+                        <div key={item.text} className="flex items-center gap-3">
+                          <Icon className="h-4 w-4 shrink-0 text-[var(--accord-primary)]" />
+                          <p className="text-sm text-[var(--accord-muted)]">{item.text}</p>
                         </div>
                       );
                     })}
@@ -389,7 +355,7 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
                       {isLoading || isConnecting ? "Opening Secure Flow" : "Create My Wallet"}
                     </button>
                     <button type="button" onClick={() => back("CHOICE")} className="secondary-button w-full">
-                      I Will Use My Own Wallet
+                      Use My Own Wallet
                     </button>
                   </div>
                 </div>
