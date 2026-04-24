@@ -16,11 +16,17 @@ import {
 import * as ethers from "ethers";
 import { Link, useNavigate } from "react-router-dom";
 import { useWallet } from "../../context/WalletContext";
-import { CONTRACT_ABI, CONTRACT_ADDRESS, USDC_ADDRESS } from "../../utils/contractABI";
+import { usePublicClient } from "wagmi";
+import { parseAbi } from "viem";
+import { CONTRACT_ADDRESS, USDC_ADDRESS } from "../../utils/contractABI";
 import { apiCall } from "../../utils/api";
 import StatusRing from "../../components/StatusRing";
 import ActivityFeed from "../../components/ActivityFeed";
 import EmptyState from "../../components/EmptyState";
+
+const VAULT_BALANCE_ABI = parseAbi([
+  "function vaultBalances(address user, address token) view returns (uint256)",
+]);
 
 /* ── helpers ── */
 
@@ -64,40 +70,84 @@ function getActivityIcon(status) {
 /* ── component ── */
 
 export default function Overview() {
-  const { address, signer } = useWallet();
+  const { address } = useWallet();
+  const publicClient = usePublicClient();
   const navigate = useNavigate();
   const [agreements, setAgreements] = useState([]);
   const [vaultBalance, setVaultBalance] = useState("0.00");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (address) {
-      loadData();
-    }
-  }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
+    let isMounted = true;
 
-  const loadData = async () => {
-    try {
-      const data = await apiCall("/api/agreements");
-      setAgreements(data || []);
-    } catch (error) {
-      console.warn(error.message);
-    } finally {
-      setLoading(false);
-    }
+    const loadAgreements = async () => {
+      if (!address) {
+        if (isMounted) {
+          setAgreements([]);
+          setLoading(false);
+        }
+        return;
+      }
 
-    try {
-      if (signer) {
-        const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-        const balance = await contract.vaultBalances(address, USDC_ADDRESS);
-        if (balance !== undefined) {
-          setVaultBalance(Number(ethers.formatUnits(balance, 6)).toFixed(2));
+      setLoading(true);
+
+      try {
+        const data = await apiCall("/api/agreements");
+        if (isMounted) {
+          setAgreements(data || []);
+        }
+      } catch (error) {
+        console.warn(error.message);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
         }
       }
-    } catch (error) {
-      console.warn("Vault load error:", error);
-    }
-  };
+    };
+
+    loadAgreements();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [address]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadVaultBalance = async () => {
+      if (!address || !publicClient) {
+        if (isMounted) {
+          setVaultBalance("0.00");
+        }
+        return;
+      }
+
+      try {
+        const balance = await publicClient.readContract({
+          address: CONTRACT_ADDRESS,
+          abi: VAULT_BALANCE_ABI,
+          functionName: "vaultBalances",
+          args: [address, USDC_ADDRESS],
+        });
+
+        if (isMounted) {
+          setVaultBalance(Number(ethers.formatUnits(balance, 6)).toFixed(2));
+        }
+      } catch (error) {
+        console.warn("Vault load error:", error);
+        if (isMounted) {
+          setVaultBalance("0.00");
+        }
+      }
+    };
+
+    loadVaultBalance();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [address, publicClient]);
 
   /* ── derived data ── */
 

@@ -3,33 +3,62 @@ import { ArrowDownUp, DollarSign, Lock, Plus, TrendingUp, Wallet } from "lucide-
 import * as ethers from "ethers";
 import { Link } from "react-router-dom";
 import { useWallet } from "../../context/WalletContext";
-import { CONTRACT_ABI, CONTRACT_ADDRESS, USDC_ADDRESS } from "../../utils/contractABI";
+import { usePublicClient } from "wagmi";
+import { parseAbi } from "viem";
+import { CONTRACT_ADDRESS, USDC_ADDRESS } from "../../utils/contractABI";
+
+const VAULT_BALANCE_ABI = parseAbi([
+  "function vaultBalances(address user, address token) view returns (uint256)",
+]);
 
 export default function VaultPage() {
-  const { address, signer, network } = useWallet();
+  const { address, network } = useWallet();
+  const publicClient = usePublicClient();
   const [vaultBalance, setVaultBalance] = useState("0.00");
   const [loading, setLoading] = useState(true);
   const networkLabel = network === "mainnet" ? "Injective EVM Mainnet" : "Injective EVM Testnet";
 
   useEffect(() => {
-    if (signer && address) {
-      loadBalance();
-    }
-  }, [address, signer]); // eslint-disable-line react-hooks/exhaustive-deps
+    let isMounted = true;
 
-  const loadBalance = async () => {
-    try {
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-      const balance = await contract.vaultBalances(address, USDC_ADDRESS);
-      if (balance !== undefined) {
-        setVaultBalance(Number(ethers.formatUnits(balance, 6)).toFixed(2));
+    const loadBalance = async () => {
+      if (!address || !publicClient) {
+        if (isMounted) {
+          setVaultBalance("0.00");
+          setLoading(false);
+        }
+        return;
       }
-    } catch (error) {
-      console.warn("Vault load error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+
+      try {
+        const balance = await publicClient.readContract({
+          address: CONTRACT_ADDRESS,
+          abi: VAULT_BALANCE_ABI,
+          functionName: "vaultBalances",
+          args: [address, USDC_ADDRESS],
+        });
+
+        if (isMounted) {
+          setVaultBalance(Number(ethers.formatUnits(balance, 6)).toFixed(2));
+        }
+      } catch (error) {
+        console.warn("Vault load error:", error);
+        if (isMounted) {
+          setVaultBalance("0.00");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadBalance();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [address, publicClient]);
 
   const cards = [
     {

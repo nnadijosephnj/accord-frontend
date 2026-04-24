@@ -1,6 +1,8 @@
-import { getDefaultConfig, connectorsForWallets } from "@rainbow-me/rainbowkit";
-import { metaMaskWallet, trustWallet, coinbaseWallet, rabbyWallet } from "@rainbow-me/rainbowkit/wallets";
-import { http } from "wagmi";
+import { createConfig, http } from "wagmi";
+import { coinbaseWallet, injected, metaMask } from "wagmi/connectors";
+
+const ACCORD_APP_NAME = "Accord";
+const DEFAULT_RPC_URL = "https://k8s.testnet.json-rpc.injective.network/";
 
 export const DEFAULT_NETWORK = "testnet";
 export const NETWORK_STORAGE_KEY = "accord-network";
@@ -14,8 +16,8 @@ export const injectiveTestnet = {
     symbol: "INJ",
   },
   rpcUrls: {
-    default: { http: [import.meta.env.VITE_RPC_URL || "https://k8s.testnet.json-rpc.injective.network/"] },
-    public: { http: [import.meta.env.VITE_RPC_URL || "https://k8s.testnet.json-rpc.injective.network/"] },
+    default: { http: [import.meta.env.VITE_RPC_URL || DEFAULT_RPC_URL] },
+    public: { http: [import.meta.env.VITE_RPC_URL || DEFAULT_RPC_URL] },
   },
   blockExplorers: {
     default: { name: "Blockscout", url: "https://testnet.blockscout.injective.network" },
@@ -44,29 +46,23 @@ export function getNetworkConfig(network = DEFAULT_NETWORK) {
   return NETWORK_CONFIGS[network] || NETWORK_CONFIGS[DEFAULT_NETWORK];
 }
 
-const connectors = connectorsForWallets(
-  [
-    {
-      groupName: "Recommended",
-      wallets: [metaMaskWallet],
-    },
-    {
-      groupName: "Other",
-      wallets: [trustWallet, coinbaseWallet, rabbyWallet],
-    },
-  ],
-  {
-    appName: "Accord",
-    projectId: "ac2026", // any dummy project id is fine
-  }
-);
+const rpcUrl = import.meta.env.VITE_RPC_URL || DEFAULT_RPC_URL;
 
-export const wagmiConfig = getDefaultConfig({
-  appName: "Accord",
-  projectId: "ac2026",
+const connectors = [
+  metaMask(),
+  coinbaseWallet({
+    appName: ACCORD_APP_NAME,
+  }),
+  // Keeps support for injected wallets like Rabby without requiring WalletConnect.
+  injected({
+    shimDisconnect: true,
+  }),
+];
+
+export const wagmiConfig = createConfig({
   chains: [injectiveTestnet],
-  connectors: connectors,
+  connectors,
   transports: {
-    [injectiveTestnet.id]: http(import.meta.env.VITE_RPC_URL),
+    [injectiveTestnet.id]: http(rpcUrl),
   },
 });

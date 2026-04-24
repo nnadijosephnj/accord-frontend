@@ -24,7 +24,6 @@ import { useNetwork } from "../../context/NetworkContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useWallet } from "../../context/WalletContext";
 import { usePublicClient } from "wagmi";
-import { getMagic } from "../../lib/magicClient";
 import { resolveIpfsUrl, toIpfsUri } from "../../lib/ipfs";
 import {
   addAddressBookEntry,
@@ -308,12 +307,11 @@ function ToastStack({ toasts }) {
 export default function DashboardSettings() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-  const { user, setUser, address } = useWallet();
+  const { setUser } = useAuth();
+  const { userProfile: user, address, logout } = useWallet();
   const publicClient = usePublicClient();
   const { isDark, setTheme } = useTheme();
   const { network, setNetwork, currentChain } = useNetwork();
-  const activeWallet = useActiveWallet();
-  const walletDetailsModal = useWalletDetailsModal();
 
   const [activeTab, setActiveTab] = useState("general");
   const [editor, setEditor] = useState(null);
@@ -462,7 +460,7 @@ export default function DashboardSettings() {
     return () => {
       isMounted = false;
     };
-  }, [address, currentChain, setUser, user?.nft_contract, user?.nft_token_id]);
+  }, [address, currentChain, publicClient, setUser, user?.nft_contract, user?.nft_token_id]);
 
   const pushToast = (type, message) => {
     const id = `${Date.now()}-${Math.random()}`;
@@ -748,21 +746,7 @@ export default function DashboardSettings() {
       return;
     }
 
-    if (activeWallet?.id !== "inApp") {
-      setWalletNotice("generated-reconnect");
-      return;
-    }
-
-    walletDetailsModal.open({
-      client,
-      theme: isDark ? "dark" : "light",
-      screen: "export",
-      hideSwitchWallet: true,
-      hideSendFunds: true,
-      hideReceiveFunds: true,
-      hideBuyFunds: true,
-      showTestnetFaucet: false,
-    });
+    setWalletNotice("generated-unavailable");
   };
 
   const tabContent = {
@@ -1255,10 +1239,10 @@ export default function DashboardSettings() {
         </p>
       </ModalShell>
       <ModalShell
-        open={walletNotice === "generated-reconnect"}
+        open={walletNotice === "generated-unavailable"}
         onClose={() => setWalletNotice(null)}
-        title="Reconnect Required"
-        description="Your wallet is marked as Accord-generated, but the current active wallet session is not the in-app wallet export flow."
+        title="Export Unavailable"
+        description="Accord-created wallets currently stay managed inside the active sign-in session."
         footer={
           <div className="flex justify-end">
             <button
@@ -1272,7 +1256,7 @@ export default function DashboardSettings() {
         }
       >
         <p className="text-sm leading-relaxed text-[var(--accord-muted)]">
-          Reconnect with the wallet Accord created for you to open Thirdweb&apos;s export flow securely.
+          Private key export is not available from Settings in this build. If you need access again later, sign back in with the same wallet path you used originally.
         </p>
       </ModalShell>
     </div>
