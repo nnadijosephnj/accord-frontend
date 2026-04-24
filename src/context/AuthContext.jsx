@@ -1,9 +1,9 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useAccount, useDisconnect } from "wagmi";
 import { upsertUserByWallet } from "../lib/supabaseHelpers";
 import { clearWalletApiAuth } from "../lib/walletApiAuth";
 import { clearPendingWalletType, getPendingWalletType } from "../lib/walletAuthState";
-import { getMagic } from "../lib/magicClient";
+import { getMagic, getMagicWalletAddress } from "../lib/magicClient";
 
 const AuthContext = createContext(null);
 
@@ -17,6 +17,31 @@ export function AuthProvider({ children }) {
   
   const [magicAddress, setMagicAddress] = useState(null);
   const [isMagicReady, setIsMagicReady] = useState(false);
+  const lastSyncedWalletRef = useRef(null);
+
+  const syncUserRecord = useCallback(async ({ walletAddress, walletType }) => {
+    const normalizedWalletAddress = walletAddress?.toLowerCase();
+    if (!normalizedWalletAddress) {
+      return null;
+    }
+
+    const syncKey = `${walletType}:${normalizedWalletAddress}`;
+    if (
+      lastSyncedWalletRef.current === syncKey &&
+      user?.wallet_address === normalizedWalletAddress
+    ) {
+      return user;
+    }
+
+    const dbUser = await upsertUserByWallet({
+      walletAddress: normalizedWalletAddress,
+      walletType,
+    });
+
+    lastSyncedWalletRef.current = syncKey;
+    setUser(dbUser);
+    return dbUser;
+  }, [user]);
 
   useEffect(() => {
     let isMounted = true;
@@ -28,22 +53,29 @@ export function AuthProvider({ children }) {
           return;
         }
 
-        // Check if OAuth redirect happened
+        let detectedMagicAddress = null;
+
         try {
           const result = await magic.oauth2.getRedirectResult();
-          if (result && result.magic && result.magic.userMetadata) {
-            if (isMounted) setMagicAddress(result.magic.userMetadata.publicAddress);
+          detectedMagicAddress = getMagicWalletAddress(result?.magic?.userMetadata);
+        } catch {
+          detectedMagicAddress = null;
+        }
+
+        if (!detectedMagicAddress) {
+          const isLoggedIn = await magic.user.isLoggedIn();
+          if (isLoggedIn) {
+            const info = await magic.user.getInfo();
+            detectedMagicAddress = getMagicWalletAddress(info);
           }
-        } catch(e) {
-            // Ignore if no redirect result
         }
-        
-        const isLoggedIn = await magic.user.isLoggedIn();
-        if (isLoggedIn) {
-          const info = await magic.user.getInfo();
-          if (isMounted) setMagicAddress(info.publicAddress);
+
+        if (detectedMagicAddress && isMounted) {
+          setMagicAddress(detectedMagicAddress);
         }
-      } catch(e) {}
+      } catch (error) {
+        console.warn("Magic session check failed:", error);
+      }
       if (isMounted) setIsMagicReady(true);
     };
     checkMagic();
@@ -64,6 +96,7 @@ export function AuthProvider({ children }) {
 
       if (!isCombinedConnected) {
         if (isMounted) {
+          lastSyncedWalletRef.current = null;
           setUser(null);
           setLoading(false);
         }
@@ -73,8 +106,8 @@ export function AuthProvider({ children }) {
       try {
         const pendingWalletType = getPendingWalletType();
         const computedWalletType = magicAddress ? "generated" : "external";
-        
-        const dbUser = await upsertUserByWallet({
+
+        const dbUser = await syncUserRecord({
           walletAddress: combinedAddress,
           walletType: computedWalletType,
         });
@@ -97,22 +130,54 @@ export function AuthProvider({ children }) {
 
     sync();
     return () => { isMounted = false; };
-  }, [combinedAddress, isCombinedConnected, wagmiAccount.isConnecting, wagmiAccount.isReconnecting, isMagicReady, magicAddress]);
+  }, [combinedAddress, isCombinedConnected, wagmiAccount.isConnecting, wagmiAccount.isReconnecting, isMagicReady, magicAddress, syncUserRecord]);
+
+  const completeMagicLogin = async () => {
+    const magic = getMagic();
+    if (!magic) {
+      throw new Error("Magic is not configured for this environment.");
+    }
+
+    const userInfo = await magic.user.getInfo();
+    const nextMagicAddress = getMagicWalletAddress(userInfo);
+
+    if (!nextMagicAddress) {
+      throw new Error("Magic did not return a wallet address.");
+    }
+
+    setMagicAddress(nextMagicAddress);
+    setIsMagicReady(true);
+
+    const dbUser = await syncUserRecord({
+      walletAddress: nextMagicAddress,
+      walletType: "generated",
+    });
+
+    clearPendingWalletType();
+    setLoading(false);
+    return dbUser;
+  };
 
   const logout = async () => {
     clearPendingWalletType();
     clearWalletApiAuth();
+    lastSyncedWalletRef.current = null;
+    setMagicAddress(null);
     setUser(null);
     setLoading(true);
     
     try {
       if (wagmiAccount.connector) disconnect({ connector: wagmiAccount.connector });
-    } catch(e) {}
+    } catch (error) {
+      console.warn("Wallet disconnect cleanup failed:", error);
+    }
     
     try {
       const magic = getMagic();
       if (magic) await magic.user.logout();
-    } catch(e) {}
+    } catch (error) {
+      console.warn("Magic logout cleanup failed:", error);
+    }
     
     window.location.href = "/";
   };
@@ -128,6 +193,7 @@ export function AuthProvider({ children }) {
     authModal,
     openAuthModal: (step = "CHOICE") => setAuthModal({ open: true, step }),
     closeAuthModal: () => setAuthModal({ open: false, step: "CHOICE" }),
+    completeMagicLogin,
     logout,
   };
 

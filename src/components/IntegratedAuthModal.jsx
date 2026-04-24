@@ -4,9 +4,7 @@ import { ArrowLeft, X, Wallet, ShieldCheck, Sparkles, Download, Fingerprint } fr
 import AccordLogo from "./AccordLogo";
 import { useAuth } from "../context/AuthContext";
 import { useNetwork } from "../context/NetworkContext";
-import { useTheme } from "../context/ThemeContext";
 import { setPendingWalletType, clearPendingWalletType } from "../lib/walletAuthState";
-import { upsertUserByWallet } from "../lib/supabaseHelpers";
 import { getMagic } from "../lib/magicClient";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 
@@ -17,9 +15,8 @@ const flowVariants = {
 };
 
 export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
-  const { authModal, closeAuthModal, setUser, walletAddress } = useAuth();
+  const { authModal, closeAuthModal, completeMagicLogin } = useAuth();
   const { currentConfig } = useNetwork();
-  const { isDark } = useTheme();
 
   const { openConnectModal } = useConnectModal();
   
@@ -117,7 +114,11 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
       const magic = getMagic();
       if (!magic) throw new Error("Magic not initialized");
       
-      const handler = magic.auth.loginWithEmailOTP({ email, showUI: false });
+      const handler = magic.auth.loginWithEmailOTP({
+        email,
+        showUI: false,
+        deviceCheckUI: false,
+      });
       setOtpHandler(handler);
       
       handler.on('email-otp-sent', () => {
@@ -155,15 +156,13 @@ export default function IntegratedAuthModal({ isOpen, onClose, onComplete }) {
 
   const handleMagicLoginSuccess = async () => {
     try {
-      const magic = getMagic();
-      const userInfo = await magic.user.getInfo();
-      if (userInfo?.publicAddress) {
-        await upsertUserByWallet({ walletAddress: userInfo.publicAddress, walletType: "generated" });
-        if (onComplete) onComplete();
-        else closeAuthModal();
-      }
+      await completeMagicLogin();
+      if (onComplete) onComplete();
+      else closeAuthModal();
     } catch (e) {
-      setError("Failed to fetch wallet info");
+      clearPendingWalletType();
+      setError(e?.message || "Failed to finish Magic sign in");
+      setIsLoading(false);
     }
   };
 
