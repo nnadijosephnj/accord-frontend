@@ -1,5 +1,5 @@
 import { createConfig, http } from "wagmi";
-import { coinbaseWallet, injected, metaMask } from "wagmi/connectors";
+import { coinbaseWallet, injected } from "wagmi/connectors";
 
 const ACCORD_APP_NAME = "Accord";
 const DEFAULT_RPC_URL = "https://k8s.testnet.json-rpc.injective.network/";
@@ -49,11 +49,14 @@ export function getNetworkConfig(network = DEFAULT_NETWORK) {
 const rpcUrl = import.meta.env.VITE_RPC_URL || DEFAULT_RPC_URL;
 
 const connectors = [
-  metaMask(),
+  injected({
+    target: "metaMask",
+    shimDisconnect: true,
+  }),
   coinbaseWallet({
     appName: ACCORD_APP_NAME,
   }),
-  // Keeps support for injected wallets like Rabby without requiring WalletConnect.
+  // Generic injected connector for Rabby and others
   injected({
     shimDisconnect: true,
   }),
